@@ -27,7 +27,7 @@
 | Parameter | Value |
 |-----------|-------|
 | IP | `lmb_v10` (LMB Bus) + `lmb_bram_if_cntlr` + `blk_mem_gen` |
-| Data Bus (DLMB) | 0x0000_0000 – 0x0000_FFFF (64 KB) |
+| Data Bus (DLMB) | 0x0000_0000 – 0x0001_FFFF (128 KB) |
 | Instruction Bus (ILMB) | 0x0000_0000 – 0x0001_FFFF (128 KB) |
 | Memory Type | True Dual-Port Block RAM |
 | ECC | Disabled |
@@ -241,7 +241,7 @@ All timer instances use `xilinx.com:ip:axi_timer:2.0`.
 
 | AXI Base Address | Range | Peripheral | IP Type | Category |
 |-----------------|-------|------------|---------|----------|
-| `0x0000_0000` | 64K / 128K | Local Memory (BRAM) | blk_mem_gen | Memory |
+| `0x0000_0000` | 128K / 128K | Local Memory (BRAM) | blk_mem_gen | Memory |
 | `0x4000_0000` | 64K | board_led_2bits | axi_gpio | GPIO |
 | `0x4001_0000` | 64K | board_button | axi_gpio | GPIO |
 | `0x4002_0000` | 64K | board_rgb | axi_gpio | GPIO |
