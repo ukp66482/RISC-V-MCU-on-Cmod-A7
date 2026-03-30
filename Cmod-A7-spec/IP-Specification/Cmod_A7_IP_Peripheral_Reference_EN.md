@@ -178,7 +178,7 @@ All timer instances use `xilinx.com:ip:axi_timer:2.0`.
 | Instance | AXI Base Address | Output Pin | DIP Pin | Description |
 |----------|-----------------|-----------|---------|-------------|
 | `PWM_0` | `0x41C1_0000` | J3 | Pin 10 | PWM Channel 0 |
-| `PWM1` | `0x41C2_0000` | W3 | Pin 34 | PWM Channel 1 |
+| `PWM_1` | `0x41C2_0000` | W3 | Pin 34 | PWM Channel 1 |
 | `PWM_2` | `0x41C3_0000` | W4 | Pin 40 | PWM Channel 2 |
 
 **Description:** AXI Timer instances configured in PWM mode to generate square-wave outputs. Useful for LED dimming, motor speed control, buzzer tone generation, etc. Frequency and duty cycle are configured through the Timer Load Registers and the PWM enable bit.
@@ -253,7 +253,7 @@ All timer instances use `xilinx.com:ip:axi_timer:2.0`.
 | `0x4120_0000` | 64K | axi_intc | axi_intc | System |
 | `0x41C0_0000` | 64K | timer_0 | axi_timer | Timer |
 | `0x41C1_0000` | 64K | PWM_0 | axi_timer | PWM |
-| `0x41C2_0000` | 64K | PWM1 | axi_timer | PWM |
+| `0x41C2_0000` | 64K | PWM_1 | axi_timer | PWM |
 | `0x41C3_0000` | 64K | PWM_2 | axi_timer | PWM |
 | `0x41C4_0000` | 64K | timer_1 | axi_timer | Timer |
 | `0x41C5_0000` | 64K | timer_2 | axi_timer | Timer |
