@@ -19,12 +19,14 @@ This project implements a MicroBlaze RISC-V soft processor with a complete perip
 
 ### Peripherals
 
-- GPIO (LEDs, buttons, DIP switches, accent LEDs)
-- PWM (Timer/Counter-based)
-- UART (115200 baud)
-- SPI (on-board SRAM)
-- AXI Timers
-- Interrupt Controller (6-channel)
+- **GPIO** — 4 × 7-bit bidirectional DIP groups (A–D), on-board LEDs × 2, RGB LED, push button
+- **PWM** — 3 channels (axi_timer, DIP Pin 10 / 34 / 40)
+- **UART** — 2 × 16550 (USB Micro-USB + DIP Pin 11/12 external)
+- **Timers** — 3 × 32-bit general-purpose (with interrupt)
+- **Interrupt Controller** — 6-channel AXI INTC
+- **XADC** — 12-bit ADC, 500 KSPS aggregate / 100 KSPS per channel (2 external analog inputs)
+- **QSPI Flash** — On-board Quad-SPI flash
+- **SRAM** — 512 KB external cellular RAM (axi_emc, 32 MB address range)
 
 ## Repository Structure
 
@@ -75,8 +77,13 @@ The `workspace-example/` directory contains three ready-to-use test programs:
 
 ## Documentation
 
-- [IP Peripheral Reference](Cmod-A7-spec/IP-Specification/Cmod_A7_IP_Peripheral_Reference_EN.md)
-- [Pin Specification](Cmod-A7-spec/Pin-Specification/Cmod_A7_Pin_Specification.md)
+All board-level documentation is in [`Cmod-A7-spec/`](Cmod-A7-spec/):
+
+| Document | Description |
+|----------|-------------|
+| [IP Peripheral Reference](Cmod-A7-spec/IP-Specification/Cmod_A7_IP_Peripheral_Reference.md) | Full AXI IP list, base addresses, parameters, interrupt mapping |
+| [Pin Specification](Cmod-A7-spec/Pin-Specification/Cmod_A7_Pin_Specification.md) | DIP connector pin map, GPIO/PWM/UART/ADC assignments, electrical characteristics |
+| [Power Specification](Cmod-A7-spec/Power-Specification/Cmod_A7_Power_Specification.md) | Power rails, input options, VU pin behavior, dual-supply considerations |
 
 ## License
 
