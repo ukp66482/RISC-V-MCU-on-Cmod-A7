@@ -62,9 +62,19 @@ The **PWRGD** (Power Good) output drives the Power On LED (LD5).
 
 ## 5. Dual Power Source (USB + External)
 
-It is possible to power the board from both USB and VU simultaneously, **but only if a Schottky diode is added in series with the external supply on the VU pin** to prevent current backflow.
+The on-board Schottky diode is located on the **USB side** (between USB VBUS and VU), not on the VU input pin. This means:
 
-Without the additional diode, **do not connect both sources at the same time**.
+| Scenario | Safe? | Notes |
+|----------|-------|-------|
+| USB only | ✓ | Normal operation |
+| External only (VU pin) | ✓ | Normal operation |
+| Both connected, only one active | ✓ | The inactive source supplies no current, no conflict |
+| Both connected **and both supplying power** | ✗ | Two voltage sources fight on the same VU node |
+| Both connected and both active, **with external Schottky added** | ✓ | Higher-voltage source wins; lower is blocked |
+
+**Key distinction:** Physically connecting both cables is not the problem — the danger is having **both sources actively supplying voltage at the same time** without isolation.
+
+If you need to have both connected simultaneously with both powered (e.g., USB for JTAG/UART while also on external supply), **add a Schottky diode in series with the external supply on the VU pin**. This creates a "diode-OR" circuit where whichever source has the higher voltage automatically takes over, and the other is safely blocked.
 
 ---
 
