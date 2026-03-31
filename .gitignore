@@ -125,6 +125,7 @@ tmp/
 Thumbs.db
 .vscode/
 .idea/
+*.css
 
 ############################################
 # Python / scripts cache (if any)
