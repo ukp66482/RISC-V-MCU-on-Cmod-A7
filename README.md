@@ -54,9 +54,10 @@ This project provides a ready-to-use RISC-V MCU environment on the Cmod A7-35T f
 │   ├── Standalone-Boot-Mode/        # Program flash for standalone boot
 │   └── README.md                    # Vitis core concepts quick reference
 ├── workspace-example/               # Vitis firmware examples (source only)
+│   ├── Btn_LED_asm_test/src/        # Button & LED control in RISC-V assembly
 │   ├── GPIO_test/src/               # GPIO peripheral test
 │   ├── PWM_test/src/                # PWM servo motor control
-│   └── Uart_test/src/               # UART communication test
+│   └── UART_test/src/               # UART communication test
 ├── docs/
 │   └── images/                      # Project-level diagrams
 │       └── system_architecture.svg
@@ -103,11 +104,12 @@ For detailed step-by-step instructions with screenshots, see the [JTAG Debug Mod
 
 ### Example Programs
 
-The `workspace-example/` directory contains three ready-to-use test programs:
+The `workspace-example/` directory contains four ready-to-use test programs:
 
+- **Btn_LED_asm_test** — Button & LED control in RISC-V assembly
 - **GPIO_test** — Toggle LEDs and read button/switch inputs
 - **PWM_test** — Drive a servo motor via PWM output
-- **Uart_test** — Send and receive data over UART
+- **UART_test** — Send and receive data over UART
 
 ## Documentation
 
