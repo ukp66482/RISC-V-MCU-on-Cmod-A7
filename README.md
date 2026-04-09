@@ -38,34 +38,14 @@ This project provides a ready-to-use RISC-V MCU environment on the Cmod A7-35T f
 
 ## Repository Structure
 
-```
-├── RISC-V-MCU/                      # Vivado hardware design files
-│   ├── top.tcl                      # Vivado project rebuild script
-│   ├── top.bit                      # Pre-built bitstream
-│   └── top_wrapper.xsa              # Hardware export for Vitis platform
-├── Cmod-A7-spec/                    # Board documentation & hardware specs
-│   ├── IP-Specification/            # IP peripheral reference
-│   ├── Pin-Specification/           # Pin mapping & electrical characteristics
-│   ├── Power-Specification/         # Power rails & supply design
-│   ├── Kicad_symbol/                # KiCad schematic symbol
-│   └── Cmod-A7-Master.xdc          # FPGA pin constraints file
-├── Vitis-Guide/                     # Vitis software development guides
-│   ├── JTAG-Debug-Mode/             # Load & debug applications over JTAG
-│   ├── Standalone-Boot-Mode/        # Program flash for standalone boot
-│   └── README.md                    # Vitis core concepts quick reference
-├── workspace-example/               # Vitis firmware examples (source only)
-│   ├── Btn_LED_asm_test/src/        # Button & LED control in RISC-V assembly
-│   ├── GPIO_test/src/               # GPIO peripheral test
-│   ├── PWM_test/src/                # PWM servo motor control
-│   └── UART_test/src/               # UART communication test
-├── docs/
-│   └── images/                      # Project-level diagrams
-│       └── system_architecture.svg
-├── Intro_PPT/                       # Course introduction slides
-│   ├── RISCV-MCU.pdf
-│   └── RISCV-MCU.pptx
-└── .gitignore
-```
+| Directory | Description |
+|-----------|-------------|
+| [`RISC-V-MCU/`](RISC-V-MCU/) | Vivado hardware design — Tcl rebuild script, pre-built bitstream, XSA export |
+| [`Cmod-A7-spec/`](Cmod-A7-spec/) | Board documentation — IP peripherals, pin mapping, power specs, KiCad symbol |
+| [`Vitis-Software-Dev-Guide/`](Vitis-Software-Dev-Guide/) | Vitis guides — JTAG debug mode, standalone boot mode, core concepts |
+| [`workspace-example/`](workspace-example/) | Firmware examples — GPIO, PWM, UART, assembly LED control |
+| [`Intro_PPT/`](Intro_PPT/) | Course introduction slides (PDF + PPTX) |
+| [`docs/`](docs/) | Project-level images and diagrams |
 
 ## Prerequisites
 
@@ -100,7 +80,7 @@ This recreates the full block design, including the MicroBlaze RISC-V processor 
 2. Click **Run** in the FLOW panel — Vitis will automatically program the FPGA and execute your application.
 3. Click **Debug** to enter a GDB-like interactive session with breakpoints, stepping, and register/memory inspection.
 
-For detailed step-by-step instructions with screenshots, see the [JTAG Debug Mode Guide](Vitis-Guide/JTAG-Debug-Mode/JTAG-Debug-Mode.md).
+For detailed step-by-step instructions with screenshots, see the [JTAG Debug Mode Guide](Vitis-Software-Dev-Guide/JTAG-Debug-Mode/JTAG-Debug-Mode.md).
 
 ### Example Programs
 
@@ -125,13 +105,13 @@ Hardware documentation in [`Cmod-A7-spec/`](Cmod-A7-spec/):
 
 ### Vitis Guides
 
-Step-by-step guides for software development in [`Vitis-Guide/`](Vitis-Guide/):
+Step-by-step guides for software development in [`Vitis-Software-Dev-Guide/`](Vitis-Software-Dev-Guide/):
 
 | Guide | Description |
 |-------|-------------|
-| [Vitis Core Concepts](Vitis-Guide/README.md) | Platform, Application, XSDB, and workflow overview |
-| [JTAG Debug Mode](Vitis-Guide/JTAG-Debug-Mode/JTAG-Debug-Mode.md) | Load and debug applications over JTAG |
-| [Standalone Boot Mode](Vitis-Guide/Standalone-Boot-Mode/Standalone-Boot-Mode.md) | Program flash for standalone boot |
+| [Vitis Core Concepts](Vitis-Software-Dev-Guide/README.md) | Platform, Application, XSDB, and workflow overview |
+| [JTAG Debug Mode](Vitis-Software-Dev-Guide/JTAG-Debug-Mode/JTAG-Debug-Mode.md) | Load and debug applications over JTAG |
+| [Standalone Boot Mode](Vitis-Software-Dev-Guide/Standalone-Boot-Mode/Standalone-Boot-Mode.md) | Program flash for standalone boot |
 
 ## License
 
