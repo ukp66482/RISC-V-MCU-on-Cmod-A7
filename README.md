@@ -39,28 +39,30 @@ This project provides a ready-to-use RISC-V MCU environment on the Cmod A7-35T f
 ## Repository Structure
 
 ```
-├── Cmod-A7-spec/                    # Board documentation & hardware files
-│   ├── IP-Specification/            # IP peripheral reference
-│   │   └── images/
-│   ├── Pin-Specification/           # Pin mapping & electrical characteristics
-│   │   └── images/
-│   ├── Power-Specification/         # Power rails & supply design
-│   │   └── images/
-│   ├── Kicad_symbol/                # KiCad schematic symbol
-│   ├── Cmod-A7-Master.xdc          # FPGA pin constraints file
+├── RISC-V-MCU/                      # Vivado hardware design files
 │   ├── top.tcl                      # Vivado project rebuild script
+│   ├── top.bit                      # Pre-built bitstream
 │   └── top_wrapper.xsa              # Hardware export for Vitis platform
-├── docs/
-│   ├── images/                      # Project-level diagrams
-│   │   └── system_architecture.svg
-│   └── pdf-style.css                # PDF export style (Markdown PDF extension)
-├── Intro_PPT/                       # Course introduction slides
-│   ├── RISCV-MCU.pdf
-│   └── RISCV-MCU.pptx
+├── Cmod-A7-spec/                    # Board documentation & hardware specs
+│   ├── IP-Specification/            # IP peripheral reference
+│   ├── Pin-Specification/           # Pin mapping & electrical characteristics
+│   ├── Power-Specification/         # Power rails & supply design
+│   ├── Kicad_symbol/                # KiCad schematic symbol
+│   └── Cmod-A7-Master.xdc          # FPGA pin constraints file
+├── Vitis-Guide/                     # Vitis software development guides
+│   ├── JTAG-Debug-Mode/             # Load & debug applications over JTAG
+│   ├── Standalone-Boot-Mode/        # Program flash for standalone boot
+│   └── README.md                    # Vitis core concepts quick reference
 ├── workspace-example/               # Vitis firmware examples (source only)
 │   ├── GPIO_test/src/               # GPIO peripheral test
 │   ├── PWM_test/src/                # PWM servo motor control
-│   └── UART_test/src/               # UART communication test
+│   └── Uart_test/src/               # UART communication test
+├── docs/
+│   └── images/                      # Project-level diagrams
+│       └── system_architecture.svg
+├── Intro_PPT/                       # Course introduction slides
+│   ├── RISCV-MCU.pdf
+│   └── RISCV-MCU.pptx
 └── .gitignore
 ```
 
@@ -71,40 +73,63 @@ This project provides a ready-to-use RISC-V MCU environment on the Cmod A7-35T f
 
 ## Getting Started
 
-### 1. Rebuild the Vivado Project
+The fastest way to get up and running is to use **JTAG Debug Mode** — load and run firmware directly over USB without touching flash memory.
 
-Open Vivado 2025.2 and run:
+### 1. Rebuild the Vivado Block Design
+
+Open Vivado 2025.2 and rebuild the hardware design from the Tcl script:
 
 ```tcl
-source Cmod-A7-spec/top.tcl
+source RISC-V-MCU/top.tcl
 ```
 
-Or use the pre-built bitstream (`Cmod-A7-spec/top.bit`) directly.
+This recreates the full block design, including the MicroBlaze RISC-V processor and all peripherals. After synthesis and implementation, export the hardware as an `.xsa` file for Vitis. Alternatively, use the pre-built `RISC-V-MCU/top_wrapper.xsa` directly.
 
-### 2. Create a Vitis Application
+### 2. Create a Vitis Platform and Application
 
-1. Open Vitis 2025.2 and create a new platform using `Cmod-A7-spec/top_wrapper.xsa`.
-2. Create a new application project targeting the MicroBlaze RISC-V processor.
-3. Copy source files from one of the examples in `workspace-example/` into your project.
-4. Build and program the FPGA.
+1. Open Vitis 2025.2 and create a new platform using `RISC-V-MCU/top_wrapper.xsa`.
+2. Select **standalone** OS and **microblaze_riscv_0** as the processor. Build the platform.
+3. Create a new application from the **Hello World** template.
+4. Copy source files from one of the examples in `workspace-example/`, or write your own.
+5. Build the application to produce an `.elf` file.
 
-### 3. Run an Example
+### 3. Run and Debug over JTAG
+
+1. Connect the Cmod A7-35T to your computer via USB.
+2. Click **Run** in the FLOW panel — Vitis will automatically program the FPGA and execute your application.
+3. Click **Debug** to enter a GDB-like interactive session with breakpoints, stepping, and register/memory inspection.
+
+For detailed step-by-step instructions with screenshots, see the [JTAG Debug Mode Guide](Vitis-Guide/JTAG-Debug-Mode/JTAG-Debug-Mode.md).
+
+### Example Programs
 
 The `workspace-example/` directory contains three ready-to-use test programs:
 
 - **GPIO_test** — Toggle LEDs and read button/switch inputs
 - **PWM_test** — Drive a servo motor via PWM output
-- **UART_test** — Send and receive data over UART
+- **Uart_test** — Send and receive data over UART
 
 ## Documentation
 
-All board-level documentation is in [`Cmod-A7-spec/`](Cmod-A7-spec/):
+### Board Specification
+
+Hardware documentation in [`Cmod-A7-spec/`](Cmod-A7-spec/):
 
 | Document | Description |
 |----------|-------------|
 | [IP Peripheral Reference](Cmod-A7-spec/IP-Specification/Cmod_A7_IP_Peripheral_Reference.md) | Full AXI IP list, base addresses, parameters, interrupt mapping |
 | [Pin Specification](Cmod-A7-spec/Pin-Specification/Cmod_A7_Pin_Specification.md) | DIP connector pin map, GPIO/PWM/UART/ADC assignments, electrical characteristics |
 | [Power Specification](Cmod-A7-spec/Power-Specification/Cmod_A7_Power_Specification.md) | Power rails, input options, VU pin behavior, dual-supply considerations |
+
+### Vitis Guides
+
+Step-by-step guides for software development in [`Vitis-Guide/`](Vitis-Guide/):
+
+| Guide | Description |
+|-------|-------------|
+| [Vitis Core Concepts](Vitis-Guide/README.md) | Platform, Application, XSDB, and workflow overview |
+| [JTAG Debug Mode](Vitis-Guide/JTAG-Debug-Mode/JTAG-Debug-Mode.md) | Load and debug applications over JTAG |
+| [Standalone Boot Mode](Vitis-Guide/Standalone-Boot-Mode/Standalone-Boot-Mode.md) | Program flash for standalone boot |
 
 ## License
 
