@@ -40,7 +40,8 @@ This project provides a ready-to-use RISC-V MCU environment on the Cmod A7-35T f
 
 | Directory | Description |
 |-----------|-------------|
-| [`RISC-V-MCU/`](RISC-V-MCU/) | Vivado hardware design — Tcl rebuild script, pre-built bitstream, XSA export, IP peripheral reference |
+| [`release/`](release/) | Pre-built outputs — `top.bit` bitstream and `top_wrapper.xsa` for direct use without rebuilding |
+| [`RISC-V-MCU/`](RISC-V-MCU/) | Vivado hardware design — Tcl rebuild script and IP peripheral reference |
 | [`Cmod-A7-spec/`](Cmod-A7-spec/) | Board documentation — pin mapping, power specs, KiCad symbol, constraints file |
 | [`Vitis-Software-Dev-Guide/`](Vitis-Software-Dev-Guide/) | Vitis guides — JTAG debug mode, standalone boot mode, core concepts |
 | [`workspace-example/`](workspace-example/) | Firmware examples — GPIO, PWM, UART, assembly LED control |
@@ -64,11 +65,11 @@ Open Vivado 2025.2 and rebuild the hardware design from the Tcl script:
 source RISC-V-MCU/top.tcl
 ```
 
-This recreates the full block design, including the MicroBlaze RISC-V processor and all peripherals. After synthesis and implementation, export the hardware as an `.xsa` file for Vitis. Alternatively, use the pre-built `RISC-V-MCU/top_wrapper.xsa` directly.
+This recreates the full block design, including the MicroBlaze RISC-V processor and all peripherals. After synthesis and implementation, export the hardware as an `.xsa` file for Vitis. Alternatively, use the pre-built `release/top_wrapper.xsa` directly.
 
 ### 2. Create a Vitis Platform and Application
 
-1. Open Vitis 2025.2 and create a new platform using `RISC-V-MCU/top_wrapper.xsa`.
+1. Open Vitis 2025.2 and create a new platform using `release/top_wrapper.xsa`.
 2. Select **standalone** OS and **microblaze_riscv_0** as the processor. Build the platform.
 3. Create a new application from the **Hello World** template.
 4. Copy source files from one of the examples in `workspace-example/`, or write your own.

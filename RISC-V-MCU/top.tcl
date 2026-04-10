@@ -49,7 +49,7 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 
 set list_projs [get_projects -quiet]
 if { $list_projs eq "" } {
-   create_project project_1 myproj -part xc7a35tcpg236-1
+   create_project RISC-V-MCU $script_folder -part xc7a35tcpg236-1
    set_property BOARD_PART digilentinc.com:cmod_a7-35t:part0:1.2 [current_project]
 }
 
@@ -738,5 +738,26 @@ proc create_root_design { parentCell } {
 ##################################################################
 
 create_root_design ""
+
+##################################################################
+# ADD CONSTRAINTS
+##################################################################
+
+set xdc_file [file normalize "$script_folder/../Cmod-A7-spec/Cmod-A7-Master.xdc"]
+if { [file exists $xdc_file] } {
+   add_files -fileset constrs_1 $xdc_file
+   common::send_gid_msg -ssname BD::TCL -id 2010 -severity "INFO" "Added constraints file: $xdc_file"
+} else {
+   common::send_gid_msg -ssname BD::TCL -id 2011 -severity "WARNING" "Constraints file not found: $xdc_file"
+}
+
+##################################################################
+# CREATE HDL WRAPPER
+##################################################################
+
+make_wrapper -files [get_files ${design_name}.bd] -top
+add_files -norecurse [glob $script_folder/RISC-V-MCU.srcs/sources_1/bd/${design_name}/hdl/${design_name}_wrapper.v]
+set_property top ${design_name}_wrapper [current_fileset]
+common::send_gid_msg -ssname BD::TCL -id 2012 -severity "INFO" "HDL wrapper created and set as top."
 
 
