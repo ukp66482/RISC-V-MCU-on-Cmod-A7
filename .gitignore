@@ -138,6 +138,7 @@ __pycache__/
 !/RISC-V-MCU/top_wrapper.xsa
 !/RISC-V-MCU/README.md
 !/RISC-V-MCU/IP-Specification/
+!/RISC-V-MCU/recreate_project.tcl
 
 ############################################
 # Workspace example – ignore all except .c/.h sources
