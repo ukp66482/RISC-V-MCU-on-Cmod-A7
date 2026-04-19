@@ -4,7 +4,7 @@ A soft-core RISC-V MCU system built on the **Digilent Cmod A7-35T** (Xilinx Arti
 
 ## Overview
 
-This project provides a ready-to-use RISC-V MCU environment on the Cmod A7-35T for the **NCKU Microprocessor Principles and Applications** course. Students write and run firmware targeting a MicroBlaze RISC-V processor with a set of pre-configured peripherals, focusing on software-level interaction such as register programming, interrupt handling, and peripheral control — without needing to deal with FPGA or circuit-level details.
+A ready-to-use RISC-V MCU environment on the Cmod A7-35T for the **NCKU Microprocessor Principles and Applications** course. Students focus on firmware — register programming, interrupts, peripheral control — without dealing with FPGA or circuit-level details.
 
 ![Digilent Cmod A7-35T](docs/images/cmod-a7-0.png)
 
@@ -12,14 +12,20 @@ This project provides a ready-to-use RISC-V MCU environment on the Cmod A7-35T f
 
 ![System Architecture](docs/images/system_architecture.svg)
 
+### AXI Bus Topology
+
+![DP/IP Bus Topology](docs/images/dp_ip_topology.svg)
+
+MicroBlaze exposes two AXI masters — **DP** (data) and **IP** (instruction). DP reaches all peripheral registers through the 20-port `axi_periph` crossbar; shared memory regions (**SRAM** and **QSPI XIP**) sit behind `smartconnect_0` and are reachable from both DP and IP. BRAM uses a separate LMB path.
+
 ### Key Specifications
 
 | Item | Detail |
 |------|--------|
 | FPGA | Xilinx Artix-7 xc7a35tcpg236-1 |
-| Processor | MicroBlaze RISC-V (32-bit, RV32IM + Bitmanip, Single Core, 5-Stage Pipeline) |
-| System Clock | 100 MHz (PLL from 12 MHz on-board oscillator) |
-| Local Memory | 128 KB (Block RAM, 128 KB Instruction + Data, shared True Dual-Port) |
+| Processor | MicroBlaze RISC-V (RV32IM + Bitmanip, 5-stage pipeline) |
+| System Clock | 100 MHz (PLL from 12 MHz oscillator) |
+| Local Memory | 128 KB Block RAM (True Dual-Port LMB) |
 | Interconnect | AXI SmartConnect (20 peripheral ports) |
 | Toolchain | Vivado & Vitis 2025.2 |
 
@@ -27,14 +33,14 @@ This project provides a ready-to-use RISC-V MCU environment on the Cmod A7-35T f
 
 ### Peripherals
 
-- **GPIO** — 4 × 7-bit bidirectional DIP groups (A–D), on-board LEDs × 2, RGB LED, push button
-- **PWM** — 3 channels (axi_timer, DIP Pin 10 / 34 / 40)
-- **UART** — 2 × 16550 (USB Micro-USB + DIP Pin 11/12 external)
-- **Timers** — 3 × 32-bit general-purpose (with interrupt)
+- **GPIO** — 4 × 7-bit DIP groups (A–D), on-board LEDs × 2, RGB LED, push button
+- **PWM** — 3 channels (DIP Pin 10 / 34 / 40)
+- **UART** — 2 × 16550 (USB + DIP external)
+- **Timers** — 3 × 32-bit with interrupt
 - **Interrupt Controller** — 6-channel AXI INTC
-- **XADC** — 12-bit ADC, 500 KSPS aggregate / 100 KSPS per channel (2 external analog inputs)
-- **QSPI Flash** — On-board Quad-SPI NOR Flash (axi_quad_spi) with dual AXI interface: control registers at `0x44A20000` (AXI-Lite, reachable from DP only), and a 4 MB XIP memory-mapped region at `0x44000000` (AXI4-Full, reachable from both IP and DP) mapped to both Instruction and Data buses for eXecute In Place
-- **SRAM** — 512 KB external cellular RAM (axi_emc, base 0x60000000, 32 MB address range); mapped to both Data and Instruction buses
+- **XADC** — 12-bit, 500 KSPS (2 external analog inputs)
+- **QSPI Flash** — 4 MB NOR, memory-mapped XIP
+- **SRAM** — 512 KB external cellular RAM
 
 ## Repository Structure
 

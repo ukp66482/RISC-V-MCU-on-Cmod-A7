@@ -1,0 +1,187 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="850" font-family="Segoe UI, Arial, sans-serif" font-size="11">
+
+  <defs>
+    <marker id="a-dp" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+      <path d="M0,0 L7,3.5 L0,7 z" fill="#1565c0"/>
+    </marker>
+    <marker id="a-ip" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+      <path d="M0,0 L7,3.5 L0,7 z" fill="#e65100"/>
+    </marker>
+    <marker id="a-both" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+      <path d="M0,0 L7,3.5 L0,7 z" fill="#4a148c"/>
+    </marker>
+    <marker id="a-lmb" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+      <path d="M0,0 L7,3.5 L0,7 z" fill="#1b5e20"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1120" height="850" fill="#f5f5f5"/>
+
+  <!-- Title -->
+  <text x="560" y="22" text-anchor="middle" font-weight="bold" font-size="15" fill="#3a3a3a">MicroBlaze RISC-V  ·  DP / IP Path Topology</text>
+
+  <!-- ════════════════════════════════════
+       MicroBlaze
+       ════════════════════════════════════ -->
+  <rect x="380" y="40" width="380" height="120" rx="8" fill="#fff9e6" stroke="#f57f17" stroke-width="2"/>
+  <text x="570" y="68" text-anchor="middle" font-weight="bold" font-size="14" fill="#e65100">MicroBlaze RISC-V</text>
+  <text x="570" y="86" text-anchor="middle" fill="#555" font-size="10">32-bit RV32IM + Bitmanip · 5-stage pipeline</text>
+  <text x="570" y="102" text-anchor="middle" fill="#555" font-size="10">100 MHz System Clock</text>
+  <text x="395" y="128" fill="#2e7d32" font-weight="bold" font-size="10">DLMB / ILMB</text>
+
+  <!-- M_AXI_IP tab -->
+  <rect x="420" y="160" width="80" height="24" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="1.3"/>
+  <text x="460" y="177" text-anchor="middle" font-weight="bold" fill="#e65100" font-size="10">M_AXI_IP</text>
+
+  <!-- M_AXI_DP tab -->
+  <rect x="640" y="160" width="80" height="24" rx="3" fill="#bbdefb" stroke="#1565c0" stroke-width="1.3"/>
+  <text x="680" y="177" text-anchor="middle" font-weight="bold" fill="#1565c0" font-size="10">M_AXI_DP</text>
+
+  <!-- ════════════════════════════════════
+       BRAM + LMB
+       ════════════════════════════════════ -->
+  <rect x="30" y="60" width="150" height="80" rx="6" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="105" y="86" text-anchor="middle" font-weight="bold" fill="#2e7d32">Block RAM</text>
+  <text x="105" y="104" text-anchor="middle" fill="#2e7d32" font-size="10">128 KB</text>
+  <text x="105" y="122" text-anchor="middle" fill="#2e7d32" font-size="9">DLMB + ILMB  (IP + DP)</text>
+
+  <!-- LMB bi-dir -->
+  <line x1="180" y1="90" x2="380" y2="90" stroke="#1b5e20" stroke-width="1.8" marker-end="url(#a-lmb)"/>
+  <line x1="380" y1="108" x2="180" y2="108" stroke="#1b5e20" stroke-width="1.8" marker-end="url(#a-lmb)"/>
+  <text x="280" y="84" text-anchor="middle" fill="#1b5e20" font-size="9" font-weight="bold">LMB</text>
+
+  <!-- ════════════════════════════════════
+       DP arrow (M_AXI_DP → axi_periph S00)
+       ════════════════════════════════════ -->
+  <line x1="680" y1="184" x2="680" y2="250" stroke="#1565c0" stroke-width="2" marker-end="url(#a-dp)"/>
+  <text x="690" y="215" fill="#1565c0" font-size="10" font-weight="bold">DP</text>
+  <text x="690" y="230" fill="#1565c0" font-size="9">→ S00</text>
+
+  <!-- ════════════════════════════════════
+       IP path (M_AXI_IP → smartconnect_0 S00)
+       Route: down 30px, left to x=240, down to y=600, right to x=450, down to y=630
+       ════════════════════════════════════ -->
+  <polyline points="460,184 460,215 240,215 240,605 450,605 450,630"
+            fill="none" stroke="#e65100" stroke-width="2" stroke-linejoin="miter" marker-end="url(#a-ip)"/>
+  <text x="248" y="210" fill="#e65100" font-size="10" font-weight="bold">IP</text>
+  <text x="248" y="405" fill="#e65100" font-size="9" transform="rotate(-90 248 405)">instruction fetch path</text>
+
+  <!-- ════════════════════════════════════
+       axi_periph SmartConnect (DP main crossbar)
+       ════════════════════════════════════ -->
+  <rect x="460" y="250" width="640" height="70" rx="6" fill="#ede7f6" stroke="#4a148c" stroke-width="2"/>
+  <text x="780" y="278" text-anchor="middle" font-weight="bold" fill="#4a148c" font-size="12">microblaze_riscv_0_axi_periph</text>
+  <text x="780" y="294" text-anchor="middle" fill="#4a148c" font-size="10">AXI SmartConnect  ·  1 slave (S00 ← DP)  →  20 masters (M00 – M19)</text>
+
+  <!-- Segment dividers -->
+  <line x1="820" y1="300" x2="820" y2="320" stroke="#4a148c" stroke-dasharray="2,2"/>
+  <line x1="900" y1="300" x2="900" y2="320" stroke="#4a148c" stroke-dasharray="2,2"/>
+  <text x="640" y="314" text-anchor="middle" fill="#4a148c" font-size="9" font-weight="bold">M00 – M17</text>
+  <text x="860" y="314" text-anchor="middle" fill="#4a148c" font-size="9" font-weight="bold">M18</text>
+  <text x="1000" y="314" text-anchor="middle" fill="#4a148c" font-size="9" font-weight="bold">M19</text>
+
+  <!-- Arrow from axi_periph M00-M17 to Peripheral Group -->
+  <line x1="640" y1="320" x2="640" y2="370" stroke="#1565c0" stroke-width="2" marker-end="url(#a-dp)"/>
+
+  <!-- Arrow from axi_periph M18 to smartconnect_0 S01 -->
+  <polyline points="860,320 860,610 870,610 870,630"
+            fill="none" stroke="#1565c0" stroke-width="2" stroke-linejoin="miter" marker-end="url(#a-dp)"/>
+  <text x="865" y="345" fill="#1565c0" font-size="9" font-weight="bold">M18 → S01</text>
+
+  <!-- Arrow from axi_periph M19 to QSPI AXI_LITE -->
+  <line x1="1000" y1="320" x2="1000" y2="370" stroke="#1565c0" stroke-width="2" marker-end="url(#a-dp)"/>
+
+  <!-- ════════════════════════════════════
+       Peripheral Group (M00 – M17, DP-only)
+       ════════════════════════════════════ -->
+  <rect x="460" y="370" width="360" height="220" rx="6" fill="#ffecb3" stroke="#ef6c00" stroke-width="1.5"/>
+  <text x="640" y="393" text-anchor="middle" font-weight="bold" fill="#ef6c00">Peripheral Group</text>
+  <text x="640" y="409" text-anchor="middle" fill="#ef6c00" font-size="10">(M00 – M17  ·  DP-only)</text>
+
+  <rect x="475" y="422" width="330" height="24" rx="3" fill="#fff3e0" stroke="#ef6c00" stroke-width="0.5"/>
+  <text x="640" y="438" text-anchor="middle" fill="#3a3a3a" font-size="10">axi_intc (M00)  ·  Timer × 3  ·  PWM × 3</text>
+
+  <rect x="475" y="450" width="330" height="24" rx="3" fill="#fff3e0" stroke="#ef6c00" stroke-width="0.5"/>
+  <text x="640" y="466" text-anchor="middle" fill="#3a3a3a" font-size="10">UART × 2  (USB + External DIP)</text>
+
+  <rect x="475" y="478" width="330" height="24" rx="3" fill="#fff3e0" stroke="#ef6c00" stroke-width="0.5"/>
+  <text x="640" y="494" text-anchor="middle" fill="#3a3a3a" font-size="10">GPIO × 4  (DIP A/B/C/D)  ·  INT_0_3</text>
+
+  <rect x="475" y="506" width="330" height="24" rx="3" fill="#fff3e0" stroke="#ef6c00" stroke-width="0.5"/>
+  <text x="640" y="522" text-anchor="middle" fill="#3a3a3a" font-size="10">Board:  LED × 2  ·  RGB LED  ·  Button</text>
+
+  <rect x="475" y="534" width="330" height="24" rx="3" fill="#fff3e0" stroke="#ef6c00" stroke-width="0.5"/>
+  <text x="640" y="550" text-anchor="middle" fill="#3a3a3a" font-size="10">XADC  (M17  ·  0x44A3_0000)</text>
+
+  <text x="640" y="578" text-anchor="middle" fill="#555" font-size="9" font-style="italic">Data-side registers only — unreachable from instruction fetch</text>
+
+  <!-- ════════════════════════════════════
+       QSPI AXI_LITE (DP-only via M19)
+       ════════════════════════════════════ -->
+  <rect x="900" y="370" width="200" height="110" rx="6" fill="#e1bee7" stroke="#4a148c" stroke-width="1.5"/>
+  <text x="1000" y="394" text-anchor="middle" font-weight="bold" fill="#4a148c">QSPI Flash  (NOR)</text>
+  <text x="1000" y="413" text-anchor="middle" fill="#4a148c" font-size="10">AXI_LITE  ·  Control Regs</text>
+  <text x="1000" y="433" text-anchor="middle" fill="#3a3a3a" font-size="12" font-weight="bold">0x44A2_0000</text>
+  <text x="1000" y="451" text-anchor="middle" fill="#555" font-size="9">64 KB register space</text>
+  <text x="1000" y="467" text-anchor="middle" fill="#555" font-size="9" font-style="italic">(DP only via M19)</text>
+
+  <!-- ════════════════════════════════════
+       smartconnect_0
+       ════════════════════════════════════ -->
+  <rect x="380" y="630" width="580" height="90" rx="6" fill="#ede7f6" stroke="#4a148c" stroke-width="2"/>
+  <text x="670" y="658" text-anchor="middle" font-weight="bold" fill="#4a148c" font-size="12">smartconnect_0</text>
+  <text x="670" y="676" text-anchor="middle" fill="#4a148c" font-size="10">AXI SmartConnect  ·  2 slaves  →  2 masters</text>
+
+  <text x="450" y="696" text-anchor="middle" fill="#e65100" font-size="10" font-weight="bold">S00  ← IP</text>
+  <text x="870" y="696" text-anchor="middle" fill="#1565c0" font-size="10" font-weight="bold">S01  ← DP</text>
+  <text x="450" y="712" text-anchor="middle" fill="#4a148c" font-size="10" font-weight="bold">M00 → SRAM</text>
+  <text x="870" y="712" text-anchor="middle" fill="#4a148c" font-size="10" font-weight="bold">M01 → QSPI XIP</text>
+
+  <!-- Arrows out of smartconnect_0 -->
+  <line x1="450" y1="720" x2="450" y2="750" stroke="#4a148c" stroke-width="2" marker-end="url(#a-both)"/>
+  <line x1="870" y1="720" x2="870" y2="750" stroke="#4a148c" stroke-width="2" marker-end="url(#a-both)"/>
+
+  <!-- ════════════════════════════════════
+       SRAM (M00)
+       ════════════════════════════════════ -->
+  <rect x="340" y="750" width="220" height="75" rx="6" fill="#f3e5f5" stroke="#4a148c" stroke-width="1.5"/>
+  <text x="450" y="774" text-anchor="middle" font-weight="bold" fill="#4a148c">SRAM  ·  512 KB</text>
+  <text x="450" y="790" text-anchor="middle" fill="#555" font-size="10">axi_emc  ·  Cellular RAM</text>
+  <text x="450" y="807" text-anchor="middle" fill="#3a3a3a" font-size="11" font-weight="bold">0x6000_0000  ·  32 MB range</text>
+  <text x="450" y="821" text-anchor="middle" fill="#4a148c" font-size="9" font-weight="bold">IP + DP</text>
+
+  <!-- ════════════════════════════════════
+       QSPI XIP (M01)
+       ════════════════════════════════════ -->
+  <rect x="760" y="750" width="260" height="75" rx="6" fill="#f3e5f5" stroke="#4a148c" stroke-width="1.5"/>
+  <text x="890" y="774" text-anchor="middle" font-weight="bold" fill="#4a148c">QSPI XIP Region</text>
+  <text x="890" y="790" text-anchor="middle" fill="#555" font-size="10">axi_quad_spi  ·  AXI_FULL</text>
+  <text x="890" y="807" text-anchor="middle" fill="#3a3a3a" font-size="11" font-weight="bold">0x4400_0000  ·  4 MB  ·  NOR</text>
+  <text x="890" y="821" text-anchor="middle" fill="#4a148c" font-size="9" font-weight="bold">IP + DP  (eXecute In Place)</text>
+
+  <!-- ════════════════════════════════════
+       Legend
+       ════════════════════════════════════ -->
+  <rect x="30" y="330" width="195" height="190" rx="6" fill="#ffffff" stroke="#bdbdbd" stroke-width="1"/>
+  <text x="127" y="350" text-anchor="middle" font-weight="bold" fill="#3a3a3a">Legend</text>
+
+  <line x1="44" y1="368" x2="74" y2="368" stroke="#1565c0" stroke-width="2" marker-end="url(#a-dp)"/>
+  <text x="82" y="372" fill="#3a3a3a" font-size="10">DP  (data access)</text>
+
+  <line x1="44" y1="390" x2="74" y2="390" stroke="#e65100" stroke-width="2" marker-end="url(#a-ip)"/>
+  <text x="82" y="394" fill="#3a3a3a" font-size="10">IP  (instruction fetch)</text>
+
+  <line x1="44" y1="412" x2="74" y2="412" stroke="#4a148c" stroke-width="2" marker-end="url(#a-both)"/>
+  <text x="82" y="416" fill="#3a3a3a" font-size="10">IP + DP shared</text>
+
+  <line x1="44" y1="434" x2="74" y2="434" stroke="#1b5e20" stroke-width="1.8" marker-end="url(#a-lmb)"/>
+  <text x="82" y="438" fill="#3a3a3a" font-size="10">LMB  (local mem bus)</text>
+
+  <text x="44" y="464" fill="#555" font-size="9">Notes:</text>
+  <text x="44" y="478" fill="#555" font-size="9">• DP-only peripherals sit behind</text>
+  <text x="44" y="490" fill="#555" font-size="9">  axi_periph (20-port crossbar).</text>
+  <text x="44" y="504" fill="#555" font-size="9">• IP + DP shared resources</text>
+  <text x="44" y="516" fill="#555" font-size="9">  are merged at smartconnect_0.</text>
+
+</svg>
