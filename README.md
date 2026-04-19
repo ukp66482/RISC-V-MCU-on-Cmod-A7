@@ -33,7 +33,7 @@ This project provides a ready-to-use RISC-V MCU environment on the Cmod A7-35T f
 - **Timers** — 3 × 32-bit general-purpose (with interrupt)
 - **Interrupt Controller** — 6-channel AXI INTC
 - **XADC** — 12-bit ADC, 500 KSPS aggregate / 100 KSPS per channel (2 external analog inputs)
-- **QSPI Flash** — On-board Quad-SPI NOR Flash (axi_quad_spi, base 0x44A20000); mapped to both Data and Instruction buses, supports instruction fetch (XIP)
+- **QSPI Flash** — On-board Quad-SPI NOR Flash (axi_quad_spi) with dual AXI interface: control registers at `0x44A20000` (AXI-Lite, reachable from DP only), and a 4 MB XIP memory-mapped region at `0x44000000` (AXI4-Full, reachable from both IP and DP) mapped to both Instruction and Data buses for eXecute In Place
 - **SRAM** — 512 KB external cellular RAM (axi_emc, base 0x60000000, 32 MB address range); mapped to both Data and Instruction buses
 
 ## Repository Structure

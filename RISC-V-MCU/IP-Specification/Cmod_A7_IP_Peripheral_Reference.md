@@ -192,11 +192,20 @@ All timer instances use `xilinx.com:ip:axi_timer:2.0`.
 | Parameter | Value |
 |-----------|-------|
 | IP Version | `xilinx.com:ip:axi_quad_spi:3.2` |
-| AXI Base Address | `0x44A2_0000` |
-| Address Range | 64 KB (control register space) |
+| AXI_LITE Base (Control) | `0x44A2_0000` (64 KB) |
+| AXI_FULL Base (XIP Memory) | `0x4400_0000` (4 MB, `0x4400_0000 – 0x443F_FFFF`) |
+| XIP Mode | Enabled (`C_XIP_MODE = 1`) |
+| SPI Memory Type | NOR Flash (`C_SPI_MEMORY = 4`) |
 | Interface | Quad SPI |
 
-**Description:** Controls the on-board Quad-SPI Flash memory. Can be used to store non-volatile data such as configuration files or firmware images.
+**Description:** Controls the on-board Quad-SPI NOR Flash memory. The controller exposes **two complementary AXI interfaces** with different reachability:
+
+| Interface | Base Address | Reachable From | Purpose |
+|-----------|--------------|----------------|---------|
+| `AXI_LITE` | `0x44A2_0000` (64 KB) | **DP only** — via `microblaze_riscv_0_axi_periph` M19 ← `M_AXI_DP` | SPI controller register access (erase / program / read-command setup, status) |
+| `AXI_FULL` (`aximm/MEM0`) | `0x4400_0000` (4 MB) | **IP & DP both** — via `smartconnect_0`: S00 ← `M_AXI_IP`, S01 ← `axi_periph` M18 ← `M_AXI_DP` | Memory-mapped flash contents for **eXecute In Place (XIP)** — instruction fetch and data read directly from flash |
+
+Because `AXI_FULL` sits behind `smartconnect_0` which has both `M_AXI_IP` and `M_AXI_DP` as slaves, the XIP region is reachable from both ports and is mapped into **both** the Instruction and Data address spaces. Instruction fetches, code execution, constant reads, and `.rodata` access from flash all work without a copy-to-RAM step. The `AXI_LITE` register interface is mapped into the Data address space only.
 
 ### 5.2 SRAM / Cellular RAM (`axi_emc_0`)
 
@@ -259,9 +268,10 @@ All timer instances use `xilinx.com:ip:axi_timer:2.0`.
 | `0x41C3_0000` | 64K | PWM_2 | axi_timer | PWM |
 | `0x41C4_0000` | 64K | timer_1 | axi_timer | Timer |
 | `0x41C5_0000` | 64K | timer_2 | axi_timer | Timer |
+| `0x4400_0000` | 4M | axi_quad_spi_0 (`aximm/MEM0`, XIP) | axi_quad_spi | Memory |
 | `0x44A0_0000` | 64K | uart_USB | axi_uart16550 | Communication |
 | `0x44A1_0000` | 64K | uart_1 | axi_uart16550 | Communication |
-| `0x44A2_0000` | 64K | axi_quad_spi_0 | axi_quad_spi | Memory |
+| `0x44A2_0000` | 64K | axi_quad_spi_0 (`AXI_LITE`, control regs) | axi_quad_spi | Memory |
 | `0x44A3_0000` | 64K | xadc_wiz_0 | xadc_wiz | ADC |
 | `0x6000_0000` | 32M | axi_emc_0 | axi_emc | Memory |
 
