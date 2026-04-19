@@ -178,3 +178,10 @@ workspace-example/ADC_test/*
 workspace-example/ADC_test/src/*
 !workspace-example/ADC_test/src/*.c
 !workspace-example/ADC_test/src/*.h
+
+!workspace-example/MemoryRead_test/
+workspace-example/MemoryRead_test/*
+!workspace-example/MemoryRead_test/src/
+workspace-example/MemoryRead_test/src/*
+!workspace-example/MemoryRead_test/src/*.c
+!workspace-example/MemoryRead_test/src/*.h
