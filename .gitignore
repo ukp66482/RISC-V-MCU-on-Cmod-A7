@@ -185,3 +185,24 @@ workspace-example/MemoryRead_test/*
 workspace-example/MemoryRead_test/src/*
 !workspace-example/MemoryRead_test/src/*.c
 !workspace-example/MemoryRead_test/src/*.h
+############################################
+# Plan-B pure-MCU additions
+############################################
+!workspace-example/bootloader/
+workspace-example/bootloader/*
+!workspace-example/bootloader/src/
+workspace-example/bootloader/src/*
+!workspace-example/bootloader/src/*.c
+!workspace-example/bootloader/src/*.h
+!workspace-example/bootloader/src/*.ld
+
+!workspace-example/SRAM_app_template/
+workspace-example/SRAM_app_template/*
+!workspace-example/SRAM_app_template/src/
+workspace-example/SRAM_app_template/src/*
+!workspace-example/SRAM_app_template/src/*.c
+!workspace-example/SRAM_app_template/src/*.h
+!workspace-example/SRAM_app_template/src/*.ld
+
+# deployment flash image is a release artifact, keep it
+!release/*.mcs

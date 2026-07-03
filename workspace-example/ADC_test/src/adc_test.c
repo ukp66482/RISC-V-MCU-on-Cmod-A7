@@ -2,7 +2,7 @@
  * XADC 5-Channel Read Test
  *
  * Hardware:
- *   - XADC Wizard @ 0x44A30000, Continuous sequencer mode, 500 KSPS aggregate
+ *   - XADC Wizard @ 0x40600000, Continuous sequencer mode, 500 KSPS aggregate
  *
  * Enabled Channels:
  *   - VAUX4       : DIP Pin 15 (external 0–3.3 V, on-board divider to 0–1 V)

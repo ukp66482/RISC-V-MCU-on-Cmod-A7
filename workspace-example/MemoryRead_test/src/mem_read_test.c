@@ -1,17 +1,25 @@
 /******************************************************************************
- * Memory Read / Write Test — BRAM · SRAM · QSPI Flash (XIP)
+ * Memory Read / Write Test — BRAM · SRAM
  *
  * Regions under test:
- *   - BRAM  : On-chip Block RAM (128 KB, via LMB)        — static buffer
- *   - SRAM  : axi_emc cellular RAM @ 0x6000_0000 (512 KB, 32 MB range)
- *   - Flash : axi_quad_spi XIP window @ 0x4400_0000 (4 MB NOR, read-only)
+ *   - BRAM  : On-chip Block RAM (128 KB, via LMB, 1-cycle, NOT cached)
+ *   - SRAM  : axi_emc cellular RAM @ 0x6000_0000 (512 KB, behind the
+ *             16 KB write-through D-cache)
  *
- * Notes:
- *   - BRAM/SRAM are tested with write + read-verify.
- *   - The Flash XIP window is read-only — writing Flash requires sending
- *     WREN/ERASE/PROGRAM commands through the AXI_LITE @ 0x44A2_0000 side,
- *     which is out of scope for this simple benchmark. We read-checksum
- *     the first TEST_SIZE bytes instead.
+ * What to expect (and to discuss in class):
+ *   - BRAM read ≈ write ≈ 1 cycle/word: the LMB path has no cache and
+ *     needs none.
+ *   - SRAM WRITE is slow: write-through means every store really goes
+ *     out to the 8-bit external bus, cache or no cache.
+ *   - SRAM READ is fast(er): the D-cache fills 32-byte lines, so 8
+ *     consecutive words share one miss. Run the read loop twice and
+ *     compare — the second pass shows the cache doing its job.
+ *
+ * The QSPI flash is no longer memory-mapped (the controller runs in
+ * register mode so the CPU can erase/program it — that is what the UART
+ * bootloader uses). To read flash contents, send SPI commands through
+ * the AXI_LITE interface @ 0x4050_0000 — see
+ * workspace-example/bootloader/src/bootloader.c for a worked example.
  *
  * Timing: uses axi_timer instance `timer_2` as a free-running 32-bit
  * up-counter. System clock is 100 MHz → one cycle = 10 ns.
@@ -25,7 +33,6 @@
 
 /* ---- Memory regions ---- */
 #define SRAM_BASE        0x60000000U
-#define FLASH_BASE       0x44000000U
 
 /* Window per region. 16 KB leaves plenty of headroom in BRAM for code+stack. */
 #define TEST_SIZE_BYTES  (16U * 1024U)
@@ -36,7 +43,7 @@
  * Register map (Xilinx PG079):
  *   +0x00 TCSR0, +0x04 TLR0, +0x08 TCR0
  */
-#define TIMER_BASE       XPAR_TIMER_2_BASEADDR   /* 0x41C5_0000 */
+#define TIMER_BASE       XPAR_TIMER_2_BASEADDR   /* 0x4012_0000 */
 #define TCSR0_OFF        0x00
 #define TLR0_OFF         0x04
 #define TCR0_OFF         0x08
@@ -134,7 +141,7 @@ int main(void)
     led_init();
     led_set(0x1);
 
-    xil_printf("\r\n=== Memory R/W Test  BRAM · SRAM · Flash ===\r\n");
+    xil_printf("\r\n=== Memory R/W Test  BRAM · SRAM ===\r\n");
     xil_printf("Test window: %u bytes (%u 32-bit words) per region\r\n",
                TEST_SIZE_BYTES, TEST_SIZE_WORDS);
     xil_printf("Timer      : 0x%08X  (100 MHz, 10 ns/cycle)\r\n\r\n",
@@ -149,30 +156,22 @@ int main(void)
     print_rw(bram_wr, bram_rd, bram_err);
     xil_printf("\r\n");
 
-    /* ---------------- SRAM ---------------- */
-    xil_printf("[SRAM]  axi_emc cellular RAM @ 0x%08X\r\n", SRAM_BASE);
+    /* ---------------- SRAM (through the D-cache) ---------------- */
+    xil_printf("[SRAM]  axi_emc cellular RAM @ 0x%08X  (16 KB write-through D$)\r\n",
+               SRAM_BASE);
     volatile u32 *sram = (volatile u32 *)SRAM_BASE;
     u32 sram_wr = do_write(sram, TEST_SIZE_WORDS, PATTERN_SEED);
     u32 sram_err;
-    u32 sram_rd = do_read_verify(sram, TEST_SIZE_WORDS, PATTERN_SEED, &sram_err);
-    print_rw(sram_wr, sram_rd, sram_err);
-    xil_printf("\r\n");
+    u32 sram_rd1 = do_read_verify(sram, TEST_SIZE_WORDS, PATTERN_SEED, &sram_err);
+    print_rw(sram_wr, sram_rd1, sram_err);
 
-    /* ---------------- Flash (XIP, read-only) ---------------- */
-    xil_printf("[Flash] axi_quad_spi XIP @ 0x%08X  (NOR, read-only window)\r\n",
-               FLASH_BASE);
-    volatile u32 *flash = (volatile u32 *)FLASH_BASE;
-    u32 flash_xor;
-    u32 flash_rd = do_read_xor(flash, TEST_SIZE_WORDS, &flash_xor);
-    xil_printf("  Read   : %10u cyc  (%6u us)   XOR=0x%08X\r\n",
-               flash_rd, flash_rd / CYCLES_PER_US, flash_xor);
-
-    volatile u8 *b = (volatile u8 *)flash;
-    xil_printf("  Dump16 : ");
-    for (u32 i = 0; i < 16; i++) xil_printf("%02X ", b[i]);
-    xil_printf("\r\n");
-    xil_printf("  Note   : XIP is read-only; writing Flash needs erase/program\r\n");
-    xil_printf("           commands via AXI_LITE @ 0x44A2_0000.\r\n\r\n");
+    /* second read pass: the working set is now (mostly) cached */
+    u32 sram_xor;
+    u32 sram_rd2 = do_read_xor(sram, TEST_SIZE_WORDS, &sram_xor);
+    xil_printf("  Read#2 : %10u cyc  (%6u us)   <- cache warm, compare with Read\r\n",
+               sram_rd2, sram_rd2 / CYCLES_PER_US);
+    xil_printf("  Note   : writes stay slow (write-through goes to the 8-bit\r\n");
+    xil_printf("           external bus every time); reads win from 32 B line fills.\r\n\r\n");
 
     xil_printf("=== Done ===\r\n");
 

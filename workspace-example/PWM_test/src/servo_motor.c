@@ -4,9 +4,9 @@
  * Hardware:
  *   - 3x AXI Timer IP with PWM output
  *   - System clock: 100 MHz
- *   - PWM_0 base: 0x41C10000  (DIP pin 10)
- *   - PWM1  base: 0x41C20000  (DIP pin 34)
- *   - PWM_2 base: 0x41C30000  (DIP pin 40)
+ *   - PWM_0 base: 0x40200000  (DIP pin 10)
+ *   - PWM1  base: 0x40210000  (DIP pin 34)
+ *   - PWM_2 base: 0x40220000  (DIP pin 40)
  *
  * SG90 Servo Spec:
  *   - PWM frequency: 50 Hz → period = 20,000,000 ns
@@ -25,9 +25,9 @@
 #include "sleep.h"
 
 /*--- Base addresses (from xparameters.h) ---*/
-#define PWM0_BASEADDR   XPAR_PWM_0_BASEADDR    /* 0x41C10000, DIP pin 10 */
-#define PWM1_BASEADDR   XPAR_PWM_1_BASEADDR     /* 0x41C20000, DIP pin 34 */
-#define PWM2_BASEADDR   XPAR_PWM_2_BASEADDR    /* 0x41C30000, DIP pin 40 */
+#define PWM0_BASEADDR   XPAR_PWM_0_BASEADDR    /* 0x40200000, DIP pin 10 */
+#define PWM1_BASEADDR   XPAR_PWM_1_BASEADDR     /* 0x40210000, DIP pin 34 */
+#define PWM2_BASEADDR   XPAR_PWM_2_BASEADDR    /* 0x40220000, DIP pin 40 */
 
 /*--- SG90 timing in nanoseconds ---*/
 #define PWM_PERIOD_NS   20000000U   /* 20 ms = 50 Hz */

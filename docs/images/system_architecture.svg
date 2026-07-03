@@ -39,9 +39,9 @@
 
   <!-- MicroBlaze -->
   <rect x="166" y="96" width="226" height="60" rx="5" fill="#ffe082" stroke="#e65100" stroke-width="1.5"/>
-  <text x="279" y="115" text-anchor="middle" font-weight="bold" fill="#3a3a3a">MicroBlaze RISC-V</text>
-  <text x="279" y="131" text-anchor="middle" fill="#555" font-size="10">32-bit RV32IM + Bitmanip</text>
-  <text x="279" y="147" text-anchor="middle" fill="#555" font-size="10">100 MHz System Clock</text>
+  <text x="279" y="114" text-anchor="middle" font-weight="bold" fill="#3a3a3a">MicroBlaze RISC-V</text>
+  <text x="279" y="130" text-anchor="middle" fill="#555" font-size="10">32-bit RV32IM + Bitmanip · 100 MHz</text>
+  <text x="279" y="146" text-anchor="middle" fill="#555" font-size="10">16 KB I-cache + 16 KB D-cache</text>
 
   <!-- MDM -->
   <rect x="410" y="96" width="148" height="60" rx="5" fill="#ffe082" stroke="#e65100" stroke-width="1.5"/>
@@ -59,9 +59,10 @@
   <!-- ══════════════════════════════════════════
        BLOCK RAM (left of processor)
   ══════════════════════════════════════════ -->
-  <rect x="18" y="112" width="112" height="52" rx="5" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
-  <text x="74" y="133" text-anchor="middle" font-weight="bold" fill="#2e7d32">Block RAM</text>
-  <text x="74" y="150" text-anchor="middle" fill="#2e7d32" font-size="10">128 KB (LMB)</text>
+  <rect x="18" y="108" width="112" height="60" rx="5" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="74" y="126" text-anchor="middle" font-weight="bold" fill="#2e7d32">Block RAM</text>
+  <text x="74" y="141" text-anchor="middle" fill="#2e7d32" font-size="10">128 KB (LMB, 1-cyc)</text>
+  <text x="74" y="156" text-anchor="middle" fill="#2e7d32" font-size="9">bootloader + stack</text>
 
   <!-- BRAM ↔ MicroBlaze (LMB, bidirectional) -->
   <line x1="130" y1="138" x2="163" y2="138" stroke="#1b5e20" stroke-width="1.8" marker-end="url(#b)"/>
@@ -120,12 +121,12 @@
   <rect x="190" y="376" width="116" height="56" rx="4" fill="#c5cae9" stroke="#283593" stroke-width="1"/>
   <text x="248" y="396" text-anchor="middle" fill="#3a3a3a" font-size="10">Timer × 3</text>
   <text x="248" y="411" text-anchor="middle" fill="#555" font-size="9">32-bit · w/ Interrupt</text>
-  <text x="248" y="424" text-anchor="middle" fill="#555" font-size="9">0x41C0/C4/C5_0000</text>
+  <text x="248" y="424" text-anchor="middle" fill="#555" font-size="9">0x4010/11/12_0000</text>
   <rect x="190" y="440" width="116" height="72" rx="4" fill="#c5cae9" stroke="#283593" stroke-width="1"/>
   <text x="248" y="458" text-anchor="middle" fill="#3a3a3a" font-size="10">PWM × 3</text>
   <text x="248" y="473" text-anchor="middle" fill="#555" font-size="9">axi_timer PWM mode</text>
   <text x="248" y="486" text-anchor="middle" fill="#555" font-size="9">DIP Pin 10 / 34 / 40</text>
-  <text x="248" y="499" text-anchor="middle" fill="#555" font-size="9">0x41C1/C2/C3_0000</text>
+  <text x="248" y="499" text-anchor="middle" fill="#555" font-size="9">0x4020/21/22_0000</text>
 
   <!-- ── UART ── x=322, w=156, cx=400 -->
   <rect x="322" y="352" width="156" height="176" rx="6" fill="#e0f7fa" stroke="#00695c" stroke-width="1.5"/>
@@ -133,24 +134,24 @@
   <rect x="330" y="376" width="140" height="60" rx="4" fill="#b2ebf2" stroke="#00695c" stroke-width="1"/>
   <text x="400" y="395" text-anchor="middle" fill="#3a3a3a" font-size="10">UART USB</text>
   <text x="400" y="410" text-anchor="middle" fill="#555" font-size="9">Micro-USB connector</text>
-  <text x="400" y="425" text-anchor="middle" fill="#555" font-size="9">0x44A0_0000</text>
+  <text x="400" y="425" text-anchor="middle" fill="#555" font-size="9">0x4030_0000</text>
   <rect x="330" y="444" width="140" height="68" rx="4" fill="#b2ebf2" stroke="#00695c" stroke-width="1"/>
   <text x="400" y="462" text-anchor="middle" fill="#3a3a3a" font-size="10">UART External</text>
   <text x="400" y="477" text-anchor="middle" fill="#555" font-size="9">DIP Pin 11 (TX) / 12 (RX)</text>
-  <text x="400" y="492" text-anchor="middle" fill="#555" font-size="9">0x44A1_0000</text>
+  <text x="400" y="492" text-anchor="middle" fill="#555" font-size="9">0x4031_0000</text>
 
   <!-- ── Memory ── x=486, w=132, cx=552 -->
   <rect x="486" y="352" width="132" height="176" rx="6" fill="#f3e5f5" stroke="#4a148c" stroke-width="1.5"/>
   <text x="552" y="370" text-anchor="middle" font-weight="bold" fill="#4a148c">Memory</text>
   <rect x="494" y="376" width="116" height="56" rx="4" fill="#e1bee7" stroke="#4a148c" stroke-width="1"/>
-  <text x="552" y="393" text-anchor="middle" fill="#3a3a3a" font-size="10">QSPI NOR (XIP, 4 MB)</text>
-  <text x="552" y="408" text-anchor="middle" fill="#555" font-size="9">Ctrl  0x44A2_0000  (DP)</text>
-  <text x="552" y="423" text-anchor="middle" fill="#555" font-size="9">XIP   0x4400_0000  (IP+DP)</text>
+  <text x="552" y="393" text-anchor="middle" fill="#3a3a3a" font-size="10">QSPI NOR  4 MB</text>
+  <text x="552" y="408" text-anchor="middle" fill="#555" font-size="9">register mode (CPU R/W)</text>
+  <text x="552" y="423" text-anchor="middle" fill="#555" font-size="9">Ctrl 0x4050_0000 · storage</text>
   <rect x="494" y="440" width="116" height="72" rx="4" fill="#e1bee7" stroke="#4a148c" stroke-width="1"/>
   <text x="552" y="458" text-anchor="middle" fill="#3a3a3a" font-size="10">SRAM  512 KB</text>
   <text x="552" y="473" text-anchor="middle" fill="#555" font-size="9">Cellular RAM (axi_emc)</text>
-  <text x="552" y="486" text-anchor="middle" fill="#555" font-size="9">32 MB addr range</text>
-  <text x="552" y="499" text-anchor="middle" fill="#555" font-size="9">0x6000_0000</text>
+  <text x="552" y="486" text-anchor="middle" fill="#555" font-size="9">cached · exec region</text>
+  <text x="552" y="499" text-anchor="middle" fill="#555" font-size="9">0x6000_0000 (512 KB fit)</text>
 
   <!-- ── XADC ── x=626, w=144, cx=698 -->
   <rect x="626" y="352" width="144" height="116" rx="6" fill="#fff3e0" stroke="#bf360c" stroke-width="1.5"/>
@@ -160,7 +161,7 @@
   <text x="698" y="409" text-anchor="middle" fill="#555" font-size="9">500 KSPS total</text>
   <text x="698" y="422" text-anchor="middle" fill="#555" font-size="9">100 KSPS / channel</text>
   <text x="698" y="437" text-anchor="middle" fill="#555" font-size="9">2 ext + 3 internal ch</text>
-  <text x="698" y="450" text-anchor="middle" fill="#555" font-size="9">0x44A3_0000</text>
+  <text x="698" y="450" text-anchor="middle" fill="#555" font-size="9">0x4060_0000</text>
 
   <!-- ══════════════════════════════════════════
        DIP CONNECTOR BAR (bottom)

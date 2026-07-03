@@ -1,0 +1,11 @@
+===================================
+Configuration Memory information
+===================================
+File Format        MCS
+Interface          SPIX4
+Size               4M
+Start Address      0x00000000
+End Address        0x003FFFFF
+
+Addr1         Addr2         Date                    File(s)
+0x00000000    0x0017BB73    Jul  3 17:54:03 2026    /tmp/claude-1000/-home-ukp66482-Desktop-RISC-V-MCU-on-Cmod-A7/75a11b51-be21-4cee-ab4b-9d8f394bc60a/scratchpad/boot_x4.bit

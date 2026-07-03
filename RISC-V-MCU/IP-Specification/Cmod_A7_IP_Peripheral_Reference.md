@@ -18,7 +18,7 @@
 | Debug Interface | Enabled (`C_DEBUG_ENABLED = 1`) |
 | Multiply / Divide | Enabled (`C_USE_MULDIV = 2`) |
 | Bit Manipulation | Bitmanip A/B/C/S all enabled |
-| Cache | Disabled (both I-Cache and D-Cache) |
+| Cache | 16 KB I-Cache + 16 KB D-Cache, write-through, 32 B lines, cacheable range `0x6000_0000`–`0x6007_FFFF` (exact SRAM fit) |
 
 **Description:** The main processor core. Executes user firmware and accesses all peripherals through the AXI SmartConnect interconnect.
 
@@ -32,7 +32,7 @@
 | Memory Type | True Dual-Port Block RAM |
 | ECC | Disabled |
 
-**Description:** Instruction and data local memory implemented with FPGA Block RAM. Provides zero-wait-state access for the processor.
+**Description:** Instruction and data local memory implemented with FPGA Block RAM. Provides zero-wait-state access for the processor, outside the cache path. Layout convention: lower 64 KB holds the UART bootloader (restored from flash at every configuration), upper 64 KB is the application stack region.
 
 ### 1.3 AXI SmartConnect (`microblaze_riscv_0_axi_periph`)
 
@@ -49,8 +49,8 @@
 | Parameter | Value |
 |-----------|-------|
 | IP Version | `xilinx.com:ip:axi_intc:4.1` |
-| AXI Base Address | `0x4120_0000` |
-| Fast Interrupt | Enabled (`C_HAS_FAST = 1`) |
+| AXI Base Address | `0x4040_0000` |
+| Fast Interrupt | Disabled (`C_HAS_FAST = 0`) |
 | Interrupt Sources | 6 (merged via `ilconcat`) |
 
 **Interrupt Mapping:**
@@ -102,8 +102,8 @@
 | Parameter | Value |
 |-----------|-------|
 | IP Version | `xilinx.com:ip:axi_uart16550:2.0` |
-| AXI Base Address | `0x44A0_0000` |
-| Address Range | 64 KB (0x44A0_0000 – 0x44A0_FFFF) |
+| AXI Base Address | `0x4030_0000` |
+| Address Range | 64 KB (0x4030_0000 – 0x4030_FFFF) |
 | TX Pin | J18 (via Micro-USB connector) |
 | RX Pin | J17 (via Micro-USB connector) |
 | Interrupt | Connected to `xlconcat In4` |
@@ -115,8 +115,8 @@
 | Parameter | Value |
 |-----------|-------|
 | IP Version | `xilinx.com:ip:axi_uart16550:2.0` |
-| AXI Base Address | `0x44A1_0000` |
-| Address Range | 64 KB (0x44A1_0000 – 0x44A1_FFFF) |
+| AXI Base Address | `0x4031_0000` |
+| Address Range | 64 KB (0x4031_0000 – 0x4031_FFFF) |
 | TX Pin | J1 (DIP Pin 11) |
 | RX Pin | K2 (DIP Pin 12) |
 | Interrupt | Connected to `xlconcat In3` |
@@ -169,17 +169,17 @@ All timer instances use `xilinx.com:ip:axi_timer:2.0`.
 
 | Instance | AXI Base Address | Mode | Interrupt | Description |
 |----------|-----------------|------|-----------|-------------|
-| `timer_0` | `0x41C0_0000` | 32-bit (`Default`) | `xlconcat In0` | General-purpose system timer |
-| `timer_1` | `0x41C4_0000` | Default | `xlconcat In1` | General-purpose timer |
-| `timer_2` | `0x41C5_0000` | Default | `xlconcat In2` | General-purpose timer |
+| `timer_0` | `0x4010_0000` | 32-bit (`Default`) | `xlconcat In0` | General-purpose system timer |
+| `timer_1` | `0x4011_0000` | Default | `xlconcat In1` | General-purpose timer |
+| `timer_2` | `0x4012_0000` | Default | `xlconcat In2` | General-purpose timer |
 
 ### 4.2 PWM Outputs
 
 | Instance | AXI Base Address | Output Pin | DIP Pin | Description |
 |----------|-----------------|-----------|---------|-------------|
-| `PWM_0` | `0x41C1_0000` | J3 | Pin 10 | PWM Channel 0 |
-| `PWM_1` | `0x41C2_0000` | W3 | Pin 34 | PWM Channel 1 |
-| `PWM_2` | `0x41C3_0000` | W4 | Pin 40 | PWM Channel 2 |
+| `PWM_0` | `0x4020_0000` | J3 | Pin 10 | PWM Channel 0 |
+| `PWM_1` | `0x4021_0000` | W3 | Pin 34 | PWM Channel 1 |
+| `PWM_2` | `0x4022_0000` | W4 | Pin 40 | PWM Channel 2 |
 
 **Description:** AXI Timer instances configured in PWM mode to generate square-wave outputs. Useful for LED dimming, motor speed control, buzzer tone generation, etc. Frequency and duty cycle are configured through the Timer Load Registers and the PWM enable bit.
 
@@ -192,20 +192,19 @@ All timer instances use `xilinx.com:ip:axi_timer:2.0`.
 | Parameter | Value |
 |-----------|-------|
 | IP Version | `xilinx.com:ip:axi_quad_spi:3.2` |
-| AXI_LITE Base (Control) | `0x44A2_0000` (64 KB) |
-| AXI_FULL Base (XIP Memory) | `0x4400_0000` (4 MB, `0x4400_0000 – 0x443F_FFFF`) |
-| XIP Mode | Enabled (`C_XIP_MODE = 1`) |
-| SPI Memory Type | NOR Flash (`C_SPI_MEMORY = 4`) |
-| Interface | Quad SPI |
+| AXI_LITE Base (Control) | `0x4050_0000` (64 KB) |
+| Mode | Standard SPI controller (`C_XIP_MODE = 0`) — **not** memory-mapped |
+| SPI Memory Type | Macronix (`C_SPI_MEMORY = 4`) |
+| Interface | Quad SPI, FIFO depth 256 |
 
-**Description:** Controls the on-board Quad-SPI NOR Flash memory. The controller exposes **two complementary AXI interfaces** with different reachability:
+**Description:** Controls the on-board Quad-SPI NOR Flash. The controller runs in **standard (register) mode**: the full register set (control, status, TX/RX FIFO, slave select — see PG153) is exposed at `0x4050_0000` via `microblaze_riscv_0_axi_periph` M19, so the CPU can issue any SPI command — read (`0x0B`), Write Enable (`0x06`), Sector/Block Erase (`0x20`/`0xD8`), Page Program (`0x02`), status poll (`0x05`). This is what allows the UART bootloader to program application images into flash at runtime (`workspace-example/bootloader/src/bootloader.c` is a complete worked example, and the Vitis `XSpi` driver wraps the register protocol).
 
-| Interface | Base Address | Reachable From | Purpose |
-|-----------|--------------|----------------|---------|
-| `AXI_LITE` | `0x44A2_0000` (64 KB) | **DP only** — via `microblaze_riscv_0_axi_periph` M19 ← `M_AXI_DP` | SPI controller register access (erase / program / read-command setup, status) |
-| `AXI_FULL` (`aximm/MEM0`) | `0x4400_0000` (4 MB) | **IP & DP both** — via `smartconnect_0`: S00 ← `M_AXI_IP`, S01 ← `axi_periph` M18 ← `M_AXI_DP` | Memory-mapped flash contents for **eXecute In Place (XIP)** — instruction fetch and data read directly from flash |
+Flash contents are **not memory-mapped** in this mode — there is no XIP window, and code cannot execute from flash directly. The standalone-boot design instead copies the application from flash into SRAM at power-on (see the Standalone Boot Mode guide). The 256-entry FIFO matches the flash's 256-byte page size, so one page program fits in a single transfer.
 
-Because `AXI_FULL` sits behind `smartconnect_0` which has both `M_AXI_IP` and `M_AXI_DP` as slaves, the XIP region is reachable from both ports and is mapped into **both** the Instruction and Data address spaces. Instruction fetches, code execution, constant reads, and `.rodata` access from flash all work without a copy-to-RAM step. The `AXI_LITE` register interface is mapped into the Data address space only.
+> **Design note:** XIP mode (`C_XIP_MODE = 1`, a read-only memory-mapped window) and CPU-programmable
+> register mode are **mutually exclusive** in this IP (PG153). This project chooses register mode:
+> self-programming (Arduino-style `upload.py` workflow) was judged more valuable for the course than
+> execute-in-place, and the 512 KB SRAM + I-cache serves execution instead.
 
 ### 5.2 SRAM / Cellular RAM (`axi_emc_0`)
 
@@ -213,7 +212,7 @@ Because `AXI_FULL` sits behind `smartconnect_0` which has both `M_AXI_IP` and `M
 |-----------|-------|
 | IP Version | `xilinx.com:ip:axi_emc:3.0` |
 | AXI Base Address | `0x6000_0000` |
-| Address Range | 32 MB (0x6000_0000 – 0x61FF_FFFF) |
+| Address Range | 512 KB, exact fit (0x6000_0000 – 0x6007_FFFF) |
 | Physical Capacity | 512 KB Cellular RAM |
 
 **Description:** External memory controller providing access to the on-board 512 KB SRAM. Suitable for large data buffers, but access latency is higher than Block RAM.
@@ -227,7 +226,7 @@ Because `AXI_FULL` sits behind `smartconnect_0` which has both `M_AXI_IP` and `M
 | Parameter | Value |
 |-----------|-------|
 | IP Version | `xilinx.com:ip:xadc_wiz:3.3` |
-| AXI Base Address | `0x44A3_0000` |
+| AXI Base Address | `0x4060_0000` |
 | Address Range | 64 KB |
 | Conversion Rate | 500 KSPS |
 | Sequencer Mode | Continuous |
@@ -250,6 +249,11 @@ Because `AXI_FULL` sits behind `smartconnect_0` which has both `M_AXI_IP` and `M
 
 ## 7. Complete Address Map
 
+Peripheral addresses follow a class-based convention — **`0x40[C]x_xxxx`, where `C` is the
+peripheral class** (1 MB per class, 64 KB per instance). Reading an address immediately tells
+you what kind of device it is: class 0 = GPIO, 1 = Timer, 2 = PWM, 3 = UART, 4 = INTC,
+5 = QSPI control, 6 = XADC.
+
 | AXI Base Address | Range | Peripheral | IP Type | Category |
 |-----------------|-------|------------|---------|----------|
 | `0x0000_0000` | 128K / 128K | Local Memory (BRAM) | blk_mem_gen | Memory |
@@ -261,18 +265,17 @@ Because `AXI_FULL` sits behind `smartconnect_0` which has both `M_AXI_IP` and `M
 | `0x4005_0000` | 64K | gpio_C_0_6 | axi_gpio | GPIO |
 | `0x4006_0000` | 64K | gpio_D_0_6 | axi_gpio | GPIO |
 | `0x4007_0000` | 64K | INT_0_3 | axi_gpio | Interrupt |
-| `0x4120_0000` | 64K | axi_intc | axi_intc | System |
-| `0x41C0_0000` | 64K | timer_0 | axi_timer | Timer |
-| `0x41C1_0000` | 64K | PWM_0 | axi_timer | PWM |
-| `0x41C2_0000` | 64K | PWM_1 | axi_timer | PWM |
-| `0x41C3_0000` | 64K | PWM_2 | axi_timer | PWM |
-| `0x41C4_0000` | 64K | timer_1 | axi_timer | Timer |
-| `0x41C5_0000` | 64K | timer_2 | axi_timer | Timer |
-| `0x4400_0000` | 4M | axi_quad_spi_0 (`aximm/MEM0`, XIP) | axi_quad_spi | Memory |
-| `0x44A0_0000` | 64K | uart_USB | axi_uart16550 | Communication |
-| `0x44A1_0000` | 64K | uart_1 | axi_uart16550 | Communication |
-| `0x44A2_0000` | 64K | axi_quad_spi_0 (`AXI_LITE`, control regs) | axi_quad_spi | Memory |
-| `0x44A3_0000` | 64K | xadc_wiz_0 | xadc_wiz | ADC |
-| `0x6000_0000` | 32M | axi_emc_0 | axi_emc | Memory |
+| `0x4010_0000` | 64K | timer_0 | axi_timer | Timer |
+| `0x4011_0000` | 64K | timer_1 | axi_timer | Timer |
+| `0x4012_0000` | 64K | timer_2 | axi_timer | Timer |
+| `0x4020_0000` | 64K | PWM_0 | axi_timer | PWM |
+| `0x4021_0000` | 64K | PWM_1 | axi_timer | PWM |
+| `0x4022_0000` | 64K | PWM_2 | axi_timer | PWM |
+| `0x4030_0000` | 64K | uart_USB | axi_uart16550 | Communication |
+| `0x4031_0000` | 64K | uart_1 | axi_uart16550 | Communication |
+| `0x4040_0000` | 64K | axi_intc | axi_intc | System |
+| `0x4050_0000` | 64K | axi_quad_spi_0 (`AXI_LITE`, full register set) | axi_quad_spi | Memory |
+| `0x4060_0000` | 64K | xadc_wiz_0 | xadc_wiz | ADC |
+| `0x6000_0000` | 512K | axi_emc_0 (exact physical fit, I/D-cached) | axi_emc | Memory |
 
 ---
