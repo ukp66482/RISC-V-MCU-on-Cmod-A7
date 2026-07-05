@@ -27,11 +27,15 @@ and work purely at the firmware level.
 
 ![System Architecture](docs/images/system_architecture.svg)
 
-## Using the board
+## Boot modes
 
-For development, build the application in Vitis and run it over JTAG — see the
+### JTAG mode
+
+For development: build the application in Vitis and run it over JTAG — see the
 [JTAG Debug Mode guide](Vitis-Software-Dev-Guide/JTAG-Debug-Mode/JTAG-Debug-Mode.md).
 Code runs from RAM and is lost at power-off.
+
+### Standalone boot
 
 To keep a program on the board, write it to flash over the USB serial port:
 
@@ -41,7 +45,8 @@ python3 tools/upload.py build/app.elf
 
 The application then starts automatically at every power-on. Details are in the
 [Standalone Boot Mode guide](Vitis-Software-Dev-Guide/Standalone-Boot-Mode/Standalone-Boot-Mode.md).
-The same ELF works in both cases, and a new board only needs `release/boot.mcs`
+
+The same ELF works in both modes, and a new board only needs `release/boot.mcs`
 programmed once with Vivado Hardware Manager (guide, section 2).
 
 ## Repository layout
