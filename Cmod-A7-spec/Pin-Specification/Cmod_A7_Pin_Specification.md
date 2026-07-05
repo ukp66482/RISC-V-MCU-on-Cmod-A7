@@ -187,6 +187,6 @@ The XADC expects an input range of 0–1 V. The board includes a resistive volta
 |-----------|-------|
 | I/O Standard | LVCMOS33 (3.3 V) |
 | Series Resistance on DIP Pins | None |
-| Max Input Voltage (digital I/O) | See Artix-7 datasheet (~3.75 V abs. max for LVCMOS33) |
+| Max Input Voltage (digital I/O) | abs. max –0.4 V to VCCO + 0.55 V = **3.85 V** (DS181); not 5 V tolerant |
 | Analog Input Range (Pin 15, 16) | 0–3.3 V (on-board divider scales to the XADC's 0–1 V) |
 | Clock Source | 12 MHz oscillator (FPGA pin L17), PLL → 100 MHz |

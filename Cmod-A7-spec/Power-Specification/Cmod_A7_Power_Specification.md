@@ -82,7 +82,7 @@ If you need to have both connected simultaneously with both powered (e.g., USB f
 
 - When a USB host is attached, the VU pin is driven to USB voltage (4.5–5.5 V). Any external power source on VU **must be disconnected first** before plugging in USB, or the external supply may be damaged.
 - This is **especially dangerous with battery power sources**, as batteries cannot tolerate reverse current.
-- The FPGA I/O pins on the DIP connector have **no series resistors**. Do not exceed the absolute maximum voltage ratings specified in the Artix-7 datasheet.
+- The FPGA I/O pins on the DIP connector have **no series resistors**. The Artix-7 absolute maximum input rating is VCCO + 0.55 V = **3.85 V** (and –0.4 V minimum, per DS181) — the pins are **not 5 V tolerant**; use a level shifter or divider for 5 V devices.
 
 ---
 
