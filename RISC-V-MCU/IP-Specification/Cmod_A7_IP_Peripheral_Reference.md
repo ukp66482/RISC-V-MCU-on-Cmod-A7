@@ -36,6 +36,8 @@
 
 ### 1.3 AXI SmartConnect (`microblaze_riscv_0_axi_periph`)
 
+![Bus & Cache Topology](../../docs/images/dp_ip_topology.svg)
+
 | Parameter | Value |
 |-----------|-------|
 | IP Version | `xilinx.com:ip:smartconnect:1.0` |
