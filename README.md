@@ -9,19 +9,23 @@ and work purely at the firmware level.
 
 ## System overview
 
-- CPU: MicroBlaze-V (RV32IM + Bitmanip), 100 MHz, 16 KB I-cache + 16 KB D-cache
-- Memory: 128 KB block RAM (bootloader and stack), 512 KB SRAM (application
-  code and data), 4 MB QSPI flash (bitstream and application storage)
-- Peripherals: GPIO (28 pins in 4 groups + on-board LED/RGB/button), 3 PWM
-  channels, 2 UARTs, I2C, SPI, 12-bit XADC, 3 timers, 8-input interrupt
-  controller
+- CPU
+  - MicroBlaze-V, RV32IM + Bitmanip, 100 MHz
+  - 16 KB I-cache + 16 KB D-cache
+- Memory
+  - 128 KB block RAM — bootloader and stack
+  - 512 KB SRAM — application code and data
+  - 4 MB QSPI flash — bitstream and application storage
+- Peripherals
+  - GPIO: 28 pins in 4 groups, plus on-board LED / RGB / button
+  - PWM: 3 channels
+  - UART: 2 (USB and external)
+  - I2C and SPI masters
+  - XADC: 12-bit, 2 external channels
+  - Timers: 3, with interrupts
+  - Interrupt controller: 8 inputs
 
 ![System Architecture](docs/images/system_architecture.svg)
-
-Peripheral base addresses follow the pattern `0x40[C]x_xxxx`, where `C` is the
-device class (0 GPIO, 1 timer, 2 PWM, 3 UART, 4 INTC, 5 QSPI, 6 XADC, 7 I2C,
-8 SPI). Register maps and pin assignments are in the
-[IP Peripheral Reference](RISC-V-MCU/IP-Specification/Cmod_A7_IP_Peripheral_Reference.md).
 
 ## Using the board
 
@@ -68,10 +72,10 @@ After implementation, export the XSA and create a Vitis platform (standalone,
 
 ## Other documents
 
-[Pin specification](Cmod-A7-spec/Pin-Specification/Cmod_A7_Pin_Specification.md) ·
-[Power specification](Cmod-A7-spec/Power-Specification/Cmod_A7_Power_Specification.md) ·
-[Vitis quick reference](Vitis-Software-Dev-Guide/README.md) ·
-[Bus topology diagram](docs/images/dp_ip_topology.svg)
+- [Pin specification](Cmod-A7-spec/Pin-Specification/Cmod_A7_Pin_Specification.md) — DIP pin assignments and electrical characteristics
+- [Power specification](Cmod-A7-spec/Power-Specification/Cmod_A7_Power_Specification.md) — power rails and supply options
+- [Vitis quick reference](Vitis-Software-Dev-Guide/README.md) — platform and application concepts, XSDB commands
+- [Bus topology diagram](docs/images/dp_ip_topology.svg) — AXI masters, caches, and interconnect wiring
 
 ## License
 
