@@ -21,7 +21,7 @@
 #ifdef STDOUT_IS_16550
  #include "xuartns550_l.h"
 
- #define UART_BAUD 9600
+ #define UART_BAUD 115200
 #endif
 
 void

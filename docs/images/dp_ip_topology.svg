@@ -62,10 +62,10 @@
   <!-- axi_periph crossbar -->
   <rect x="360" y="250" width="740" height="66" rx="6" fill="#ede7f6" stroke="#4a148c" stroke-width="2"/>
   <text x="730" y="277" text-anchor="middle" font-weight="bold" fill="#4a148c" font-size="12">microblaze_riscv_0_axi_periph</text>
-  <text x="730" y="293" text-anchor="middle" fill="#4a148c" font-size="10">AXI SmartConnect · 1 slave (S00 ← DP) → 20 masters (M00 – M19) · uncached</text>
+  <text x="730" y="293" text-anchor="middle" fill="#4a148c" font-size="10">AXI SmartConnect · 1 slave (S00 ← DP) → 22 masters (M00 – M21) · uncached</text>
   <line x1="900" y1="296" x2="900" y2="316" stroke="#4a148c" stroke-dasharray="2,2"/>
   <line x1="1000" y1="296" x2="1000" y2="316" stroke="#4a148c" stroke-dasharray="2,2"/>
-  <text x="620" y="311" text-anchor="middle" fill="#4a148c" font-size="9" font-weight="bold">M00 – M17  peripherals</text>
+  <text x="620" y="311" text-anchor="middle" fill="#4a148c" font-size="9" font-weight="bold">M00 – M17 · M20 – M21  peripherals</text>
   <text x="950" y="311" text-anchor="middle" fill="#4a148c" font-size="9" font-weight="bold">M18 → SC0 S01</text>
   <text x="1050" y="311" text-anchor="middle" fill="#4a148c" font-size="9" font-weight="bold">M19 → QSPI</text>
 
@@ -75,8 +75,8 @@
   <line x1="1050" y1="316" x2="1050" y2="360" stroke="#1565c0" stroke-width="2" marker-end="url(#a-dp)"/>
 
   <!-- ════════════════════════════════════ Peripheral Group (M00-M17) ════════════════════════════════════ -->
-  <rect x="360" y="360" width="500" height="210" rx="6" fill="#ffecb3" stroke="#ef6c00" stroke-width="1.5"/>
-  <text x="610" y="382" text-anchor="middle" font-weight="bold" fill="#ef6c00">Peripheral Group  (M00 – M17 · DP-only · uncached)</text>
+  <rect x="360" y="360" width="500" height="226" rx="6" fill="#ffecb3" stroke="#ef6c00" stroke-width="1.5"/>
+  <text x="610" y="382" text-anchor="middle" font-weight="bold" fill="#ef6c00">Peripheral Group  (M00 – M17, M20 – M21 · DP-only · uncached)</text>
   <text x="610" y="398" text-anchor="middle" fill="#ef6c00" font-size="9">class-based map  0x40[C]x_xxxx</text>
 
   <rect x="375" y="410" width="470" height="24" rx="3" fill="#fff3e0" stroke="#ef6c00" stroke-width="0.5"/>
@@ -87,8 +87,10 @@
   <text x="610" y="482" text-anchor="middle" fill="#3a3a3a" font-size="10">GPIO × 4 (0x4003–06)  ·  INT_0_3 (0x4007)  ·  board LED/RGB/Button (0x4000–02)</text>
   <rect x="375" y="494" width="470" height="24" rx="3" fill="#fff3e0" stroke="#ef6c00" stroke-width="0.5"/>
   <text x="610" y="510" text-anchor="middle" fill="#3a3a3a" font-size="10">XADC  (0x4060)  ·  12-bit · 500 KSPS</text>
-  <text x="610" y="540" text-anchor="middle" fill="#555" font-size="9" font-style="italic">Registers only — never cached, reads always return live values</text>
-  <text x="610" y="556" text-anchor="middle" fill="#555" font-size="9" font-style="italic">Reachable only from M_AXI_DP (data side)</text>
+  <rect x="375" y="522" width="470" height="24" rx="3" fill="#fff3e0" stroke="#ef6c00" stroke-width="0.5"/>
+  <text x="610" y="538" text-anchor="middle" fill="#3a3a3a" font-size="10">I2C (0x4070 · DIP 13/14)  ·  SPI master (0x4080 · DIP 35–39, SS×2)</text>
+  <text x="610" y="560" text-anchor="middle" fill="#555" font-size="9" font-style="italic">Registers only — never cached, reads always return live values</text>
+  <text x="610" y="574" text-anchor="middle" fill="#555" font-size="9" font-style="italic">Reachable only from M_AXI_DP (data side)</text>
 
   <!-- ════════════════════════════════════ QSPI control (M19) ════════════════════════════════════ -->
   <rect x="900" y="360" width="200" height="150" rx="6" fill="#e1bee7" stroke="#4a148c" stroke-width="1.5"/>

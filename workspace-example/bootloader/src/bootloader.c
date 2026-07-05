@@ -180,9 +180,22 @@ static int flash_write_app(uint32_t size, uint32_t entry, uint32_t crc)
 
 /* ---------------- jump to application ---------------- */
 
-static void run_app(uint32_t entry)
+/* A loader's duty: memory beyond the image (the app's .bss/.sbss/heap)
+ * must be ZEROED before the app runs — ELF loaders zero p_memsz-p_filesz
+ * for the same reason. Skipping this makes apps depend on whatever the
+ * previous run left in SRAM (a classic latent bug).                      */
+static void zero_tail(uint32_t image_size)
+{
+    uint32_t *p   = (uint32_t *)(SRAM_BASE + ((image_size + 3u) & ~3u));
+    uint32_t *end = (uint32_t *)(SRAM_BASE + APP_MAX_SIZE);
+    while (p < end)
+        *p++ = 0;
+}
+
+static void run_app(uint32_t entry, uint32_t image_size)
 {
     led(0x2);
+    zero_tail(image_size);
     __asm__ volatile("fence.i");                   /* I-cache sees new code */
     ((void (*)(void))entry)();
     while (1) ;                                    /* app returned: hang    */
@@ -198,7 +211,7 @@ static void try_boot_from_flash(void)
     flash_read(FLASH_APP_OFF + 16, (uint8_t *)SRAM_BASE, hdr[1]);
     if (crc32((const uint8_t *)SRAM_BASE, hdr[1]) != hdr[3])
         return;                                    /* corrupted             */
-    run_app(hdr[2]);
+    run_app(hdr[2], hdr[1]);
 }
 
 /* ---------------- UART upload protocol ---------------- */
@@ -241,7 +254,7 @@ static void serve_upload(void)
                 /* verify read-back rewrote SRAM with the same image, so   */
                 /* it is already in place — just go                        */
                 putb('K');
-                run_app(entry);
+                run_app(entry, size);
             }
             putb('E');
             break;
@@ -249,7 +262,7 @@ static void serve_upload(void)
         case 'R':                                  /* volatile run-from-RAM */
             if (got == size && crc32((const uint8_t *)SRAM_BASE, size) == crc) {
                 putb('K');
-                run_app(entry);
+                run_app(entry, size);
             }
             putb('E');
             break;
@@ -268,7 +281,10 @@ int main(void)
     XUartNs550_SetBaud(UART_BASE, XPAR_XUARTNS550_0_CLOCK_FREQ, BAUD);
     XUartNs550_SetLineControlReg(UART_BASE, XUN_LCR_8_DATA_BITS);
 
-    XSpi_Config *cfg = XSpi_LookupConfig(XPAR_XSPI_0_BASEADDR);
+    /* NOTE: use the flash controller's instance macro, NOT the generic
+     * XPAR_XSPI_0_* — the design has a second SPI (spi_0, external header)
+     * and generic numbering must never decide which controller we erase. */
+    XSpi_Config *cfg = XSpi_LookupConfig(XPAR_AXI_QUAD_SPI_0_BASEADDR);
     XSpi_CfgInitialize(&Spi, cfg, cfg->BaseAddress);
     XSpi_SetOptions(&Spi, XSP_MASTER_OPTION | XSP_MANUAL_SSELECT_OPTION);
     XSpi_Start(&Spi);

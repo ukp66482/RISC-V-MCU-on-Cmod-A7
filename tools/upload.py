@@ -86,10 +86,14 @@ class Board:
     def sync(self, seconds=8):
         print("syncing (power-cycle the board now, or hold BTN while plugging in)…")
         end = time.time() + seconds
-        self.s.timeout = 0.1
+        self.s.timeout = 0.05
         while time.time() < end:
+            # a running app may be chattering on the same UART; the bootloader
+            # is silent. Drain first, then require the reply to be EXACTLY one
+            # 'K' — anything else is app noise, not a handshake.
+            self.s.reset_input_buffer()
             self.s.write(b"U")
-            if self.s.read(1) == b"K":
+            if self.s.read(2) == b"K":
                 self.s.timeout = 5
                 return
         sys.exit("no answer from bootloader — power-cycle the board and retry")

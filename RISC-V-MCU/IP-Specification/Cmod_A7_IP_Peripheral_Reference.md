@@ -39,10 +39,10 @@
 | Parameter | Value |
 |-----------|-------|
 | IP Version | `xilinx.com:ip:smartconnect:1.0` |
-| Master Ports | 20 (M00 – M19) |
+| Master Ports | 22 (M00 – M21) |
 | Slave Ports | 1 (S00, connected to MicroBlaze M_AXI_DP) |
 
-**Description:** AXI interconnect crossbar that routes processor data transactions to 20 peripheral endpoints.
+**Description:** AXI interconnect crossbar that routes processor data transactions to 22 peripheral endpoints.
 
 ### 1.4 AXI Interrupt Controller (`microblaze_riscv_0_axi_intc`)
 
@@ -51,7 +51,7 @@
 | IP Version | `xilinx.com:ip:axi_intc:4.1` |
 | AXI Base Address | `0x4040_0000` |
 | Fast Interrupt | Disabled (`C_HAS_FAST = 0`) |
-| Interrupt Sources | 6 (merged via `ilconcat`) |
+| Interrupt Sources | 8 (merged via `ilconcat`) |
 
 **Interrupt Mapping:**
 
@@ -63,6 +63,8 @@
 | In3 | `uart_1` | External UART interrupt |
 | In4 | `uart_USB` | USB UART interrupt |
 | In5 | `INT_0_3` | External GPIO interrupt (4-bit) |
+| In6 | `i2c_0` | I2C controller interrupt |
+| In7 | `spi_0` | External SPI master interrupt |
 
 ### 1.5 Debug Module (`mdm_1`)
 
@@ -247,12 +249,47 @@ Flash contents are **not memory-mapped** in this mode — there is no XIP window
 
 ---
 
-## 7. Complete Address Map
+## 7. Serial Expansion Interfaces (I2C / SPI)
+
+### 7.1 I2C Controller (`i2c_0`)
+
+| Parameter | Value |
+|-----------|-------|
+| IP Version | `xilinx.com:ip:axi_iic:2.1` |
+| AXI Base Address | `0x4070_0000` |
+| SCL Frequency | 100 kHz (standard mode) |
+| SCL / SDA Pins | DIP Pin 13 (L1) / Pin 14 (L2) |
+| Pull-ups | Weak FPGA internal pull-ups enabled in XDC; **external 4.7 kΩ to 3.3 V recommended** for real devices |
+| Interrupt | Connected to `xlconcat In6` |
+
+**Description:** AXI IIC master for external I2C devices (sensors, EEPROMs, OLED displays). Open-drain signaling: any device may only pull the line low; the pull-up resistor returns it high. Devices are addressed by their 7-bit I2C address. Use the Vitis `XIic` driver.
+
+### 7.2 External SPI Master (`spi_0`)
+
+| Parameter | Value |
+|-----------|-------|
+| IP Version | `xilinx.com:ip:axi_quad_spi:3.2` (standard mode, no STARTUP) |
+| AXI Base Address | `0x4080_0000` |
+| SCLK | 100 MHz / 16 = **6.25 MHz** (fixed at synthesis, `C_SCK_RATIO = 16`) |
+| Slave Selects | 2 (`C_NUM_SS_BITS = 2`) — two devices can share the bus |
+| Pins | DIP 35 SCLK (V3) · 36 MOSI (W5) · 37 MISO (V4) · 38 SS0 (U4) · 39 SS1 (V5) |
+| Interrupt | Connected to `xlconcat In7` |
+
+**Description:** SPI master for external devices (displays, ADCs, flash modules). Full-duplex push-pull signaling — no pull-ups needed; the active device is chosen by driving its SS line low. Use the Vitis `XSpi` driver.
+
+> **Note:** This is a *second, independent* SPI controller — do not confuse it with
+> `axi_quad_spi_0` (`0x4050_0000`), which is dedicated to the on-board QSPI boot flash.
+> Firmware should select controllers by instance macro (`XPAR_SPI_0_BASEADDR` vs
+> `XPAR_AXI_QUAD_SPI_0_BASEADDR`), never by generic `XPAR_XSPI_n_*` numbering.
+
+---
+
+## 8. Complete Address Map
 
 Peripheral addresses follow a class-based convention — **`0x40[C]x_xxxx`, where `C` is the
 peripheral class** (1 MB per class, 64 KB per instance). Reading an address immediately tells
 you what kind of device it is: class 0 = GPIO, 1 = Timer, 2 = PWM, 3 = UART, 4 = INTC,
-5 = QSPI control, 6 = XADC.
+5 = QSPI control, 6 = XADC, 7 = I2C, 8 = SPI.
 
 | AXI Base Address | Range | Peripheral | IP Type | Category |
 |-----------------|-------|------------|---------|----------|
@@ -276,6 +313,8 @@ you what kind of device it is: class 0 = GPIO, 1 = Timer, 2 = PWM, 3 = UART, 4 =
 | `0x4040_0000` | 64K | axi_intc | axi_intc | System |
 | `0x4050_0000` | 64K | axi_quad_spi_0 (`AXI_LITE`, full register set) | axi_quad_spi | Memory |
 | `0x4060_0000` | 64K | xadc_wiz_0 | xadc_wiz | ADC |
+| `0x4070_0000` | 64K | i2c_0 (DIP 13/14) | axi_iic | Communication |
+| `0x4080_0000` | 64K | spi_0 (external master, DIP 35–39) | axi_quad_spi | Communication |
 | `0x6000_0000` | 512K | axi_emc_0 (exact physical fit, I/D-cached) | axi_emc | Memory |
 
 ---

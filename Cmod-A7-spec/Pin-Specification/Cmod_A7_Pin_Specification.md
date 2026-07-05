@@ -37,8 +37,8 @@ The Cmod A7-35T has a 48-pin DIP connector (J1). All digital I/O pins operate at
 | 10 | PWM_0 | J3 | Output | PWM output channel 0 (axi_timer) |
 | 11 | UART_TX | J1 | Output | UART 1 transmit |
 | 12 | UART_RX | K2 | Input | UART 1 receive |
-| 13 | NOT_IMPL | L1 | — | Not implemented (pio[13]) |
-| 14 | NOT_IMPL | L2 | — | Not implemented (pio[14]) |
+| 13 | I2C_SCL | L1 | I/O (open-drain) | I2C clock (axi_iic @ 0x4070_0000; external 4.7 kΩ pull-up recommended) |
+| 14 | I2C_SDA | L2 | I/O (open-drain) | I2C data (axi_iic @ 0x4070_0000; external 4.7 kΩ pull-up recommended) |
 | 15 | ADC_0 | G3 / G2 | Analog | XADC VAUX4 (ain_p[15] / ain_n[15]) |
 | 16 | ADC_1 | H2 / J2 | Analog | XADC VAUX12 (ain_p[16] / ain_n[16]) |
 | 17 | GPIO_B0 | M1 | I/O | General purpose GPIO, Group B bit 0 |
@@ -66,11 +66,11 @@ The Cmod A7-35T has a 48-pin DIP connector (J1). All digital I/O pins operate at
 | 32 | GPIO_D0 | R3 | I/O | General purpose GPIO, Group D bit 0 |
 | 33 | INTR_3 | V2 | Input | External interrupt input 3 |
 | 34 | PWM_1 | W3 | Output | PWM output channel 1 (axi_timer) |
-| 35 | NOT_IMPL | V3 | — | Not implemented (pio[35]) |
-| 36 | NOT_IMPL | W5 | — | Not implemented (pio[36]) |
-| 37 | NOT_IMPL | V4 | — | Not implemented (pio[37]) |
-| 38 | NOT_IMPL | U4 | — | Not implemented (pio[38]) |
-| 39 | NOT_IMPL | V5 | — | Not implemented (pio[39]) |
+| 35 | SPI_SCLK | V3 | Output | SPI clock, 6.25 MHz (spi_0 @ 0x4080_0000) |
+| 36 | SPI_MOSI | W5 | Output | SPI master-out slave-in |
+| 37 | SPI_MISO | V4 | Input | SPI master-in slave-out |
+| 38 | SPI_SS0 | U4 | Output | SPI slave select 0 (active low) |
+| 39 | SPI_SS1 | V5 | Output | SPI slave select 1 (active low) |
 | 40 | PWM_2 | W4 | Output | PWM output channel 2 (axi_timer) |
 | 41 | INTR_2 | U5 | Input | External interrupt input 2 |
 | 42 | GPIO_C6 | U2 | I/O | General purpose GPIO, Group C bit 6 |
@@ -158,19 +158,22 @@ The XADC expects an input range of 0–1 V. The board includes a resistive volta
 
 ---
 
-## 9. Not Implemented Pins
+## 9. Serial Expansion Pins (I2C / SPI)
 
-These FPGA pins are physically connected to the DIP header but not assigned in the current design. They are available for future use.
+Formerly unassigned, these pins now carry the serial expansion interfaces (all 48 DIP pins are in use).
 
-| DIP Pin | FPGA Pin | Digilent Schematic Name |
-|---------|----------|------------------------|
-| 13 | L1 | pio[13] |
-| 14 | L2 | pio[14] |
-| 35 | V3 | pio[35] |
-| 36 | W5 | pio[36] |
-| 37 | V4 | pio[37] |
-| 38 | U4 | pio[38] |
-| 39 | V5 | pio[39] |
+| DIP Pin | FPGA Pin | Signal | Interface |
+|---------|----------|--------|-----------|
+| 13 | L1 | I2C_SCL | `i2c_0` @ `0x4070_0000` (100 kHz) |
+| 14 | L2 | I2C_SDA | `i2c_0` @ `0x4070_0000` |
+| 35 | V3 | SPI_SCLK | `spi_0` @ `0x4080_0000` (6.25 MHz) |
+| 36 | W5 | SPI_MOSI | `spi_0` |
+| 37 | V4 | SPI_MISO | `spi_0` |
+| 38 | U4 | SPI_SS0 | `spi_0` slave select 0 |
+| 39 | V5 | SPI_SS1 | `spi_0` slave select 1 |
+
+> **I2C pull-ups:** SCL/SDA are open-drain. Weak FPGA-internal pull-ups are enabled as a
+> fallback, but connect external 4.7 kΩ resistors to 3.3 V when wiring real devices.
 
 ---
 

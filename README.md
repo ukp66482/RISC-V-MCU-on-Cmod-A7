@@ -4,7 +4,7 @@ A soft-core RISC-V MCU system built on the **Digilent Cmod A7-35T** (Xilinx Arti
 
 ## Overview
 
-A ready-to-use RISC-V MCU environment on the Cmod A7-35T for the **NCKU Microprocessor Principles and Applications** course. Students focus on firmware — register programming, interrupts, peripheral control — without dealing with FPGA or circuit-level details.
+A ready-to-use RISC-V MCU environment on the Cmod A7-35T for the **NCKU Microprocessor Principles and Applications** course. Students focus on firmware — register programming, interrupts, peripheral control — without dealing with FPGA details.
 
 ![Digilent Cmod A7-35T](docs/images/cmod-a7-0.png)
 
@@ -29,7 +29,7 @@ MicroBlaze exposes four AXI masters — **DP/IP** (uncached data/instruction) an
 | Local Memory | 128 KB Block RAM (LMB, 1-cycle) — lower 64 KB bootloader, upper 64 KB app stack |
 | Program Memory | 512 KB external SRAM (cached) — applications execute here |
 | Storage | 4 MB QSPI flash — bitstream + persistent application slot |
-| Interconnect | AXI SmartConnect (20 peripheral ports) |
+| Interconnect | AXI SmartConnect (22 peripheral ports) |
 | Toolchain | Vivado & Vitis 2025.2 (day-to-day student use: Python + pyserial only) |
 
 ![Cmod A7-35T DIP Pinout](Cmod-A7-spec/Pin-Specification/images/pinout_diagram.png)
@@ -39,8 +39,10 @@ MicroBlaze exposes four AXI masters — **DP/IP** (uncached data/instruction) an
 - **GPIO** — 4 × 7-bit DIP groups (A–D), on-board LEDs × 2, RGB LED, push button
 - **PWM** — 3 channels (DIP Pin 10 / 34 / 40)
 - **UART** — 2 × 16550 (USB + DIP external)
+- **I2C** — 100 kHz master (DIP Pin 13 SCL / 14 SDA; add external 4.7 kΩ pull-ups)
+- **SPI** — 6.25 MHz master, 2 slave selects (DIP Pin 35 SCLK / 36 MOSI / 37 MISO / 38 SS0 / 39 SS1)
 - **Timers** — 3 × 32-bit with interrupt
-- **Interrupt Controller** — 6-channel AXI INTC
+- **Interrupt Controller** — 8-channel AXI INTC
 - **XADC** — 12-bit, 500 KSPS (2 external analog inputs)
 - **QSPI Flash** — 4 MB NOR, CPU-programmable (bitstream + persistent app storage)
 - **SRAM** — 512 KB external cellular RAM (I/D-cached; application program memory)
@@ -59,6 +61,8 @@ Peripherals follow a class-based scheme — **`0x40[C]x_xxxx`, where `C` is the 
 | INTC (class 4) | `0x4040_0000` | AXI interrupt controller |
 | QSPI ctrl (class 5) | `0x4050_0000` | flash register interface (erase/program) |
 | XADC (class 6) | `0x4060_0000` | 12-bit ADC |
+| I2C (class 7) | `0x4070_0000` | 100 kHz master, DIP 13/14 |
+| SPI (class 8) | `0x4080_0000` | 6.25 MHz master, 2 slave selects, DIP 35–39 |
 | SRAM | `0x6000_0000` – `0x6007_FFFF` | 512 KB, I/D-cached, application execution region |
 | QSPI Flash | *(not memory-mapped)* | 4 MB storage — bitstream + app image, accessed via the QSPI controller |
 
@@ -121,16 +125,29 @@ For detailed step-by-step instructions with screenshots, see the [JTAG Debug Mod
 
 ### Example Programs
 
-The `workspace-example/` directory contains ready-to-use programs:
+`workspace-example/` is organized into three tiers:
 
-- **Btn_LED_asm_test** — Button & LED control in RISC-V assembly
-- **GPIO_test** — Toggle LEDs and read button/switch inputs
-- **PWM_test** — Drive a servo motor via PWM output
-- **UART_test** — Send and receive data over UART
-- **ADC_test** — Read the XADC analog inputs
-- **MemoryRead_test** — Measure BRAM / SRAM access latency with a hardware timer
-- **SRAM_app_template** — Starting point for standalone-boot apps (SRAM layout, works over JTAG too)
-- **bootloader** — The UART flash bootloader baked into `release/boot.mcs` (instructor-maintained; great loader/SPI-flash reading material)
+**`demo_all/`** — one program that exercises *every* peripheral in a looping,
+self-narrating breadboard demo (GPIO, PWM, XADC, I2C scan, SPI/UART loopback,
+memory benchmark, timer interrupt). Ship it to the board with `upload.py` and
+it runs at every power-on; wiring guide is in the source header. Great as a
+board self-test and as an open-house demo.
+
+**`examples/`** — single-topic teaching examples, in course order:
+
+| # | Example | Topic |
+|---|---------|-------|
+| 01 | `examples/01_gpio` | Toggle LEDs, read buttons (raw register I/O) |
+| 02 | `examples/02_btn_led_asm` | Same, in RISC-V assembly |
+| 03 | `examples/03_pwm_servo` | PWM duty/frequency, drive a servo |
+| 04 | `examples/04_uart` | 16550 UART send/receive |
+| 05 | `examples/05_adc` | XADC channels, die temperature |
+| 06 | `examples/06_memory` | BRAM vs SRAM latency, cache warm-up |
+
+**Infrastructure** — `SRAM_app_template/` (starting point for standalone-boot
+apps; same ELF also runs over JTAG) and `bootloader/` (the UART flash
+bootloader baked into `release/boot.mcs`; instructor-maintained, doubles as
+loader/SPI-flash course material).
 
 ## Documentation
 

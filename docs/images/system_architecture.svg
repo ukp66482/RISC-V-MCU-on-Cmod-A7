@@ -53,8 +53,8 @@
 
   <!-- INTC -->
   <rect x="166" y="172" width="392" height="52" rx="5" fill="#ffe082" stroke="#e65100" stroke-width="1.5"/>
-  <text x="362" y="193" text-anchor="middle" font-weight="bold" fill="#3a3a3a">AXI Interrupt Controller  (6-channel)</text>
-  <text x="362" y="212" text-anchor="middle" fill="#555" font-size="10">UART×2 · Timer×3 · GPIO-INT  →  MicroBlaze IRQ</text>
+  <text x="362" y="193" text-anchor="middle" font-weight="bold" fill="#3a3a3a">AXI Interrupt Controller  (8-channel)</text>
+  <text x="362" y="212" text-anchor="middle" fill="#555" font-size="10">UART×2 · Timer×3 · GPIO-INT · I2C · SPI  →  MicroBlaze IRQ</text>
 
   <!-- ══════════════════════════════════════════
        BLOCK RAM (left of processor)
@@ -79,7 +79,7 @@
        AXI SmartConnect Bus (horizontal bar)
   ══════════════════════════════════════════ -->
   <rect x="18" y="296" width="752" height="30" rx="4" fill="#4a148c"/>
-  <text x="394" y="316" text-anchor="middle" fill="white" font-weight="bold" font-size="12">AXI SmartConnect  —  20 Peripheral Ports</text>
+  <text x="394" y="316" text-anchor="middle" fill="white" font-weight="bold" font-size="12">AXI SmartConnect  —  22 Peripheral Ports</text>
 
   <!-- ══════════════════════════════════════════
        Bus → Peripheral vertical connectors
@@ -201,25 +201,36 @@
        4. climb up outside all boxes at x=820 to y=60
        5. run right to USB center x=901
        6. enter USB box from top at y=96 -->
-  <polyline points="478,406 484,406 484,605 820,605 820,60 901,60 901,96"
+  <polyline points="478,406 484,406 484,545 784,545 784,60 901,60 901,96"
             fill="none" stroke="#37474f" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#c)"/>
 
   <!-- ══════════════════════════════════════════
        LEGEND
   ══════════════════════════════════════════ -->
-  <rect x="800" y="200" width="202" height="140" rx="6" fill="#ffffff" stroke="#bdbdbd" stroke-width="1"/>
-  <text x="901" y="218" text-anchor="middle" font-weight="bold" fill="#3a3a3a">Legend</text>
-  <line x1="814" y1="234" x2="844" y2="234" stroke="#4a148c" stroke-width="2" marker-end="url(#a)"/>
-  <text x="852" y="238" fill="#3a3a3a" font-size="10">AXI Bus</text>
-  <line x1="814" y1="254" x2="844" y2="254" stroke="#1b5e20" stroke-width="1.8" marker-end="url(#b)"/>
-  <text x="852" y="258" fill="#3a3a3a" font-size="10">LMB (Local Memory Bus)</text>
-  <line x1="814" y1="274" x2="844" y2="274" stroke="#1565c0" stroke-width="1.5" marker-end="url(#d)"/>
-  <text x="852" y="278" fill="#3a3a3a" font-size="10">Clock Signal</text>
-  <line x1="814" y1="294" x2="844" y2="294" stroke="#bf360c" stroke-width="1.5" marker-end="url(#e)"/>
-  <text x="852" y="298" fill="#3a3a3a" font-size="10">Analog Input</text>
-  <line x1="814" y1="314" x2="844" y2="314" stroke="#37474f" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#c)"/>
-  <text x="852" y="318" fill="#3a3a3a" font-size="10">External Interface</text>
-  <rect x="814" y="322" width="12" height="12" fill="#4a148c" rx="2"/>
-  <text x="832" y="332" fill="#3a3a3a" font-size="10">AXI SmartConnect Bus</text>
+  <!-- I2C / SPI expansion (right column, fed from the AXI bus bar) -->
+  <polyline points="770,311 901,311 901,352" fill="none" stroke="#4a148c" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="800" y="352" width="202" height="116" rx="6" fill="#e0f2f1" stroke="#00695c" stroke-width="1.5"/>
+  <text x="901" y="370" text-anchor="middle" font-weight="bold" fill="#00695c">I2C / SPI Expansion</text>
+  <rect x="808" y="378" width="186" height="38" rx="4" fill="#b2dfdb" stroke="#00695c" stroke-width="1"/>
+  <text x="901" y="393" text-anchor="middle" fill="#3a3a3a" font-size="10">I2C 100 kHz · 0x4070_0000</text>
+  <text x="901" y="408" text-anchor="middle" fill="#555" font-size="9">DIP 13 SCL / 14 SDA (open-drain)</text>
+  <rect x="808" y="422" width="186" height="38" rx="4" fill="#b2dfdb" stroke="#00695c" stroke-width="1"/>
+  <text x="901" y="437" text-anchor="middle" fill="#3a3a3a" font-size="10">SPI 6.25 MHz · 0x4080_0000</text>
+  <text x="901" y="452" text-anchor="middle" fill="#555" font-size="9">DIP 35–39 · SS×2</text>
+
+  <rect x="800" y="480" width="202" height="140" rx="6" fill="#ffffff" stroke="#bdbdbd" stroke-width="1"/>
+  <text x="901" y="498" text-anchor="middle" font-weight="bold" fill="#3a3a3a">Legend</text>
+  <line x1="814" y1="514" x2="844" y2="514" stroke="#4a148c" stroke-width="2" marker-end="url(#a)"/>
+  <text x="852" y="518" fill="#3a3a3a" font-size="10">AXI Bus</text>
+  <line x1="814" y1="534" x2="844" y2="534" stroke="#1b5e20" stroke-width="1.8" marker-end="url(#b)"/>
+  <text x="852" y="538" fill="#3a3a3a" font-size="10">LMB (Local Memory Bus)</text>
+  <line x1="814" y1="554" x2="844" y2="554" stroke="#1565c0" stroke-width="1.5" marker-end="url(#d)"/>
+  <text x="852" y="558" fill="#3a3a3a" font-size="10">Clock Signal</text>
+  <line x1="814" y1="574" x2="844" y2="574" stroke="#bf360c" stroke-width="1.5" marker-end="url(#e)"/>
+  <text x="852" y="578" fill="#3a3a3a" font-size="10">Analog Input</text>
+  <line x1="814" y1="594" x2="844" y2="594" stroke="#37474f" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#c)"/>
+  <text x="852" y="598" fill="#3a3a3a" font-size="10">External Interface</text>
+  <rect x="814" y="602" width="12" height="12" fill="#4a148c" rx="2"/>
+  <text x="832" y="612" fill="#3a3a3a" font-size="10">AXI SmartConnect Bus</text>
 
 </svg>
