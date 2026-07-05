@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1020" height="620" font-family="Segoe UI, Arial, sans-serif" font-size="11">
+<svg xmlns="http://www.w3.org/2000/svg" width="1020" height="632" font-family="Segoe UI, Arial, sans-serif" font-size="11">
 
   <defs>
     <marker id="a" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
@@ -19,7 +19,7 @@
   </defs>
 
   <!-- ── Background ── -->
-  <rect width="1020" height="620" fill="#f5f5f5"/>
+  <rect width="1020" height="632" fill="#f5f5f5"/>
 
   <!-- ══════════════════════════════════════════
        CLOCK
@@ -78,8 +78,8 @@
   <!-- ══════════════════════════════════════════
        AXI SmartConnect Bus (horizontal bar)
   ══════════════════════════════════════════ -->
-  <rect x="18" y="296" width="752" height="30" rx="4" fill="#4a148c"/>
-  <text x="394" y="316" text-anchor="middle" fill="white" font-weight="bold" font-size="12">AXI SmartConnect  —  22 Peripheral Ports</text>
+  <rect x="18" y="296" width="984" height="30" rx="4" fill="#4a148c"/>
+  <text x="510" y="316" text-anchor="middle" fill="white" font-weight="bold" font-size="12">AXI SmartConnect  —  22 Peripheral Ports</text>
 
   <!-- ══════════════════════════════════════════
        Bus → Peripheral vertical connectors
@@ -91,9 +91,9 @@
   <!-- UART center=400 -->
   <line x1="400" y1="326" x2="400" y2="352" stroke="#00695c" stroke-width="1.5" marker-end="url(#a)"/>
   <!-- Memory center=552 -->
-  <line x1="552" y1="326" x2="552" y2="352" stroke="#4a148c" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="561" y1="326" x2="561" y2="352" stroke="#4a148c" stroke-width="1.5" marker-end="url(#a)"/>
   <!-- XADC center=704 -->
-  <line x1="704" y1="326" x2="704" y2="352" stroke="#bf360c" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="719" y1="326" x2="719" y2="352" stroke="#bf360c" stroke-width="1.5" marker-end="url(#a)"/>
 
   <!-- ══════════════════════════════════════════
        PERIPHERAL GROUPS  (y=352)
@@ -141,27 +141,27 @@
   <text x="400" y="492" text-anchor="middle" fill="#555" font-size="9">0x4031_0000</text>
 
   <!-- ── Memory ── x=486, w=132, cx=552 -->
-  <rect x="486" y="352" width="132" height="176" rx="6" fill="#f3e5f5" stroke="#4a148c" stroke-width="1.5"/>
-  <text x="552" y="370" text-anchor="middle" font-weight="bold" fill="#4a148c">Memory</text>
-  <rect x="494" y="376" width="116" height="56" rx="4" fill="#e1bee7" stroke="#4a148c" stroke-width="1"/>
-  <text x="552" y="393" text-anchor="middle" fill="#3a3a3a" font-size="10">QSPI NOR  4 MB</text>
-  <text x="552" y="408" text-anchor="middle" fill="#555" font-size="9">register mode (CPU R/W)</text>
-  <text x="552" y="423" text-anchor="middle" fill="#555" font-size="9">Ctrl 0x4050_0000 · storage</text>
-  <rect x="494" y="440" width="116" height="72" rx="4" fill="#e1bee7" stroke="#4a148c" stroke-width="1"/>
-  <text x="552" y="458" text-anchor="middle" fill="#3a3a3a" font-size="10">SRAM  512 KB</text>
-  <text x="552" y="473" text-anchor="middle" fill="#555" font-size="9">Cellular RAM (axi_emc)</text>
-  <text x="552" y="486" text-anchor="middle" fill="#555" font-size="9">cached · exec region</text>
-  <text x="552" y="499" text-anchor="middle" fill="#555" font-size="9">0x6000_0000 (512 KB fit)</text>
+  <rect x="486" y="352" width="150" height="176" rx="6" fill="#f3e5f5" stroke="#4a148c" stroke-width="1.5"/>
+  <text x="561" y="370" text-anchor="middle" font-weight="bold" fill="#4a148c">Memory</text>
+  <rect x="494" y="376" width="134" height="56" rx="4" fill="#e1bee7" stroke="#4a148c" stroke-width="1"/>
+  <text x="561" y="393" text-anchor="middle" fill="#3a3a3a" font-size="10">QSPI NOR  4 MB</text>
+  <text x="561" y="408" text-anchor="middle" fill="#555" font-size="9">register mode (CPU R/W)</text>
+  <text x="561" y="423" text-anchor="middle" fill="#555" font-size="9">Ctrl 0x4050_0000 · storage</text>
+  <rect x="494" y="440" width="134" height="72" rx="4" fill="#e1bee7" stroke="#4a148c" stroke-width="1"/>
+  <text x="561" y="458" text-anchor="middle" fill="#3a3a3a" font-size="10">SRAM  512 KB</text>
+  <text x="561" y="473" text-anchor="middle" fill="#555" font-size="9">Cellular RAM (axi_emc)</text>
+  <text x="561" y="486" text-anchor="middle" fill="#555" font-size="9">cached · exec region</text>
+  <text x="561" y="499" text-anchor="middle" fill="#555" font-size="9">0x6000_0000 (512 KB fit)</text>
 
   <!-- ── XADC ── x=626, w=144, cx=698 -->
-  <rect x="626" y="352" width="144" height="116" rx="6" fill="#fff3e0" stroke="#bf360c" stroke-width="1.5"/>
-  <text x="698" y="370" text-anchor="middle" font-weight="bold" fill="#bf360c">XADC</text>
-  <rect x="634" y="376" width="128" height="80" rx="4" fill="#ffe0b2" stroke="#bf360c" stroke-width="1"/>
-  <text x="698" y="394" text-anchor="middle" fill="#3a3a3a" font-size="10">12-bit ADC</text>
-  <text x="698" y="409" text-anchor="middle" fill="#555" font-size="9">500 KSPS total</text>
-  <text x="698" y="422" text-anchor="middle" fill="#555" font-size="9">100 KSPS / channel</text>
-  <text x="698" y="437" text-anchor="middle" fill="#555" font-size="9">2 ext + 3 internal ch</text>
-  <text x="698" y="450" text-anchor="middle" fill="#555" font-size="9">0x4060_0000</text>
+  <rect x="644" y="352" width="150" height="116" rx="6" fill="#fff3e0" stroke="#bf360c" stroke-width="1.5"/>
+  <text x="719" y="370" text-anchor="middle" font-weight="bold" fill="#bf360c">XADC</text>
+  <rect x="652" y="376" width="134" height="80" rx="4" fill="#ffe0b2" stroke="#bf360c" stroke-width="1"/>
+  <text x="719" y="394" text-anchor="middle" fill="#3a3a3a" font-size="10">12-bit ADC</text>
+  <text x="719" y="409" text-anchor="middle" fill="#555" font-size="9">500 KSPS total</text>
+  <text x="719" y="422" text-anchor="middle" fill="#555" font-size="9">100 KSPS / channel</text>
+  <text x="719" y="437" text-anchor="middle" fill="#555" font-size="9">2 ext + 3 internal ch</text>
+  <text x="719" y="450" text-anchor="middle" fill="#555" font-size="9">0x4060_0000</text>
 
   <!-- ══════════════════════════════════════════
        DIP CONNECTOR BAR (bottom)
@@ -179,12 +179,12 @@
   <!-- ══════════════════════════════════════════
        ANALOG INPUTS (below XADC)
   ══════════════════════════════════════════ -->
-  <rect x="626" y="492" width="144" height="40" rx="5" fill="#eceff1" stroke="#546e7a" stroke-width="1.5"/>
-  <text x="698" y="509" text-anchor="middle" font-weight="bold" fill="#37474f">Analog Inputs</text>
-  <text x="698" y="524" text-anchor="middle" fill="#555" font-size="9">ADC_0/1 · DIP Pin 15/16 · 0–3.3 V</text>
+  <rect x="644" y="492" width="150" height="40" rx="5" fill="#eceff1" stroke="#546e7a" stroke-width="1.5"/>
+  <text x="719" y="509" text-anchor="middle" font-weight="bold" fill="#37474f">Analog Inputs</text>
+  <text x="719" y="524" text-anchor="middle" fill="#555" font-size="9">ADC_0/1 · DIP Pin 15/16 · 0–3.3 V</text>
 
   <!-- Analog → XADC -->
-  <line x1="698" y1="492" x2="698" y2="468" stroke="#bf360c" stroke-width="1.5" marker-end="url(#e)"/>
+  <line x1="719" y1="492" x2="719" y2="468" stroke="#bf360c" stroke-width="1.5" marker-end="url(#e)"/>
 
   <!-- ══════════════════════════════════════════
        MICRO-USB (right side)
@@ -201,36 +201,36 @@
        4. climb up outside all boxes at x=820 to y=60
        5. run right to USB center x=901
        6. enter USB box from top at y=96 -->
-  <polyline points="478,406 484,406 484,560 1008,560 1008,60 901,60 901,96"
+  <polyline points="478,406 484,406 484,626 1008,626 1008,60 901,60 901,96"
             fill="none" stroke="#37474f" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#c)"/>
 
   <!-- ══════════════════════════════════════════
        LEGEND
   ══════════════════════════════════════════ -->
   <!-- I2C / SPI expansion (right column, fed from the AXI bus bar) -->
-  <line x1="770" y1="311" x2="796" y2="311" stroke="#4a148c" stroke-width="1.5" marker-end="url(#a)"/>
-  <rect x="800" y="200" width="202" height="116" rx="6" fill="#e0f2f1" stroke="#00695c" stroke-width="1.5"/>
-  <text x="901" y="218" text-anchor="middle" font-weight="bold" fill="#00695c">I2C / SPI Expansion</text>
-  <rect x="808" y="226" width="186" height="38" rx="4" fill="#b2dfdb" stroke="#00695c" stroke-width="1"/>
-  <text x="901" y="241" text-anchor="middle" fill="#3a3a3a" font-size="10">I2C 100 kHz · 0x4070_0000</text>
-  <text x="901" y="256" text-anchor="middle" fill="#555" font-size="9">DIP 13 SCL / 14 SDA (open-drain)</text>
-  <rect x="808" y="270" width="186" height="38" rx="4" fill="#b2dfdb" stroke="#00695c" stroke-width="1"/>
-  <text x="901" y="285" text-anchor="middle" fill="#3a3a3a" font-size="10">SPI 6.25 MHz · 0x4080_0000</text>
-  <text x="901" y="300" text-anchor="middle" fill="#555" font-size="9">DIP 35–39 · SS×2</text>
+  <line x1="901" y1="326" x2="901" y2="352" stroke="#00695c" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="800" y="352" width="202" height="116" rx="6" fill="#e0f2f1" stroke="#00695c" stroke-width="1.5"/>
+  <text x="901" y="370" text-anchor="middle" font-weight="bold" fill="#00695c">I2C / SPI Expansion</text>
+  <rect x="808" y="378" width="186" height="38" rx="4" fill="#b2dfdb" stroke="#00695c" stroke-width="1"/>
+  <text x="901" y="393" text-anchor="middle" fill="#3a3a3a" font-size="10">I2C 100 kHz · 0x4070_0000</text>
+  <text x="901" y="408" text-anchor="middle" fill="#555" font-size="9">DIP 13 SCL / 14 SDA (open-drain)</text>
+  <rect x="808" y="422" width="186" height="38" rx="4" fill="#b2dfdb" stroke="#00695c" stroke-width="1"/>
+  <text x="901" y="437" text-anchor="middle" fill="#3a3a3a" font-size="10">SPI 6.25 MHz · 0x4080_0000</text>
+  <text x="901" y="452" text-anchor="middle" fill="#555" font-size="9">DIP 35–39 · SS×2</text>
 
-  <rect x="800" y="356" width="202" height="140" rx="6" fill="#ffffff" stroke="#bdbdbd" stroke-width="1"/>
-  <text x="901" y="374" text-anchor="middle" font-weight="bold" fill="#3a3a3a">Legend</text>
-  <line x1="814" y1="390" x2="844" y2="390" stroke="#4a148c" stroke-width="2" marker-end="url(#a)"/>
-  <text x="852" y="394" fill="#3a3a3a" font-size="10">AXI Bus</text>
-  <line x1="814" y1="410" x2="844" y2="410" stroke="#1b5e20" stroke-width="1.8" marker-end="url(#b)"/>
-  <text x="852" y="414" fill="#3a3a3a" font-size="10">LMB (Local Memory Bus)</text>
-  <line x1="814" y1="430" x2="844" y2="430" stroke="#1565c0" stroke-width="1.5" marker-end="url(#d)"/>
-  <text x="852" y="434" fill="#3a3a3a" font-size="10">Clock Signal</text>
-  <line x1="814" y1="450" x2="844" y2="450" stroke="#bf360c" stroke-width="1.5" marker-end="url(#e)"/>
-  <text x="852" y="454" fill="#3a3a3a" font-size="10">Analog Input</text>
-  <line x1="814" y1="470" x2="844" y2="470" stroke="#37474f" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#c)"/>
-  <text x="852" y="474" fill="#3a3a3a" font-size="10">External Interface</text>
-  <rect x="814" y="478" width="12" height="12" fill="#4a148c" rx="2"/>
-  <text x="832" y="488" fill="#3a3a3a" font-size="10">AXI SmartConnect Bus</text>
+  <rect x="800" y="480" width="202" height="140" rx="6" fill="#ffffff" stroke="#bdbdbd" stroke-width="1"/>
+  <text x="901" y="498" text-anchor="middle" font-weight="bold" fill="#3a3a3a">Legend</text>
+  <line x1="814" y1="514" x2="844" y2="514" stroke="#4a148c" stroke-width="2" marker-end="url(#a)"/>
+  <text x="852" y="518" fill="#3a3a3a" font-size="10">AXI Bus</text>
+  <line x1="814" y1="534" x2="844" y2="534" stroke="#1b5e20" stroke-width="1.8" marker-end="url(#b)"/>
+  <text x="852" y="538" fill="#3a3a3a" font-size="10">LMB (Local Memory Bus)</text>
+  <line x1="814" y1="554" x2="844" y2="554" stroke="#1565c0" stroke-width="1.5" marker-end="url(#d)"/>
+  <text x="852" y="558" fill="#3a3a3a" font-size="10">Clock Signal</text>
+  <line x1="814" y1="574" x2="844" y2="574" stroke="#bf360c" stroke-width="1.5" marker-end="url(#e)"/>
+  <text x="852" y="578" fill="#3a3a3a" font-size="10">Analog Input</text>
+  <line x1="814" y1="594" x2="844" y2="594" stroke="#37474f" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#c)"/>
+  <text x="852" y="598" fill="#3a3a3a" font-size="10">External Interface</text>
+  <rect x="814" y="602" width="12" height="12" fill="#4a148c" rx="2"/>
+  <text x="832" y="612" fill="#3a3a3a" font-size="10">AXI SmartConnect Bus</text>
 
 </svg>
