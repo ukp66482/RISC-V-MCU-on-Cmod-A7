@@ -20,6 +20,9 @@ The Cmod A7-35T has a 48-pin DIP connector (J1). All digital I/O pins operate at
 | Power (VU + GND) | 2 |
 | **Total** | **48** |
 
+Peripheral registers and base addresses are documented in the
+[IP peripheral reference](../../RISC-V-MCU/IP-Specification/Cmod_A7_IP_Peripheral_Reference.md).
+
 ---
 
 ## 2. Pin Map — Left Side (Pin 1–24)
@@ -35,7 +38,7 @@ The Cmod A7-35T has a 48-pin DIP connector (J1). All digital I/O pins operate at
 | 7 | GPIO_A6 | A15 | I/O | General purpose GPIO, Group A bit 6 |
 | 8 | INTR_0 | B15 | Input | External interrupt input 0 |
 | 9 | INTR_1 | A14 | Input | External interrupt input 1 |
-| 10 | PWM_0 | J3 | Output | PWM output channel 0 (axi_timer) |
+| 10 | PWM_0 | J3 | Output | PWM output channel 0 |
 | 11 | UART_TX | J1 | Output | UART 1 transmit |
 | 12 | UART_RX | K2 | Input | UART 1 receive |
 | 13 | I2C_SCL | L1 | I/O (open-drain) | I2C clock (external 4.7 kΩ pull-up recommended) |
@@ -66,13 +69,13 @@ The Cmod A7-35T has a 48-pin DIP connector (J1). All digital I/O pins operate at
 | 31 | GPIO_D1 | U1 | I/O | General purpose GPIO, Group D bit 1 |
 | 32 | GPIO_D0 | W2 | I/O | General purpose GPIO, Group D bit 0 |
 | 33 | INTR_3 | V2 | Input | External interrupt input 3 |
-| 34 | PWM_1 | W3 | Output | PWM output channel 1 (axi_timer) |
+| 34 | PWM_1 | W3 | Output | PWM output channel 1 |
 | 35 | SPI_SCLK | V3 | Output | SPI clock, 6.25 MHz |
 | 36 | SPI_MOSI | W5 | Output | SPI master-out slave-in |
 | 37 | SPI_MISO | V4 | Input | SPI master-in slave-out |
 | 38 | SPI_SS0 | U4 | Output | SPI slave select 0 (active low) |
 | 39 | SPI_SS1 | V5 | Output | SPI slave select 1 (active low) |
-| 40 | PWM_2 | W4 | Output | PWM output channel 2 (axi_timer) |
+| 40 | PWM_2 | W4 | Output | PWM output channel 2 |
 | 41 | INTR_2 | U5 | Input | External interrupt input 2 |
 | 42 | GPIO_C6 | U2 | I/O | General purpose GPIO, Group C bit 6 |
 | 43 | GPIO_C5 | W6 | I/O | General purpose GPIO, Group C bit 5 |
@@ -86,39 +89,33 @@ The Cmod A7-35T has a 48-pin DIP connector (J1). All digital I/O pins operate at
 
 ## 4. GPIO Groups
 
-Each GPIO group is controlled by an AXI GPIO IP instance accessible from the
-MicroBlaze RISC-V processor. Register base addresses for all peripherals are
-listed in the [IP peripheral reference](../../RISC-V-MCU/IP-Specification/Cmod_A7_IP_Peripheral_Reference.md).
-
-| Group | Width | HDL Port Name | DIP Pins |
-|-------|-------|---------------|----------|
-| A | 7-bit | `gpio_A_tri_io[6:0]` | 1–7 |
-| B | 7-bit | `gpio_B_tri_io[6:0]` | 17–23 |
-| C | 7-bit | `gpio_C_tri_io[6:0]` | 42–48 |
-| D | 7-bit | `gpio_D_tri_io[6:0]` | 26–32 |
+| Group | Width | DIP Pins |
+|-------|-------|----------|
+| A | 7-bit | 1–7 |
+| B | 7-bit | 17–23 |
+| C | 7-bit | 42–48 |
+| D | 7-bit | 26–32 |
 
 ---
 
 ## 5. Interrupt Inputs
 
-| Signal | DIP Pin | FPGA Pin | HDL Port Name |
-|--------|---------|----------|---------------|
-| INTR_0 | 8 | B15 | `intr_tri_i[0]` |
-| INTR_1 | 9 | A14 | `intr_tri_i[1]` |
-| INTR_2 | 41 | U5 | `intr_tri_i[2]` |
-| INTR_3 | 33 | V2 | `intr_tri_i[3]` |
-
-All 4 interrupts are grouped into a single 4-bit AXI GPIO instance (INT_0_3) with interrupt capability enabled (`C_INTERRUPT_PRESENT = 1`).
+| Signal | DIP Pin | FPGA Pin |
+|--------|---------|----------|
+| INTR_0 | 8 | B15 |
+| INTR_1 | 9 | A14 |
+| INTR_2 | 41 | U5 |
+| INTR_3 | 33 | V2 |
 
 ---
 
 ## 6. PWM Outputs
 
-| Signal | DIP Pin | FPGA Pin | IP Instance |
-|--------|---------|----------|-------------|
-| PWM_0 | 10 | J3 | PWM_0 (axi_timer) |
-| PWM_1 | 34 | W3 | PWM_1 (axi_timer) |
-| PWM_2 | 40 | W4 | PWM_2 (axi_timer) |
+| Signal | DIP Pin | FPGA Pin |
+|--------|---------|----------|
+| PWM_0 | 10 | J3 |
+| PWM_1 | 34 | W3 |
+| PWM_2 | 40 | W4 |
 
 ---
 
@@ -129,8 +126,6 @@ All 4 interrupts are grouped into a single 4-bit AXI GPIO instance (INT_0_3) wit
 | UART 0 (USB) | — | — | J18 | J17 | Via Micro-USB (J3), no DIP pin |
 | UART 1 (External) | DIP 11 | DIP 12 | J1 | K2 | Exposed on DIP connector |
 
-Both are AXI UART16550 instances (16550-compatible).
-
 ---
 
 ## 8. Analog Inputs (XADC)
@@ -139,8 +134,6 @@ Both are AXI UART16550 instances (16550-compatible).
 |--------|---------|----------------|-------------|
 | ADC_0 | 15 | G3 / G2 | VAUX4 |
 | ADC_1 | 16 | H2 / J2 | VAUX12 |
-
-The XADC sequencer also monitors on-chip temperature, VCCINT, and VCCAUX.
 
 ### Analog Input Circuit
 
@@ -195,5 +188,5 @@ The XADC expects an input range of 0–1 V. The board includes a resistive volta
 | I/O Standard | LVCMOS33 (3.3 V) |
 | Series Resistance on DIP Pins | None |
 | Max Input Voltage (digital I/O) | See Artix-7 datasheet (~3.75 V abs. max for LVCMOS33) |
-| Analog Input Range (Pin 15, 16) | 0–1 V (via on-board voltage divider) |
+| Analog Input Range (Pin 15, 16) | 0–3.3 V (on-board divider scales to the XADC's 0–1 V) |
 | Clock Source | 12 MHz oscillator (FPGA pin L17), PLL → 100 MHz |
