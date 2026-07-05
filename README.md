@@ -32,7 +32,7 @@ and work purely at the firmware level.
 ### JTAG mode
 
 For development: build the application in Vitis and run it over JTAG — see the
-[JTAG Debug Mode guide](Vitis-Software-Dev-Guide/JTAG-Debug-Mode/JTAG-Debug-Mode.md).
+[JTAG Debug Mode guide](docs/guides/JTAG-Debug-Mode/JTAG-Debug-Mode.md).
 Code runs from RAM and is lost at power-off.
 
 ### Standalone boot
@@ -44,7 +44,7 @@ python3 tools/upload.py build/app.elf
 ```
 
 The application then starts automatically at every power-on. Details are in the
-[Standalone Boot Mode guide](Vitis-Software-Dev-Guide/Standalone-Boot-Mode/Standalone-Boot-Mode.md).
+[Standalone Boot Mode guide](docs/guides/Standalone-Boot-Mode/Standalone-Boot-Mode.md).
 
 The same ELF works in both modes, and a new board only needs `release/boot.mcs`
 programmed once with Vivado Hardware Manager (guide, section 2).
@@ -53,9 +53,9 @@ programmed once with Vivado Hardware Manager (guide, section 2).
 
 ```
 release/                  prebuilt outputs: boot.mcs, top.bit, top_wrapper.xsa
-RISC-V-MCU/               Vivado project (recreate_project.tcl) and IP reference
-Cmod-A7-spec/             board files, constraints, pin/power specs, KiCad symbol
-Vitis-Software-Dev-Guide/ JTAG and standalone-boot guides
+RISC-V-MCU/               Vivado project (recreate_project.tcl)
+board/                    Cmod A7 hardware: constraints, board files, KiCad symbol
+docs/                     specs (pin / power / IP), guides (JTAG / standalone boot), diagrams
 workspace-example/
   demo_all/               demo that exercises all peripherals (preloaded on the board)
   examples/01...06        course examples: GPIO, assembly, PWM, UART, ADC, memory
@@ -77,9 +77,10 @@ After implementation, export the XSA and create a Vitis platform (standalone,
 
 ## Other documents
 
-- [Pin specification](Cmod-A7-spec/Pin-Specification/Cmod_A7_Pin_Specification.md) — DIP pin assignments and electrical characteristics
-- [Power specification](Cmod-A7-spec/Power-Specification/Cmod_A7_Power_Specification.md) — power rails and supply options
-- [Vitis quick reference](Vitis-Software-Dev-Guide/README.md) — platform and application concepts, XSDB commands
+- [IP peripheral reference](docs/IP-Specification/Cmod_A7_IP_Peripheral_Reference.md) — register base addresses, IP parameters, interrupt mapping
+- [Pin specification](docs/Pin-Specification/Cmod_A7_Pin_Specification.md) — DIP pin assignments and electrical characteristics
+- [Power specification](docs/Power-Specification/Cmod_A7_Power_Specification.md) — power rails and supply options
+- [Vitis quick reference](docs/guides/README.md) — platform and application concepts, XSDB commands
 - [Bus topology diagram](docs/images/dp_ip_topology.svg) — AXI masters, caches, and interconnect wiring
 
 ## License

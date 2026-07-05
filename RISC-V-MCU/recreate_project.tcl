@@ -18,7 +18,7 @@ set script_folder [file dirname [file normalize [info script]]]
 # Add local board files to Vivado's board repository path
 ################################################################
 
-set board_repo_path [file normalize "$script_folder/../Cmod-A7-spec/Board-Files"]
+set board_repo_path [file normalize "$script_folder/../board/Board-Files"]
 set current_repo_paths [get_param board.repoPaths]
 if { [lsearch $current_repo_paths $board_repo_path] == -1 } {
    set_param board.repoPaths [concat $current_repo_paths [list $board_repo_path]]
@@ -46,7 +46,7 @@ source [file normalize "$script_folder/top.tcl"]
 # Add constraints
 ################################################################
 
-set xdc_file [file normalize "$script_folder/../Cmod-A7-spec/Cmod-A7-Master.xdc"]
+set xdc_file [file normalize "$script_folder/../board/Cmod-A7-Master.xdc"]
 if { [file exists $xdc_file] } {
    add_files -fileset constrs_1 $xdc_file
    common::send_gid_msg -ssname BD::TCL -id 2010 -severity "INFO" "Added constraints file: $xdc_file"

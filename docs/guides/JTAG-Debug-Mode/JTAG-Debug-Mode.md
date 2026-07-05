@@ -119,7 +119,7 @@ After creation, a default `helloworld.c` file is placed in the `src` directory. 
 
 ### 4.2 Add Source Files
 
-Add your source files under the `src` directory (e.g. `gpio_init.c`). Assembly files (`.S`) are also supported — add them the same way and they will be compiled and linked together with the rest of the project. See [`workspace-example/Btn_LED_asm_test/`](../../workspace-example/Btn_LED_asm_test/) for an example written entirely in RISC-V assembly.
+Add your source files under the `src` directory (e.g. `gpio_init.c`). Assembly files (`.S`) are also supported — add them the same way and they will be compiled and linked together with the rest of the project. See [`workspace-example/examples/02_btn_led_asm/`](../../../workspace-example/examples/02_btn_led_asm/) for an example written entirely in RISC-V assembly.
 
 ![Add Source Files](images/image_11.png)
 

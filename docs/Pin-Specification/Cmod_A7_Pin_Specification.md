@@ -21,7 +21,7 @@ The Cmod A7-35T has a 48-pin DIP connector (J1). All digital I/O pins operate at
 | **Total** | **48** |
 
 Peripheral registers and base addresses are documented in the
-[IP peripheral reference](../../RISC-V-MCU/IP-Specification/Cmod_A7_IP_Peripheral_Reference.md).
+[IP peripheral reference](../IP-Specification/Cmod_A7_IP_Peripheral_Reference.md).
 
 ---
 

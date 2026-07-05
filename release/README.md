@@ -17,7 +17,7 @@ Pre-built outputs for the MicroBlaze RISC-V MCU design on the Cmod A7-35T (with 
 
 Program `boot.mcs` into the QSPI flash: Vivado **Hardware Manager > Add Configuration
 Memory Device** (`mx25l3273f-spi-x1_x2_x4` for Macronix, or `n25q32-3.3v-spi-x1_x2_x4` per the IC3 marking) >
-**Program Configuration Memory Device**. Full steps: [Standalone Boot Mode guide](../Vitis-Software-Dev-Guide/Standalone-Boot-Mode/Standalone-Boot-Mode.md) §2.
+**Program Configuration Memory Device**. Full steps: [Standalone Boot Mode guide](../docs/guides/Standalone-Boot-Mode/Standalone-Boot-Mode.md) §2.
 
 ### Create a Vitis Platform
 
@@ -32,4 +32,4 @@ project from source with `RISC-V-MCU/recreate_project.tcl`.
 > **Status (2026-07-03):** board-verified on real hardware (Macronix MX25L3273F). Full cycle
 > confirmed: flash program, x4 fast power-on config (<1 s), UART bootloader, RAM/flash upload,
 > and unattended standalone boot. Bitstream uses quad-SPI x4 @ 33 MHz + compression
-> (`BITSTREAM.CONFIG` set in `Cmod-A7-spec/Cmod-A7-Master.xdc`).
+> (`BITSTREAM.CONFIG` set in `board/Cmod-A7-Master.xdc`).

@@ -36,7 +36,7 @@
 
 ### 1.3 AXI SmartConnect (`microblaze_riscv_0_axi_periph`)
 
-![Bus & Cache Topology](../../docs/images/dp_ip_topology.svg)
+![Bus & Cache Topology](../images/dp_ip_topology.svg)
 
 | Parameter | Value |
 |-----------|-------|
