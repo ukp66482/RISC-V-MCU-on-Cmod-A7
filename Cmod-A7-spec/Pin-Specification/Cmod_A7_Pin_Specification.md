@@ -38,8 +38,8 @@ The Cmod A7-35T has a 48-pin DIP connector (J1). All digital I/O pins operate at
 | 10 | PWM_0 | J3 | Output | PWM output channel 0 (axi_timer) |
 | 11 | UART_TX | J1 | Output | UART 1 transmit |
 | 12 | UART_RX | K2 | Input | UART 1 receive |
-| 13 | I2C_SCL | L1 | I/O (open-drain) | I2C clock (axi_iic @ 0x4070_0000; external 4.7 kΩ pull-up recommended) |
-| 14 | I2C_SDA | L2 | I/O (open-drain) | I2C data (axi_iic @ 0x4070_0000; external 4.7 kΩ pull-up recommended) |
+| 13 | I2C_SCL | L1 | I/O (open-drain) | I2C clock (external 4.7 kΩ pull-up recommended) |
+| 14 | I2C_SDA | L2 | I/O (open-drain) | I2C data (external 4.7 kΩ pull-up recommended) |
 | 15 | ADC_0 | G3 / G2 | Analog | XADC VAUX4 (ain_p[15] / ain_n[15]) |
 | 16 | ADC_1 | H2 / J2 | Analog | XADC VAUX12 (ain_p[16] / ain_n[16]) |
 | 17 | GPIO_B0 | M1 | I/O | General purpose GPIO, Group B bit 0 |
@@ -67,7 +67,7 @@ The Cmod A7-35T has a 48-pin DIP connector (J1). All digital I/O pins operate at
 | 32 | GPIO_D0 | W2 | I/O | General purpose GPIO, Group D bit 0 |
 | 33 | INTR_3 | V2 | Input | External interrupt input 3 |
 | 34 | PWM_1 | W3 | Output | PWM output channel 1 (axi_timer) |
-| 35 | SPI_SCLK | V3 | Output | SPI clock, 6.25 MHz (spi_0 @ 0x4080_0000) |
+| 35 | SPI_SCLK | V3 | Output | SPI clock, 6.25 MHz |
 | 36 | SPI_MOSI | W5 | Output | SPI master-out slave-in |
 | 37 | SPI_MISO | V4 | Input | SPI master-in slave-out |
 | 38 | SPI_SS0 | U4 | Output | SPI slave select 0 (active low) |
@@ -84,48 +84,50 @@ The Cmod A7-35T has a 48-pin DIP connector (J1). All digital I/O pins operate at
 
 ---
 
-## 4. GPIO Groups — AXI Address Map
+## 4. GPIO Groups
 
-Each GPIO group is controlled by an AXI GPIO IP instance accessible from the MicroBlaze RISC-V processor.
+Each GPIO group is controlled by an AXI GPIO IP instance accessible from the
+MicroBlaze RISC-V processor. Register base addresses for all peripherals are
+listed in the [IP peripheral reference](../../RISC-V-MCU/IP-Specification/Cmod_A7_IP_Peripheral_Reference.md).
 
-| Group | Width | AXI Base Address | HDL Port Name | DIP Pins |
-|-------|-------|-----------------|---------------|----------|
-| A | 7-bit | 0x4003_0000 | `gpio_A_tri_io[6:0]` | 1–7 |
-| B | 7-bit | 0x4004_0000 | `gpio_B_tri_io[6:0]` | 17–23 |
-| C | 7-bit | 0x4005_0000 | `gpio_C_tri_io[6:0]` | 42–48 |
-| D | 7-bit | 0x4006_0000 | `gpio_D_tri_io[6:0]` | 26–32 |
+| Group | Width | HDL Port Name | DIP Pins |
+|-------|-------|---------------|----------|
+| A | 7-bit | `gpio_A_tri_io[6:0]` | 1–7 |
+| B | 7-bit | `gpio_B_tri_io[6:0]` | 17–23 |
+| C | 7-bit | `gpio_C_tri_io[6:0]` | 42–48 |
+| D | 7-bit | `gpio_D_tri_io[6:0]` | 26–32 |
 
 ---
 
-## 5. Interrupt Inputs — AXI Address Map
+## 5. Interrupt Inputs
 
-| Signal | DIP Pin | FPGA Pin | AXI Base Address | HDL Port Name |
-|--------|---------|----------|-----------------|---------------|
-| INTR_0 | 8 | B15 | 0x4007_0000 | `intr_tri_i[0]` |
-| INTR_1 | 9 | A14 | 0x4007_0000 | `intr_tri_i[1]` |
-| INTR_2 | 41 | U5 | 0x4007_0000 | `intr_tri_i[2]` |
-| INTR_3 | 33 | V2 | 0x4007_0000 | `intr_tri_i[3]` |
+| Signal | DIP Pin | FPGA Pin | HDL Port Name |
+|--------|---------|----------|---------------|
+| INTR_0 | 8 | B15 | `intr_tri_i[0]` |
+| INTR_1 | 9 | A14 | `intr_tri_i[1]` |
+| INTR_2 | 41 | U5 | `intr_tri_i[2]` |
+| INTR_3 | 33 | V2 | `intr_tri_i[3]` |
 
 All 4 interrupts are grouped into a single 4-bit AXI GPIO instance (INT_0_3) with interrupt capability enabled (`C_INTERRUPT_PRESENT = 1`).
 
 ---
 
-## 6. PWM Outputs — AXI Address Map
+## 6. PWM Outputs
 
-| Signal | DIP Pin | FPGA Pin | AXI Base Address | IP Instance |
-|--------|---------|----------|-----------------|-------------|
-| PWM_0 | 10 | J3 | 0x4020_0000 | PWM_0 (axi_timer) |
-| PWM_1 | 34 | W3 | 0x4021_0000 | PWM_1 (axi_timer) |
-| PWM_2 | 40 | W4 | 0x4022_0000 | PWM_2 (axi_timer) |
+| Signal | DIP Pin | FPGA Pin | IP Instance |
+|--------|---------|----------|-------------|
+| PWM_0 | 10 | J3 | PWM_0 (axi_timer) |
+| PWM_1 | 34 | W3 | PWM_1 (axi_timer) |
+| PWM_2 | 40 | W4 | PWM_2 (axi_timer) |
 
 ---
 
 ## 7. UART Interfaces
 
-| Interface | TX Pin | RX Pin | TX FPGA | RX FPGA | AXI Base Address | Connection |
-|-----------|--------|--------|---------|---------|-----------------|------------|
-| UART 0 (USB) | J18 | J17 | J18 | J17 | 0x4030_0000 | Via Micro-USB (J3), no DIP pin |
-| UART 1 (External) | DIP 11 | DIP 12 | J1 | K2 | 0x4031_0000 | Exposed on DIP connector |
+| Interface | TX Pin | RX Pin | TX FPGA | RX FPGA | Connection |
+|-----------|--------|--------|---------|---------|------------|
+| UART 0 (USB) | — | — | J18 | J17 | Via Micro-USB (J3), no DIP pin |
+| UART 1 (External) | DIP 11 | DIP 12 | J1 | K2 | Exposed on DIP connector |
 
 Both are AXI UART16550 instances (16550-compatible).
 
@@ -138,7 +140,7 @@ Both are AXI UART16550 instances (16550-compatible).
 | ADC_0 | 15 | G3 / G2 | VAUX4 |
 | ADC_1 | 16 | H2 / J2 | VAUX12 |
 
-XADC AXI base address: **0x4060_0000**. The sequencer also monitors on-chip temperature, VCCINT, and VCCAUX.
+The XADC sequencer also monitors on-chip temperature, VCCINT, and VCCAUX.
 
 ### Analog Input Circuit
 
@@ -161,36 +163,28 @@ The XADC expects an input range of 0–1 V. The board includes a resistive volta
 
 ## 9. Serial Expansion Pins (I2C / SPI)
 
-Formerly unassigned, these pins now carry the serial expansion interfaces (all 48 DIP pins are in use).
-
-| DIP Pin | FPGA Pin | Signal | Interface |
-|---------|----------|--------|-----------|
-| 13 | L1 | I2C_SCL | `i2c_0` @ `0x4070_0000` (100 kHz) |
-| 14 | L2 | I2C_SDA | `i2c_0` @ `0x4070_0000` |
-| 35 | V3 | SPI_SCLK | `spi_0` @ `0x4080_0000` (6.25 MHz) |
-| 36 | W5 | SPI_MOSI | `spi_0` |
-| 37 | V4 | SPI_MISO | `spi_0` |
-| 38 | U4 | SPI_SS0 | `spi_0` slave select 0 |
-| 39 | V5 | SPI_SS1 | `spi_0` slave select 1 |
+| DIP Pin | FPGA Pin | Signal | Description |
+|---------|----------|--------|-------------|
+| 13 | L1 | I2C_SCL | I2C clock, 100 kHz |
+| 14 | L2 | I2C_SDA | I2C data |
+| 35 | V3 | SPI_SCLK | SPI clock, 6.25 MHz |
+| 36 | W5 | SPI_MOSI | Master out, slave in |
+| 37 | V4 | SPI_MISO | Master in, slave out |
+| 38 | U4 | SPI_SS0 | Slave select 0 (active low) |
+| 39 | V5 | SPI_SS1 | Slave select 1 (active low) |
 
 > **I2C pull-ups:** SCL/SDA are open-drain. Weak FPGA-internal pull-ups are enabled as a
 > fallback, but connect external 4.7 kΩ resistors to 3.3 V when wiring real devices.
 
 ---
 
-## 10. Internal Peripherals (No DIP Pin Exposure)
+## 10. On-Board I/O (No DIP Pin Exposure)
 
-| Peripheral | AXI Base Address | Description |
-|------------|-----------------|-------------|
-| Board LEDs | 0x4000_0000 | 2-bit on-board LEDs (FPGA: A17, C16) |
-| Board Button | 0x4001_0000 | 1-bit push button (FPGA: A18) |
-| Board RGB LED | 0x4002_0000 | On-board RGB LED (FPGA: B17, B16, C17) |
-| Timer 0 | 0x4010_0000 | System timer with interrupt |
-| Timer 1 | 0x4011_0000 | System timer with interrupt |
-| Timer 2 | 0x4012_0000 | System timer with interrupt |
-| AXI Interrupt Controller | 0x4040_0000 | 8 interrupt inputs |
-| QSPI Flash | 0x4050_0000 | On-board Quad-SPI flash (storage only, not memory-mapped) |
-| SRAM (EMC) | 0x6000_0000 | 512 KB cellular RAM, exact-fit window to 0x6007_FFFF |
+| Function | FPGA Pins |
+|----------|-----------|
+| LEDs (2) | A17, C16 |
+| Push button | A18 |
+| RGB LED | B17, B16, C17 |
 
 ---
 
