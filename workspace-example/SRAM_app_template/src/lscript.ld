@@ -12,7 +12,7 @@ _HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0x800;
 
 MEMORY
 {
-	axi_emc_0_memory_0 : ORIGIN = 0x60000000, LENGTH = 0x80000
+	sram : ORIGIN = 0x60000000, LENGTH = 0x80000
 	itcm : ORIGIN = 0x00008000, LENGTH = 0x8000
 	dtcm : ORIGIN = 0x00010000, LENGTH = 0x10000
 }
@@ -29,14 +29,14 @@ SECTIONS
    __text.init_start = .;
    *(.text.init)
    __text.init_end = .;
-} > axi_emc_0_memory_0
+} > sram
 
 .text : {
    . = ALIGN(2048);
    *(.text)
    *(.text.*)
    *(.gnu.linkonce.t.*)
-} > axi_emc_0_memory_0
+} > sram
 
 /* Fast code (ISRs, control loops): executes from ITCM but is STORED inside
  * the SRAM image (AT>) — tcm_init() in main.c copies it out at startup, the
@@ -48,21 +48,21 @@ SECTIONS
    *(.itcm.text.*)
    . = ALIGN(4);
    __itcm_end = .;
-} > itcm AT> axi_emc_0_memory_0
+} > itcm AT> sram
 
 __itcm_lma = LOADADDR(.itcm.text);
 
 .note.gnu.build-id : {
    KEEP (*(.note.gnu.build-id))
-} > axi_emc_0_memory_0
+} > sram
 
 .init : {
    KEEP (*(.init))
-} > axi_emc_0_memory_0
+} > sram
 
 .fini : {
    KEEP (*(.fini))
-} > axi_emc_0_memory_0
+} > sram
 
 .ctors : {
    __CTOR_LIST__ = .;
@@ -73,7 +73,7 @@ __itcm_lma = LOADADDR(.itcm.text);
    KEEP (*(.ctors))
    __CTOR_END__ = .;
    ___CTORS_END___ = .;
-} > axi_emc_0_memory_0
+} > sram
 
 .dtors : {
    __DTOR_LIST__ = .;
@@ -84,7 +84,7 @@ __itcm_lma = LOADADDR(.itcm.text);
    KEEP (*(.dtors))
    __DTOR_END__ = .;
    ___DTORS_END___ = .;
-} > axi_emc_0_memory_0
+} > sram
 
 .rodata : {
    __rodata_start = .;
@@ -92,13 +92,13 @@ __itcm_lma = LOADADDR(.itcm.text);
    *(.rodata.*)
    *(.gnu.linkonce.r.*)
    __rodata_end = .;
-} > axi_emc_0_memory_0
+} > sram
 
 .srodata : {
    __srodata_start = .;
    *(.srodata)
    __srodata_end = .;
-} > axi_emc_0_memory_0
+} > sram
 
 .sdata2 : {
    __sdata2_start = .;
@@ -106,7 +106,7 @@ __itcm_lma = LOADADDR(.itcm.text);
    *(.sdata2.*)
    *(.gnu.linkonce.s2.*)
    __sdata2_end = .;
-} > axi_emc_0_memory_0
+} > sram
 
 .data : {
    __data_start = .;
@@ -114,45 +114,29 @@ __itcm_lma = LOADADDR(.itcm.text);
    *(.data.*)
    *(.gnu.linkonce.d.*)
    _edata = .;
-} > axi_emc_0_memory_0
-
-.got : {
-   *(.got)
-} > axi_emc_0_memory_0
-
-.got1 : {
-   *(.got1)
-} > axi_emc_0_memory_0
-
-.got2 : {
-   *(.got2)
-} > axi_emc_0_memory_0
+} > sram
 
 .eh_frame : {
    *(.eh_frame)
-} > axi_emc_0_memory_0
-
-.jcr : {
-   *(.jcr)
-} > axi_emc_0_memory_0
+} > sram
 
 .gcc_except_table : {
    *(.gcc_except_table)
-} > axi_emc_0_memory_0
+} > sram
 
 .init_array : {
    __init_array_start = .;
    KEEP (*(SORT(.init_array.*)))
    KEEP (*(.init_array))
    __init_array_end = .;
-} > axi_emc_0_memory_0
+} > sram
 
 .fini_array : {
    __fini_array_start = .;
    KEEP (*(SORT(.fini_array.*)))
    KEEP (*(.fini_array))
    __fini_array_end = .;
-} > axi_emc_0_memory_0
+} > sram
 
 .sdata : {
    __sdata_start = .;
@@ -160,23 +144,7 @@ __itcm_lma = LOADADDR(.itcm.text);
    *(.sdata.*)
    *(.gnu.linkonce.s.*)
    __sdata_end = .;
-} > axi_emc_0_memory_0
-
-.tdata : {
-   __tdata_start = .;
-   *(.tdata)
-   *(.tdata.*)
-   *(.gnu.linkonce.td.*)
-   __tdata_end = .;
-} > axi_emc_0_memory_0
-
-.tbss : {
-   __tbss_start = .;
-   *(.tbss)
-   *(.tbss.*)
-   *(.gnu.linkonce.tb.*)
-   __tbss_end = .;
-} > axi_emc_0_memory_0
+} > sram
 
 .bss (NOLOAD) : {
    __bss_start = .;
@@ -185,7 +153,7 @@ __itcm_lma = LOADADDR(.itcm.text);
    *(.gnu.linkonce.b.*)
    *(COMMON)
    __bss_end = .;
-} > axi_emc_0_memory_0
+} > sram
 
 .sbss (NOLOAD) : {
    __sbss_start = .;
@@ -193,7 +161,7 @@ __itcm_lma = LOADADDR(.itcm.text);
    *(.sbss.*)
    *(.gnu.linkonce.sb.*)
    __sbss_end = .;
-} > axi_emc_0_memory_0
+} > sram
 
 .sbss2 : {
    __sbss2_start = .;
@@ -201,7 +169,7 @@ __itcm_lma = LOADADDR(.itcm.text);
    *(.sbss2.*)
    *(.gnu.linkonce.sb2.*)
    __sbss2_end = .;
-} > axi_emc_0_memory_0
+} > sram
 
 _SDA_BASE_ = __sdata_start + ((__sbss_end - __sdata_start) / 2 );
 
@@ -219,7 +187,7 @@ _SDA2_BASE_ = __sdata2_start + ((__sbss2_end - __sdata2_start) / 2 );
     * (With .stack moved to BRAM, a trailing "_end = .;" would land in
     *  BRAM below __bss_start and the BSS clear loop would never run.) */
    _end = .;
-} > axi_emc_0_memory_0
+} > sram
 
 /* Zero-initialised fast data in DTCM (cleared by tcm_init()).
  * Tag variables with __attribute__((section(".dtcm"))). */

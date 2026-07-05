@@ -4,7 +4,7 @@ This guide walks through loading and debugging a MicroBlaze RISC-V application o
 
 ## Prerequisites
 
-- A hardware design exported as an `.xsa` file from Vivado
+- The hardware design as an `.xsa` file — use the prebuilt [`release/top_wrapper.xsa`](../../../release/top_wrapper.xsa) (no Vivado needed)
 - Vitis Unified IDE installed
 - Cmod A7-35T board connected to the host via USB
 
@@ -155,14 +155,29 @@ Verify that each section (`.text`, `.data`, `.bss`, `.stack`, `.heap`, etc.) is 
 
 ![Section Mapping](images/image_15.png)
 
+> **Note:** the Vitis-generated default linker script places everything in the
+> 128 KB BRAM — fine for a quick Hello World over JTAG, but small, and the
+> layout does not match the bootloader flow. For real applications replace it
+> with [`workspace-example/SRAM_app_template/src/lscript.ld`](../../../workspace-example/SRAM_app_template/src/lscript.ld)
+> (code/data in 512 KB SRAM, stack in DTCM, `ITCM_FUNC`/`DTCM_DATA` support) —
+> the same ELF then also works with `upload.py`. See the
+> [Standalone Boot Mode guide](../Standalone-Boot-Mode/Standalone-Boot-Mode.md) §3.
+
 ---
 
 ## 6. Configure Platform BSP
 
 Open the platform's **Configuration for Os: standalone** settings page and verify the following key parameters:
 
-- **stdin** and **stdout**: set to the appropriate UART peripheral (e.g. `axi_uartlite_0`)
+- **stdin** and **stdout**: set both to **`uart_USB`**. The default may be
+  `uart_1` (the DIP-pin UART) — with that setting `xil_printf` output never
+  reaches your USB terminal.
 - Adjust other BSP settings as needed
+
+The project-wide serial convention is **115200 8N1**. The plain Hello World
+template prints at whatever the UART was last configured to — add
+`XUartNs550_SetBaud(XPAR_UART_USB_BASEADDR, XPAR_XUARTNS550_0_CLOCK_FREQ, 115200);`
+at the top of `main()` (the provided templates and examples already do this).
 
 ![BSP Configuration](images/image_16.png)
 
