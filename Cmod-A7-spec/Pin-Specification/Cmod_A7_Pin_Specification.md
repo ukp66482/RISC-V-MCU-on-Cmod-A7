@@ -14,8 +14,9 @@ The Cmod A7-35T has a 48-pin DIP connector (J1). All digital I/O pins operate at
 | External Interrupts | 4 |
 | PWM Outputs | 3 |
 | UART 1 (TX + RX) | 2 |
+| I2C (SCL + SDA) | 2 |
+| SPI (SCLK/MOSI/MISO/SS×2) | 5 |
 | Analog Inputs (XADC) | 2 |
-| Not Implemented | 7 |
 | Power (VU + GND) | 2 |
 | **Total** | **48** |
 
@@ -57,13 +58,13 @@ The Cmod A7-35T has a 48-pin DIP connector (J1). All digital I/O pins operate at
 | DIP Pin | Signal Name | FPGA Pin | Direction | Function |
 |---------|-------------|----------|-----------|----------|
 | 25 | **GND** | — | Power | Ground reference |
-| 26 | GPIO_D6 | W2 | I/O | General purpose GPIO, Group D bit 6 |
-| 27 | GPIO_D5 | U1 | I/O | General purpose GPIO, Group D bit 5 |
-| 28 | GPIO_D4 | T2 | I/O | General purpose GPIO, Group D bit 4 |
+| 26 | GPIO_D6 | R3 | I/O | General purpose GPIO, Group D bit 6 |
+| 27 | GPIO_D5 | T3 | I/O | General purpose GPIO, Group D bit 5 |
+| 28 | GPIO_D4 | R2 | I/O | General purpose GPIO, Group D bit 4 |
 | 29 | GPIO_D3 | T1 | I/O | General purpose GPIO, Group D bit 3 |
-| 30 | GPIO_D2 | R2 | I/O | General purpose GPIO, Group D bit 2 |
-| 31 | GPIO_D1 | T3 | I/O | General purpose GPIO, Group D bit 1 |
-| 32 | GPIO_D0 | R3 | I/O | General purpose GPIO, Group D bit 0 |
+| 30 | GPIO_D2 | T2 | I/O | General purpose GPIO, Group D bit 2 |
+| 31 | GPIO_D1 | U1 | I/O | General purpose GPIO, Group D bit 1 |
+| 32 | GPIO_D0 | W2 | I/O | General purpose GPIO, Group D bit 0 |
 | 33 | INTR_3 | V2 | Input | External interrupt input 3 |
 | 34 | PWM_1 | W3 | Output | PWM output channel 1 (axi_timer) |
 | 35 | SPI_SCLK | V3 | Output | SPI clock, 6.25 MHz (spi_0 @ 0x4080_0000) |
@@ -113,9 +114,9 @@ All 4 interrupts are grouped into a single 4-bit AXI GPIO instance (INT_0_3) wit
 
 | Signal | DIP Pin | FPGA Pin | AXI Base Address | IP Instance |
 |--------|---------|----------|-----------------|-------------|
-| PWM_0 | 10 | J3 | 0x41C1_0000 | PWM_0 (axi_timer) |
-| PWM_1 | 34 | W3 | 0x41C2_0000 | PWM_1 (axi_timer) |
-| PWM_2 | 40 | W4 | 0x41C3_0000 | PWM_2 (axi_timer) |
+| PWM_0 | 10 | J3 | 0x4020_0000 | PWM_0 (axi_timer) |
+| PWM_1 | 34 | W3 | 0x4021_0000 | PWM_1 (axi_timer) |
+| PWM_2 | 40 | W4 | 0x4022_0000 | PWM_2 (axi_timer) |
 
 ---
 
@@ -123,8 +124,8 @@ All 4 interrupts are grouped into a single 4-bit AXI GPIO instance (INT_0_3) wit
 
 | Interface | TX Pin | RX Pin | TX FPGA | RX FPGA | AXI Base Address | Connection |
 |-----------|--------|--------|---------|---------|-----------------|------------|
-| UART 0 (USB) | J18 | J17 | J18 | J17 | 0x44A0_0000 | Via Micro-USB (J3), no DIP pin |
-| UART 1 (External) | DIP 11 | DIP 12 | J1 | K2 | 0x44A1_0000 | Exposed on DIP connector |
+| UART 0 (USB) | J18 | J17 | J18 | J17 | 0x4030_0000 | Via Micro-USB (J3), no DIP pin |
+| UART 1 (External) | DIP 11 | DIP 12 | J1 | K2 | 0x4031_0000 | Exposed on DIP connector |
 
 Both are AXI UART16550 instances (16550-compatible).
 
@@ -137,7 +138,7 @@ Both are AXI UART16550 instances (16550-compatible).
 | ADC_0 | 15 | G3 / G2 | VAUX4 |
 | ADC_1 | 16 | H2 / J2 | VAUX12 |
 
-XADC AXI base address: **0x44A3_0000**. The sequencer also monitors on-chip temperature, VCCINT, and VCCAUX.
+XADC AXI base address: **0x4060_0000**. The sequencer also monitors on-chip temperature, VCCINT, and VCCAUX.
 
 ### Analog Input Circuit
 
@@ -184,12 +185,12 @@ Formerly unassigned, these pins now carry the serial expansion interfaces (all 4
 | Board LEDs | 0x4000_0000 | 2-bit on-board LEDs (FPGA: A17, C16) |
 | Board Button | 0x4001_0000 | 1-bit push button (FPGA: A18) |
 | Board RGB LED | 0x4002_0000 | On-board RGB LED (FPGA: B17, B16, C17) |
-| Timer 0 | 0x41C0_0000 | System timer with interrupt |
-| Timer 1 | 0x41C4_0000 | System timer with interrupt |
-| Timer 2 | 0x41C5_0000 | System timer with interrupt |
-| AXI Interrupt Controller | 0x4120_0000 | 6 interrupt sources |
-| QSPI Flash | 0x44A2_0000 | On-board Quad-SPI flash |
-| SRAM (EMC) | 0x6000_0000 | 512 KB cellular RAM (32 MB address range) |
+| Timer 0 | 0x4010_0000 | System timer with interrupt |
+| Timer 1 | 0x4011_0000 | System timer with interrupt |
+| Timer 2 | 0x4012_0000 | System timer with interrupt |
+| AXI Interrupt Controller | 0x4040_0000 | 8 interrupt inputs |
+| QSPI Flash | 0x4050_0000 | On-board Quad-SPI flash (storage only, not memory-mapped) |
+| SRAM (EMC) | 0x6000_0000 | 512 KB cellular RAM, exact-fit window to 0x6007_FFFF |
 
 ---
 

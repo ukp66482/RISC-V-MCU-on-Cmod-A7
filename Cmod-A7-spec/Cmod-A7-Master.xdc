@@ -43,13 +43,13 @@ set_property -dict { PACKAGE_PIN N2    IOSTANDARD LVCMOS33 } [get_ports { gpio_B
 set_property -dict { PACKAGE_PIN P1    IOSTANDARD LVCMOS33 } [get_ports { gpio_B_tri_io[6] }];  # DIP 23
 
 ## ── DIP header, pins 26–48
-set_property -dict { PACKAGE_PIN R3    IOSTANDARD LVCMOS33 } [get_ports { gpio_D_tri_io[0] }];  # DIP 26
-set_property -dict { PACKAGE_PIN T3    IOSTANDARD LVCMOS33 } [get_ports { gpio_D_tri_io[1] }];  # DIP 27
-set_property -dict { PACKAGE_PIN R2    IOSTANDARD LVCMOS33 } [get_ports { gpio_D_tri_io[2] }];  # DIP 28
+set_property -dict { PACKAGE_PIN R3    IOSTANDARD LVCMOS33 } [get_ports { gpio_D_tri_io[6] }];  # DIP 26
+set_property -dict { PACKAGE_PIN T3    IOSTANDARD LVCMOS33 } [get_ports { gpio_D_tri_io[5] }];  # DIP 27
+set_property -dict { PACKAGE_PIN R2    IOSTANDARD LVCMOS33 } [get_ports { gpio_D_tri_io[4] }];  # DIP 28
 set_property -dict { PACKAGE_PIN T1    IOSTANDARD LVCMOS33 } [get_ports { gpio_D_tri_io[3] }];  # DIP 29
-set_property -dict { PACKAGE_PIN T2    IOSTANDARD LVCMOS33 } [get_ports { gpio_D_tri_io[4] }];  # DIP 30
-set_property -dict { PACKAGE_PIN U1    IOSTANDARD LVCMOS33 } [get_ports { gpio_D_tri_io[5] }];  # DIP 31
-set_property -dict { PACKAGE_PIN W2    IOSTANDARD LVCMOS33 } [get_ports { gpio_D_tri_io[6] }];  # DIP 32
+set_property -dict { PACKAGE_PIN T2    IOSTANDARD LVCMOS33 } [get_ports { gpio_D_tri_io[2] }];  # DIP 30
+set_property -dict { PACKAGE_PIN U1    IOSTANDARD LVCMOS33 } [get_ports { gpio_D_tri_io[1] }];  # DIP 31
+set_property -dict { PACKAGE_PIN W2    IOSTANDARD LVCMOS33 } [get_ports { gpio_D_tri_io[0] }];  # DIP 32
 set_property -dict { PACKAGE_PIN V2    IOSTANDARD LVCMOS33 } [get_ports { intr_tri_i[3]    }];  # DIP 33  INT_3
 set_property -dict { PACKAGE_PIN W3    IOSTANDARD LVCMOS33 } [get_ports { pwm_1            }];  # DIP 34  PWM_1
 set_property -dict { PACKAGE_PIN V3    IOSTANDARD LVCMOS33 } [get_ports { spi_ext_sck_io   }];  # DIP 35  SPI SCLK
