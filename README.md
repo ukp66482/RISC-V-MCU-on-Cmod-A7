@@ -13,7 +13,7 @@ and work purely at the firmware level.
   - MicroBlaze-V, RV32IM + Bitmanip, 100 MHz
   - 16 KB I-cache + 16 KB D-cache
 - Memory
-  - 128 KB block RAM — bootloader and stack
+  - 128 KB block RAM — 32 KB bootloader + 32 KB ITCM + 64 KB DTCM
   - 512 KB SRAM — application code and data
   - 4 MB QSPI flash — bitstream and application storage
 - Peripherals

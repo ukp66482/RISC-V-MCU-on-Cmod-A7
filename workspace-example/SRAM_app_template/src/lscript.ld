@@ -3,15 +3,18 @@
 * SPDX-License-Identifier: MIT
 ******************************************************************************/
 
-_STACK_SIZE = DEFINED(_STACK_SIZE) ? _STACK_SIZE : 0x400;
+_STACK_SIZE = DEFINED(_STACK_SIZE) ? _STACK_SIZE : 0x2000;
 _HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0x800;
 
-/* Define Memories in the system */
+/* Define Memories in the system.
+ * itcm/dtcm are the two halves of the on-chip BRAM left to the application
+ * (the lower 32 KB belong to the bootloader): 1-cycle, never cached. */
 
 MEMORY
 {
 	axi_emc_0_memory_0 : ORIGIN = 0x60000000, LENGTH = 0x80000
-	bram_stack : ORIGIN = 0x00010000, LENGTH = 0x10000
+	itcm : ORIGIN = 0x00008000, LENGTH = 0x8000
+	dtcm : ORIGIN = 0x00010000, LENGTH = 0x10000
 }
 
 /* Specify the default entry point to the program */
@@ -34,6 +37,20 @@ SECTIONS
    *(.text.*)
    *(.gnu.linkonce.t.*)
 } > axi_emc_0_memory_0
+
+/* Fast code (ISRs, control loops): executes from ITCM but is STORED inside
+ * the SRAM image (AT>) — tcm_init() in main.c copies it out at startup, the
+ * same way STM32H7 startup code copies ITCM routines out of flash.
+ * Tag functions with __attribute__((section(".itcm.text"))). */
+.itcm.text : ALIGN(4) {
+   __itcm_start = .;
+   *(.itcm.text)
+   *(.itcm.text.*)
+   . = ALIGN(4);
+   __itcm_end = .;
+} > itcm AT> axi_emc_0_memory_0
+
+__itcm_lma = LOADADDR(.itcm.text);
 
 .note.gnu.build-id : {
    KEEP (*(.note.gnu.build-id))
@@ -204,13 +221,26 @@ _SDA2_BASE_ = __sdata2_start + ((__sbss2_end - __sdata2_start) / 2 );
    _end = .;
 } > axi_emc_0_memory_0
 
-.stack (NOLOAD) : {
-   _stack_end = .;
-   . += _STACK_SIZE;
+/* Zero-initialised fast data in DTCM (cleared by tcm_init()).
+ * Tag variables with __attribute__((section(".dtcm"))). */
+.dtcm (NOLOAD) : ALIGN(8) {
+   __dtcm_start = .;
+   *(.dtcm)
+   *(.dtcm.*)
    . = ALIGN(8);
+   __dtcm_end = .;
+} > dtcm
+
+/* Stack: everything left in DTCM, top-down (SP starts at 0x20000). */
+.stack (NOLOAD) : {
+   . = ALIGN(8);
+   _stack_end = .;
+   . = ORIGIN(dtcm) + LENGTH(dtcm);
    _stack = .;
    __stack = _stack;
-} > bram_stack
+} > dtcm
+
+ASSERT(_stack - _stack_end >= _STACK_SIZE, "DTCM stack smaller than _STACK_SIZE")
 
 __global_pointer$ = MIN(__sdata_start + 0x800, MAX(__data_start + 0x800, __bss_end - 0x800));
 }

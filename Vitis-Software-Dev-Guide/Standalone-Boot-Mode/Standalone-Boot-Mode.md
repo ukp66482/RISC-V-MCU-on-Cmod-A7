@@ -26,7 +26,7 @@ Memory roles:
 |---|---|---|
 | QSPI flash | 4 MB | bitstream (2.1 MB) + application slot @ `0x300000` (non-volatile) |
 | SRAM @ `0x60000000` | 512 KB | where your application executes (code/data/heap, I/D-cached) |
-| BRAM @ `0x00000000` | 128 KB | lower 64 KB: bootloader (untouchable); upper 64 KB: your stack |
+| BRAM @ `0x00000000` | 128 KB | 32 KB bootloader (untouchable) · 32 KB ITCM @ `0x8000` (your fast code) · 64 KB DTCM @ `0x10000` (stack + fast data) |
 
 > **Note:** The bootloader is part of the bitstream, so it is restored from flash at every
 > power-on — like a mask ROM, it cannot be bricked from software. Holding the on-board
@@ -52,7 +52,13 @@ Students never repeat this step; from here on the board is a pure MCU.
 Start from `workspace-example/SRAM_app_template/` (copy `main.c` and `lscript.ld` into a Vitis application as in the JTAG guide). The template's linker script places:
 
 - `.text` / `.rodata` / `.data` / `.bss` / heap → **SRAM** (512 KB, cached)
-- stack → **upper BRAM** (1-cycle; never collides with the bootloader)
+- stack → top of **DTCM** (64 KB BRAM @ `0x10000`; 1-cycle, never collides with the bootloader)
+- functions tagged `ITCM_FUNC` → **ITCM** (32 KB BRAM @ `0x8000`); variables tagged `DTCM_DATA` → DTCM
+
+ITCM code ships inside the SRAM image and is copied out by `tcm_init()` at the
+top of `main()` (keep that call — it is the same startup-copy idiom an STM32H7
+uses for its ITCM). Put interrupt handlers and timing-critical loops there:
+TCM never misses, so worst-case latency equals best-case.
 
 Check the footprint after building: the image must fit in 512 KB, or the linker reports a region overflow.
 
@@ -106,7 +112,7 @@ Daily development loop: **edit → build → JTAG Run/Debug**; when it works, `u
 `release/boot.mcs` = bitstream with the bootloader merged into its BRAM initialization:
 
 ```bash
-# 1. build workspace-example/bootloader/ in Vitis (linker confines it to the lower 64 KB BRAM)
+# 1. build workspace-example/bootloader/ in Vitis (linker confines it to the lower 32 KB BRAM)
 # 2. merge the ELF into the bitstream BRAM init:
 tools/make_boot_mcs.sh bootloader.elf --hw release/top_wrapper/
 #    (wraps: updatemem -proc top_i/microblaze_riscv_0 + write_cfgmem -interface SPIx4)

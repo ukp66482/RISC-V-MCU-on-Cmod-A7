@@ -62,7 +62,7 @@
   <rect x="18" y="108" width="112" height="60" rx="5" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
   <text x="74" y="126" text-anchor="middle" font-weight="bold" fill="#2e7d32">Block RAM</text>
   <text x="74" y="141" text-anchor="middle" fill="#2e7d32" font-size="10">128 KB (LMB, 1-cyc)</text>
-  <text x="74" y="156" text-anchor="middle" fill="#2e7d32" font-size="9">bootloader + stack</text>
+  <text x="74" y="156" text-anchor="middle" fill="#2e7d32" font-size="9">boot · ITCM · DTCM</text>
 
   <!-- BRAM ↔ MicroBlaze (LMB, bidirectional) -->
   <line x1="130" y1="138" x2="163" y2="138" stroke="#1b5e20" stroke-width="1.8" marker-end="url(#b)"/>

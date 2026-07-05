@@ -43,10 +43,14 @@ def parse_elf(data: bytes):
 
     segs = []
     for i in range(phnum):
-        p_type, p_offset, p_vaddr, _p_paddr, p_filesz, p_memsz = struct.unpack_from(
+        p_type, p_offset, p_vaddr, p_paddr, p_filesz, p_memsz = struct.unpack_from(
             "<IIIIII", data, phoff + i * phentsize)
         if p_type == 1 and p_filesz > 0:  # PT_LOAD
-            segs.append((p_vaddr, data[p_offset:p_offset + p_filesz]))
+            # Place segments by LMA (p_paddr), like xsdb "dow": ITCM code has
+            # its run address (vaddr) in BRAM but is stored inside the SRAM
+            # image and copied out by the app's tcm_init() at startup.
+            lma = p_paddr if p_paddr else p_vaddr
+            segs.append((lma, data[p_offset:p_offset + p_filesz]))
 
     loadable = [(v, d) for v, d in segs if SRAM_BASE <= v < SRAM_BASE + SRAM_SIZE]
     dropped = [(v, d) for v, d in segs if not (SRAM_BASE <= v < SRAM_BASE + SRAM_SIZE)]

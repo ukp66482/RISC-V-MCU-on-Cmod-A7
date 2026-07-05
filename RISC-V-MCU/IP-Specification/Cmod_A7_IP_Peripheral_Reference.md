@@ -32,7 +32,7 @@
 | Memory Type | True Dual-Port Block RAM |
 | ECC | Disabled |
 
-**Description:** Instruction and data local memory implemented with FPGA Block RAM. Provides zero-wait-state access for the processor, outside the cache path. Layout convention: lower 64 KB holds the UART bootloader (restored from flash at every configuration), upper 64 KB is the application stack region.
+**Description:** Instruction and data local memory implemented with FPGA Block RAM — functionally this MCU's tightly-coupled memory (TCM): the ILMB/DLMB ports play the same role as ITCM/DTCM on other MCU cores (e.g. Cortex-M7), giving 1-cycle access outside the cache path. Layout: `0x0000`–`0x7FFF` (32 KB) holds the UART bootloader (restored from flash at every configuration); `0x8000`–`0xFFFF` (32 KB) is the application's ITCM for interrupt handlers and timing-critical code (`ITCM_FUNC`, copied out of the SRAM image by `tcm_init()` at startup); `0x10000`–`0x1FFFF` (64 KB) is the DTCM, holding the stack (top-down from `0x20000`) and `DTCM_DATA` fast data.
 
 ### 1.3 AXI SmartConnect (`microblaze_riscv_0_axi_periph`)
 
