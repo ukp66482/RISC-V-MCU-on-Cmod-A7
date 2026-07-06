@@ -77,7 +77,7 @@ After implementation, export the XSA and create a Vitis platform (standalone,
 
 ## Other documents
 
-- [IP peripheral reference](docs/IP-Specification/Cmod_A7_IP_Peripheral_Reference.md) — register base addresses, IP parameters, interrupt mapping
+- [IP peripheral reference](docs/IP-Specification/Cmod_A7_IP_Peripheral_Reference.md) — peripheral capabilities, register base addresses, interrupt mapping
 - [Pin specification](docs/Pin-Specification/Cmod_A7_Pin_Specification.md) — DIP pin assignments and electrical characteristics
 - [Power specification](docs/Power-Specification/Cmod_A7_Power_Specification.md) — power rails and supply options
 - [Vitis quick reference](docs/guides/README.md) — platform and application concepts, XSDB commands

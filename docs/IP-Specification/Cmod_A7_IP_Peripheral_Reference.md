@@ -2,7 +2,7 @@
 
 **Platform:** Xilinx Artix-7 (xc7a35tcpg236-1) — Cmod A7-35T  
 **Processor:** MicroBlaze RISC-V  
-**System Clock:** 100 MHz (PLL from 12 MHz on-board oscillator via Clocking Wizard)  
+**System Clock:** 100 MHz (12 MHz on-board oscillator × PLL)  
 **Toolchain:** Vivado & Vitis 2025.2  
 
 ---
@@ -11,26 +11,23 @@
 
 ### 1.1 MicroBlaze RISC-V (`microblaze_riscv_0`)
 
-| Parameter | Value |
-|-----------|-------|
-| IP Version | `xilinx.com:ip:microblaze_riscv:1.0` |
-| Instruction / Data Bus | 32-bit LMB (Local Memory Bus) + AXI4 Data Port |
-| Debug Interface | Enabled (`C_DEBUG_ENABLED = 1`) |
-| Multiply / Divide | Enabled (`C_USE_MULDIV = 2`) |
-| Bit Manipulation | Bitmanip A/B/C/S all enabled |
-| Cache | 16 KB I-Cache + 16 KB D-Cache, write-through, 32 B lines, cacheable range `0x6000_0000`–`0x6007_FFFF` (exact SRAM fit) |
+| Item | Value |
+|------|-------|
+| Architecture | 32-bit RISC-V — RV32IM + bit-manipulation (hardware multiply/divide) |
+| Clock | 100 MHz |
+| Buses | LMB to local BRAM (1-cycle) · AXI to peripherals and external memory |
+| Cache | 16 KB I-Cache + 16 KB D-Cache, write-through, 32 B lines — covers exactly the 512 KB SRAM (`0x6000_0000`–`0x6007_FFFF`) |
+| Debug | JTAG: breakpoints, register inspection, memory read/write |
 
-**Description:** The main processor core. Executes user firmware and accesses all peripherals through the AXI SmartConnect interconnect.
+**Description:** The main processor core. Executes user firmware and reaches every peripheral through the AXI interconnect. Only the SRAM range is cached — BRAM is already single-cycle, and peripheral registers must never be cached.
 
 ### 1.2 Local Memory
 
-| Parameter | Value |
-|-----------|-------|
-| IP | `lmb_v10` (LMB Bus) + `lmb_bram_if_cntlr` + `blk_mem_gen` |
-| Data Bus (DLMB) | 0x0000_0000 – 0x0001_FFFF (128 KB) |
-| Instruction Bus (ILMB) | 0x0000_0000 – 0x0001_FFFF (128 KB) |
-| Memory Type | True Dual-Port Block RAM |
-| ECC | Disabled |
+| Item | Value |
+|------|-------|
+| Address | `0x0000_0000` – `0x0001_FFFF` (128 KB) |
+| Access | 1 cycle, dual-port — instruction and data sides read simultaneously |
+| Layout | 32 KB bootloader + 32 KB ITCM + 64 KB DTCM |
 
 **Description:** Instruction and data local memory implemented with FPGA Block RAM — functionally this MCU's tightly-coupled memory (TCM): the ILMB/DLMB ports play the same role as ITCM/DTCM on other MCU cores (e.g. Cortex-M7), giving 1-cycle access outside the cache path. Layout: `0x0000`–`0x7FFF` (32 KB) holds the UART bootloader (restored from flash at every configuration); `0x8000`–`0xFFFF` (32 KB) is the application's ITCM for interrupt handlers and timing-critical code (`ITCM_FUNC`, copied out of the SRAM image by `tcm_init()` at startup); `0x10000`–`0x1FFFF` (64 KB) is the DTCM, holding the stack (top-down from `0x20000`) and `DTCM_DATA` fast data.
 
@@ -38,22 +35,14 @@
 
 ![Bus & Cache Topology](../images/dp_ip_topology.svg)
 
-| Parameter | Value |
-|-----------|-------|
-| IP Version | `xilinx.com:ip:smartconnect:1.0` |
-| Master Ports | 22 (M00 – M21) |
-| Slave Ports | 1 (S00, connected to MicroBlaze M_AXI_DP) |
-
-**Description:** AXI interconnect crossbar that routes processor data transactions to 22 peripheral endpoints.
+**Description:** AXI crossbar that fans the processor's data port out to all peripheral endpoints. Routing is pure address decoding — the diagram above shows which path each address range takes (a second, smaller interconnect merges the cache and debug masters in front of the SRAM controller).
 
 ### 1.4 AXI Interrupt Controller (`microblaze_riscv_0_axi_intc`)
 
-| Parameter | Value |
-|-----------|-------|
-| IP Version | `xilinx.com:ip:axi_intc:4.1` |
-| AXI Base Address | `0x4040_0000` |
-| Fast Interrupt | Disabled (`C_HAS_FAST = 0`) |
-| Interrupt Sources | 8 (merged via `ilconcat`) |
+| Item | Value |
+|------|-------|
+| Base Address | `0x4040_0000` |
+| Interrupt Sources | 8 |
 
 **Interrupt Mapping:**
 
@@ -70,32 +59,15 @@
 
 ### 1.5 Debug Module (`mdm_1`)
 
-| Parameter | Value |
-|-----------|-------|
-| IP Version | `xilinx.com:ip:mdm_riscv:1.0` |
-
-**Description:** MicroBlaze Debug Module providing JTAG debug access for breakpoints, register inspection, and memory read/write. Its `Debug_SYS_Rst` signal is connected to the system reset module.
+**Description:** MicroBlaze Debug Module providing JTAG debug access for breakpoints, register inspection, and memory read/write. It can also trigger a system reset from the debugger (used by `xsdb` / Vitis debug sessions).
 
 ### 1.6 Clocking Wizard (`clk_wiz_1`)
 
-| Parameter | Value |
-|-----------|-------|
-| IP Version | `xilinx.com:ip:clk_wiz:6.0` |
-| Input Clock | 12 MHz (on-board oscillator) |
-| Output Clock | 100 MHz |
-| PLL Multiply Factor | MMCM_CLKFBOUT_MULT_F = 62.5 |
-| PLL Divide Factor | MMCM_CLKOUT0_DIVIDE_F = 7.5 |
-
-**Description:** Uses an MMCM/PLL to multiply the 12 MHz board clock to 100 MHz for the entire system. The `locked` signal indicates clock stability.
+**Description:** Multiplies the 12 MHz on-board oscillator up to the 100 MHz system clock with an MMCM/PLL. Its `locked` signal indicates clock stability and gates the release of system reset.
 
 ### 1.7 Processor System Reset (`rst_clk_wiz_1_100M`)
 
-| Parameter | Value |
-|-----------|-------|
-| IP Version | `xilinx.com:ip:proc_sys_reset:5.0` |
-| External Reset | On-board push button (Active Low) |
-
-**Description:** Generates synchronized reset signals (`mb_reset`, `bus_struct_reset`, `peripheral_aresetn`) ensuring all modules are released from reset only after the clock is stable.
+**Description:** Generates synchronized reset signals for the CPU, bus fabric and peripherals, releasing them only after the clock is stable. External reset source: the on-board push button (active-low).
 
 ---
 
@@ -103,27 +75,21 @@
 
 ### 2.1 USB UART (`uart_USB`)
 
-| Parameter | Value |
-|-----------|-------|
-| IP Version | `xilinx.com:ip:axi_uart16550:2.0` |
-| AXI Base Address | `0x4030_0000` |
-| Address Range | 64 KB (0x4030_0000 – 0x4030_FFFF) |
-| TX Pin | J18 (via Micro-USB connector) |
-| RX Pin | J17 (via Micro-USB connector) |
-| Interrupt | Connected to `xlconcat In4` |
+| Item | Value |
+|------|-------|
+| Base Address | `0x4030_0000` |
+| TX / RX Pins | J18 / J17 — routed to the on-board Micro-USB connector |
+| Interrupt | INTC In4 |
 
-**Description:** 16550-compatible UART for host PC communication through the on-board Micro-USB connector. Baud rate is software-configured via the Divisor Latch Register. At 100 MHz system clock, the divisor for 115200 baud is 54 (0x36). Typically mapped as STDIN/STDOUT.
+**Description:** 16550-compatible UART for host PC communication through the on-board Micro-USB connector. Baud rate is software-configured via the divisor latch: at 100 MHz system clock, divisor 54 (0x36) gives 115200 baud. Typically mapped as STDIN/STDOUT.
 
 ### 2.2 External UART (`uart_1`)
 
-| Parameter | Value |
-|-----------|-------|
-| IP Version | `xilinx.com:ip:axi_uart16550:2.0` |
-| AXI Base Address | `0x4031_0000` |
-| Address Range | 64 KB (0x4031_0000 – 0x4031_FFFF) |
-| TX Pin | J1 (DIP Pin 11) |
-| RX Pin | K2 (DIP Pin 12) |
-| Interrupt | Connected to `xlconcat In3` |
+| Item | Value |
+|------|-------|
+| Base Address | `0x4031_0000` |
+| TX / RX Pins | J1 (DIP 11) / K2 (DIP 12) |
+| Interrupt | INTC In3 |
 
 **Description:** Second 16550 UART exposed on the DIP connector for communication with external devices (e.g., sensor modules, Bluetooth modules).
 
@@ -131,61 +97,61 @@
 
 ## 3. GPIO (General Purpose I/O)
 
-All GPIO instances use `xilinx.com:ip:axi_gpio:2.0`.
+All GPIO groups are memory-mapped ports with per-bit direction control: the TRI register sets each pin's direction, the DATA register reads/writes the pin. Vitis driver: `XGpio`.
 
 ### 3.1 On-Board GPIO
 
-| Instance | AXI Base Address | Width | Direction | Connection | Description |
-|----------|-----------------|-------|-----------|------------|-------------|
+| Instance | Base Address | Width | Direction | Connection | Description |
+|----------|-------------|-------|-----------|------------|-------------|
 | `board_led_2bits` | `0x4000_0000` | 2 | Output | A17, C16 | On-board LEDs × 2 |
 | `board_button` | `0x4001_0000` | 1 | Input | A18 | On-board push button × 1 |
 | `board_rgb` | `0x4002_0000` | 3 | Output | B17, B16, C17 | On-board RGB LED (R/G/B) |
 
 ### 3.2 DIP Connector GPIO (4 Groups × 7-bit)
 
-| Instance | AXI Base Address | Width | DIP Pins | Description |
-|----------|-----------------|-------|----------|-------------|
+| Instance | Base Address | Width | DIP Pins | Description |
+|----------|-------------|-------|----------|-------------|
 | `gpio_A_0_6` | `0x4003_0000` | 7 | Pin 1–7 | GPIO Group A, bidirectional I/O |
 | `gpio_B_0_6` | `0x4004_0000` | 7 | Pin 17–23 | GPIO Group B, bidirectional I/O |
 | `gpio_C_0_6` | `0x4005_0000` | 7 | Pin 42–48 | GPIO Group C, bidirectional I/O |
 | `gpio_D_0_6` | `0x4006_0000` | 7 | Pin 26–32 | GPIO Group D, bidirectional I/O |
 
-**Description:** Each group is a 7-bit bidirectional port (`C_ALL_OUTPUTS = 0`). Pin direction is set through the TRI register; data is read/written via the DATA register.
+**Description:** Each group is a 7-bit bidirectional port; every bit can be an input or an output independently.
 
 ### 3.3 External Interrupt Inputs (`INT_0_3`)
 
-| Parameter | Value |
-|-----------|-------|
-| AXI Base Address | `0x4007_0000` |
-| Width | 4-bit (all inputs) |
-| Interrupt Capability | Enabled (`C_INTERRUPT_PRESENT = 1`) |
+| Item | Value |
+|------|-------|
+| Base Address | `0x4007_0000` |
+| Width | 4-bit, input-only |
 | DIP Pins | Pin 8 (INTR_0), Pin 9 (INTR_1), Pin 41 (INTR_2), Pin 33 (INTR_3) |
+| Interrupt | INTC In5 |
 
-**Description:** Four external interrupt inputs grouped into a single AXI GPIO instance. The interrupt signal is routed to `xlconcat In5` and then to the AXI Interrupt Controller.
+**Description:** Four external interrupt inputs grouped into a single GPIO instance with interrupt generation enabled — a change on any of the four pins can raise INTC In5.
 
 ---
 
 ## 4. Timers & PWM
 
-All timer instances use `xilinx.com:ip:axi_timer:2.0`.
+Six 32-bit AXI timer instances (Vitis driver: `XTmrCtr`) — three as general-purpose timers with interrupts, three with their outputs routed to pins as PWM channels.
 
 ### 4.1 System Timers
 
-| Instance | AXI Base Address | Mode | Interrupt | Description |
-|----------|-----------------|------|-----------|-------------|
-| `timer_0` | `0x4010_0000` | 32-bit (`Default`) | `xlconcat In0` | General-purpose system timer |
-| `timer_1` | `0x4011_0000` | Default | `xlconcat In1` | General-purpose timer |
-| `timer_2` | `0x4012_0000` | Default | `xlconcat In2` | General-purpose timer |
+| Instance | Base Address | Interrupt | Description |
+|----------|-------------|-----------|-------------|
+| `timer_0` | `0x4010_0000` | INTC In0 | General-purpose system timer |
+| `timer_1` | `0x4011_0000` | INTC In1 | General-purpose timer |
+| `timer_2` | `0x4012_0000` | INTC In2 | General-purpose timer |
 
 ### 4.2 PWM Outputs
 
-| Instance | AXI Base Address | Output Pin | DIP Pin | Description |
-|----------|-----------------|-----------|---------|-------------|
+| Instance | Base Address | Output Pin | DIP Pin | Description |
+|----------|-------------|-----------|---------|-------------|
 | `PWM_0` | `0x4020_0000` | J3 | Pin 10 | PWM Channel 0 |
 | `PWM_1` | `0x4021_0000` | W3 | Pin 34 | PWM Channel 1 |
 | `PWM_2` | `0x4022_0000` | W4 | Pin 40 | PWM Channel 2 |
 
-**Description:** AXI Timer instances configured in PWM mode to generate square-wave outputs. Useful for LED dimming, motor speed control, buzzer tone generation, etc. Frequency and duty cycle are configured through the Timer Load Registers and the PWM enable bit.
+**Description:** Timer instances configured in PWM mode to generate square-wave outputs. Useful for LED dimming, motor speed control, buzzer tone generation, etc. Frequency and duty cycle are configured through the Timer Load Registers and the PWM enable bit.
 
 ---
 
@@ -193,33 +159,32 @@ All timer instances use `xilinx.com:ip:axi_timer:2.0`.
 
 ### 5.1 QSPI Flash (`axi_quad_spi_0`)
 
-| Parameter | Value |
-|-----------|-------|
-| IP Version | `xilinx.com:ip:axi_quad_spi:3.2` |
-| AXI_LITE Base (Control) | `0x4050_0000` (64 KB) |
-| Mode | Standard SPI controller (`C_XIP_MODE = 0`) — **not** memory-mapped |
-| SPI Memory Type | Macronix (`C_SPI_MEMORY = 4`) |
-| Interface | Quad SPI, FIFO depth 256 |
+| Item | Value |
+|------|-------|
+| Base Address | `0x4050_0000` |
+| Flash Device | On-board Macronix 4 MB QSPI NOR flash |
+| Mode | CPU-programmable register mode — flash contents are **not** memory-mapped |
+| FIFO | 256 B TX/RX — one full flash page (256 B) per transfer |
 
-**Description:** Controls the on-board Quad-SPI NOR Flash. The controller runs in **standard (register) mode**: the full register set (control, status, TX/RX FIFO, slave select — see PG153) is exposed at `0x4050_0000` via `microblaze_riscv_0_axi_periph` M19, so the CPU can issue any SPI command — read (`0x0B`), Write Enable (`0x06`), Sector/Block Erase (`0x20`/`0xD8`), Page Program (`0x02`), status poll (`0x05`). This is what allows the UART bootloader to program application images into flash at runtime (`workspace-example/bootloader/src/bootloader.c` is a complete worked example, and the Vitis `XSpi` driver wraps the register protocol).
+**Description:** Controls the on-board Quad-SPI NOR Flash. The full register set (control, status, TX/RX FIFO, slave select) is exposed at `0x4050_0000`, so the CPU can issue any SPI command — read (`0x0B`), Write Enable (`0x06`), Sector/Block Erase (`0x20`/`0xD8`), Page Program (`0x02`), status poll (`0x05`). This is what allows the UART bootloader to program application images into flash at runtime (`workspace-example/bootloader/src/bootloader.c` is a complete worked example, and the Vitis `XSpi` driver wraps the register protocol).
 
-Flash contents are **not memory-mapped** in this mode — there is no XIP window, and code cannot execute from flash directly. The standalone-boot design instead copies the application from flash into SRAM at power-on (see the Standalone Boot Mode guide). The 256-entry FIFO matches the flash's 256-byte page size, so one page program fits in a single transfer.
+Flash contents are **not memory-mapped**: there is no XIP window, and code cannot execute from flash directly. The standalone-boot design instead copies the application from flash into SRAM at power-on (see the Standalone Boot Mode guide).
 
-> **Design note:** XIP mode (`C_XIP_MODE = 1`, a read-only memory-mapped window) and CPU-programmable
-> register mode are **mutually exclusive** in this IP (PG153). This project chooses register mode:
-> self-programming (Arduino-style `upload.py` workflow) was judged more valuable for the course than
+> **Design note:** a read-only memory-mapped XIP window and CPU-programmable register mode are
+> mutually exclusive in this controller. This project chooses register mode: self-programming
+> (Arduino-style `upload.py` workflow) was judged more valuable for the course than
 > execute-in-place, and the 512 KB SRAM + I-cache serves execution instead.
 
 ### 5.2 SRAM / Cellular RAM (`axi_emc_0`)
 
-| Parameter | Value |
-|-----------|-------|
-| IP Version | `xilinx.com:ip:axi_emc:3.0` |
-| AXI Base Address | `0x6000_0000` |
-| Address Range | 512 KB, exact fit (0x6000_0000 – 0x6007_FFFF) |
-| Physical Capacity | 512 KB Cellular RAM |
+| Item | Value |
+|------|-------|
+| Base Address | `0x6000_0000` |
+| Size | 512 KB — `0x6000_0000` – `0x6007_FFFF`, an exact physical fit |
+| Memory | On-board asynchronous SRAM (Cellular RAM) |
+| Cache | Fully covered by the I-Cache and D-Cache |
 
-**Description:** External memory controller providing access to the on-board 512 KB SRAM. Suitable for large data buffers, but access latency is higher than Block RAM.
+**Description:** External memory controller for the on-board 512 KB SRAM — the main application memory: standalone boot copies the program here and executes it. Raw access latency is higher than Block RAM, but with both caches covering this range, hot code and data run near BRAM speed.
 
 ---
 
@@ -227,13 +192,12 @@ Flash contents are **not memory-mapped** in this mode — there is no XIP window
 
 ### 6.1 XADC Wizard (`xadc_wiz_0`)
 
-| Parameter | Value |
-|-----------|-------|
-| IP Version | `xilinx.com:ip:xadc_wiz:3.3` |
-| AXI Base Address | `0x4060_0000` |
-| Address Range | 64 KB |
-| Conversion Rate | 500 KSPS |
-| Sequencer Mode | Continuous |
+| Item | Value |
+|------|-------|
+| Base Address | `0x4060_0000` |
+| Resolution | 12-bit |
+| Conversion Rate | 500 KSPS aggregate |
+| Sequencer | Continuous scan over the 5 enabled channels |
 
 **Enabled Channels:**
 
@@ -255,28 +219,26 @@ Flash contents are **not memory-mapped** in this mode — there is no XIP window
 
 ### 7.1 I2C Controller (`i2c_0`)
 
-| Parameter | Value |
-|-----------|-------|
-| IP Version | `xilinx.com:ip:axi_iic:2.1` |
-| AXI Base Address | `0x4070_0000` |
+| Item | Value |
+|------|-------|
+| Base Address | `0x4070_0000` |
 | SCL Frequency | 100 kHz (standard mode) |
-| Input Glitch Filter | 50 ns on SCL and SDA (`C_*_INERTIAL_DELAY = 5` @ 100 MHz) — per the I2C tSP spike-suppression spec |
+| Input Glitch Filter | 50 ns on SCL and SDA — per the I2C tSP spike-suppression spec |
 | SCL / SDA Pins | DIP Pin 13 (L1) / Pin 14 (L2) |
-| Pull-ups | Weak FPGA internal pull-ups enabled in XDC; **external 4.7 kΩ to 3.3 V recommended** for real devices |
-| Interrupt | Connected to `xlconcat In6` |
+| Pull-ups | Weak FPGA internal pull-ups enabled; **external 4.7 kΩ to 3.3 V recommended** for real devices |
+| Interrupt | INTC In6 |
 
 **Description:** AXI IIC master for external I2C devices (sensors, EEPROMs, OLED displays). Open-drain signaling: any device may only pull the line low; the pull-up resistor returns it high. Devices are addressed by their 7-bit I2C address. Use the Vitis `XIic` driver.
 
 ### 7.2 External SPI Master (`spi_0`)
 
-| Parameter | Value |
-|-----------|-------|
-| IP Version | `xilinx.com:ip:axi_quad_spi:3.2` (standard mode, no STARTUP) |
-| AXI Base Address | `0x4080_0000` |
-| SCLK | 100 MHz / 16 = **6.25 MHz** (fixed at synthesis, `C_SCK_RATIO = 16`) |
-| Slave Selects | 2 (`C_NUM_SS_BITS = 2`) — two devices can share the bus |
+| Item | Value |
+|------|-------|
+| Base Address | `0x4080_0000` |
+| SCLK | 6.25 MHz (100 MHz ÷ 16) — fixed in hardware, not software-configurable |
+| Slave Selects | 2 — two devices can share the bus |
 | Pins | DIP 35 SCLK (V3) · 36 MOSI (W5) · 37 MISO (V4) · 38 SS0 (U4) · 39 SS1 (V5) |
-| Interrupt | Connected to `xlconcat In7` |
+| Interrupt | INTC In7 |
 
 **Description:** SPI master for external devices (displays, ADCs, flash modules). Full-duplex push-pull signaling — no pull-ups needed; the active device is chosen by driving its SS line low. Use the Vitis `XSpi` driver.
 
@@ -294,9 +256,9 @@ peripheral class** (1 MB per class, 64 KB per instance). Reading an address imme
 you what kind of device it is: class 0 = GPIO, 1 = Timer, 2 = PWM, 3 = UART, 4 = INTC,
 5 = QSPI control, 6 = XADC, 7 = I2C, 8 = SPI.
 
-| AXI Base Address | Range | Peripheral | IP Type | Category |
+| Base Address | Range | Peripheral | Type | Category |
 |-----------------|-------|------------|---------|----------|
-| `0x0000_0000` | 128K / 128K | Local Memory (BRAM) | blk_mem_gen | Memory |
+| `0x0000_0000` | 128K / 128K | Local Memory (BRAM) | BRAM | Memory |
 | `0x4000_0000` | 64K | board_led_2bits | axi_gpio | GPIO |
 | `0x4001_0000` | 64K | board_button | axi_gpio | GPIO |
 | `0x4002_0000` | 64K | board_rgb | axi_gpio | GPIO |
@@ -314,7 +276,7 @@ you what kind of device it is: class 0 = GPIO, 1 = Timer, 2 = PWM, 3 = UART, 4 =
 | `0x4030_0000` | 64K | uart_USB | axi_uart16550 | Communication |
 | `0x4031_0000` | 64K | uart_1 | axi_uart16550 | Communication |
 | `0x4040_0000` | 64K | axi_intc | axi_intc | System |
-| `0x4050_0000` | 64K | axi_quad_spi_0 (`AXI_LITE`, full register set) | axi_quad_spi | Memory |
+| `0x4050_0000` | 64K | axi_quad_spi_0 (QSPI flash controller) | axi_quad_spi | Memory |
 | `0x4060_0000` | 64K | xadc_wiz_0 | xadc_wiz | ADC |
 | `0x4070_0000` | 64K | i2c_0 (DIP 13/14) | axi_iic | Communication |
 | `0x4080_0000` | 64K | spi_0 (external master, DIP 35–39) | axi_quad_spi | Communication |
