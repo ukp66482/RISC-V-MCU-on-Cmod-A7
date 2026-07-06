@@ -260,6 +260,7 @@ Flash contents are **not memory-mapped** in this mode — there is no XIP window
 | IP Version | `xilinx.com:ip:axi_iic:2.1` |
 | AXI Base Address | `0x4070_0000` |
 | SCL Frequency | 100 kHz (standard mode) |
+| Input Glitch Filter | 50 ns on SCL and SDA (`C_*_INERTIAL_DELAY = 5` @ 100 MHz) — per the I2C tSP spike-suppression spec |
 | SCL / SDA Pins | DIP Pin 13 (L1) / Pin 14 (L2) |
 | Pull-ups | Weak FPGA internal pull-ups enabled in XDC; **external 4.7 kΩ to 3.3 V recommended** for real devices |
 | Interrupt | Connected to `xlconcat In6` |

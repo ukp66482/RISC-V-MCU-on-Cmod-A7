@@ -584,6 +584,11 @@ proc create_root_design { parentCell } {
 
   # Create instance: i2c_0, and set properties
   set i2c_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_iic:2.1 i2c_0 ]
+  set_property -dict [list \
+    CONFIG.C_SCL_INERTIAL_DELAY {5} \
+    CONFIG.C_SDA_INERTIAL_DELAY {5} \
+  ] $i2c_0
+
 
   # Create instance: spi_0, and set properties
   set spi_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_quad_spi:3.2 spi_0 ]
