@@ -162,7 +162,7 @@ Six 32-bit AXI timer instances (Vitis driver: `XTmrCtr`) — three as general-pu
 | Item | Value |
 |------|-------|
 | Base Address | `0x4050_0000` |
-| Flash Device | On-board Macronix 4 MB QSPI NOR flash |
+| Flash Device | On-board 4 MB QSPI NOR flash (Macronix; Micron on older boards) |
 | Mode | CPU-programmable register mode — flash contents are **not** memory-mapped |
 | FIFO | 256 B TX/RX — one full flash page (256 B) per transfer |
 

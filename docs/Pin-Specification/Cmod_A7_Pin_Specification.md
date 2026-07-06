@@ -4,9 +4,9 @@
 
 The Cmod A7-35T has a 48-pin DIP connector (J1). All digital I/O pins operate at **LVCMOS33** (3.3 V logic level) with **no series resistors**.
 
-![Cmod A7-35T DIP Pinout](./images/pinout_diagram.png)
+![Cmod A7-35T DIP Pinout](./images/pinout_diagram.svg)
 
-*Figure 1. U1 Cmod A7-35T DIP Pinout (custom schematic symbol)*
+*Figure 1. Cmod A7-35T DIP pinout (top view)*
 
 | Category | Count |
 |----------|-------|
@@ -137,9 +137,9 @@ Peripheral registers and base addresses are documented in the
 
 ### Analog Input Circuit
 
-![Analog Input Circuit](./images/analog_input_circuit.png)
+![Analog Input Circuit](./images/analog_input_circuit.svg)
 
-*Figure 2. On-board voltage divider circuit for XADC analog inputs (from Digilent Reference Manual)*
+*Figure 2. On-board voltage divider circuit for XADC analog inputs*
 
 The XADC expects an input range of 0–1 V. The board includes a resistive voltage divider (2.32 KΩ / 1 KΩ, all 1% precision) that scales the DIP pin voltage down to the FPGA's acceptable range. A 140 Ω series resistor and 1 nF capacitor are placed on the differential pair for filtering. The ADx_N path has an 845 Ω series resistor.
 

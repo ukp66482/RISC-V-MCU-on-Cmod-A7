@@ -4,9 +4,9 @@
 
 The Cmod A7-35T uses a **Linear Technologies LTC3569** triple-output buck regulator (IC10) to generate all onboard supply voltages from a single input rail called **VU**.
 
-![Cmod A7 Power Supply Block Diagram](./images/power_block_diagram.png)
+![Cmod A7 Power Supply Block Diagram](./images/power_block_diagram.svg)
 
-*Figure 1. Cmod A7 Power Supply (from Digilent Reference Manual)*
+*Figure 1. Cmod A7 power supply tree*
 
 ---
 

@@ -1,119 +1,95 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="600" font-family="Segoe UI, Arial, sans-serif" font-size="11">
-
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 560" font-family="Liberation Sans, Helvetica, Arial, sans-serif" fill="black">
   <defs>
-    <marker id="a-dp" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
-      <path d="M0,0 L7,3.5 L0,7 z" fill="#1565c0"/>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z"/>
     </marker>
-    <marker id="a-ip" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
-      <path d="M0,0 L7,3.5 L0,7 z" fill="#e65100"/>
+    <marker id="arrb" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto">
+      <path d="M0,0 L5,2.5 L0,5 z"/>
     </marker>
-    <marker id="a-ic" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
-      <path d="M0,0 L7,3.5 L0,7 z" fill="#00695c"/>
-    </marker>
-    <marker id="a-dc" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
-      <path d="M0,0 L7,3.5 L0,7 z" fill="#ad1457"/>
-    </marker>
-    <marker id="a-both" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
-      <path d="M0,0 L7,3.5 L0,7 z" fill="#4a148c"/>
-    </marker>
-    <marker id="a-lmb" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
-      <path d="M0,0 L7,3.5 L0,7 z" fill="#1b5e20"/>
+    <marker id="arrs" markerWidth="5" markerHeight="5" refX="1" refY="2.5" orient="auto">
+      <path d="M5,0 L0,2.5 L5,5 z"/>
     </marker>
   </defs>
+  <style>
+    .box  { fill:white; stroke:black; stroke-width:1.3; }
+    .bus  { stroke:black; stroke-width:4; fill:none; marker-end:url(#arrb); }
+    .bus2 { stroke:black; stroke-width:4; fill:none; marker-end:url(#arrb); marker-start:url(#arrs); }
+    .wire { stroke:black; stroke-width:1; fill:none; marker-end:url(#arr); }
+    .t    { font-size:9px; }
+    .tb   { font-size:10px; font-weight:bold; }
+    .ts   { font-size:8px; }
+    .ti   { font-size:8px; font-style:italic; }
+  </style>
 
-  <!-- Background -->
-  <rect width="1120" height="600" fill="#f5f5f5"/>
+  <!-- ============ CPU ============ -->
+  <rect class="box" x="270" y="40" width="340" height="110"/>
+  <text class="tb" x="440" y="62" text-anchor="middle" font-size="12">MicroBlaze-V CPU</text>
+  <text class="t"  x="440" y="77" text-anchor="middle">RV32IM &#183; bit-manip &#183; 100 MHz</text>
+  <rect class="box" x="285" y="88" width="150" height="30"/>
+  <text class="t" x="360" y="107" text-anchor="middle">16 KB I-Cache</text>
+  <rect class="box" x="445" y="88" width="150" height="30"/>
+  <text class="t" x="520" y="107" text-anchor="middle">16 KB D-Cache</text>
 
-  <!-- Title -->
-  <text x="560" y="24" text-anchor="middle" font-weight="bold" font-size="15" fill="#3a3a3a">MicroBlaze RISC-V  ·  Bus &amp; Cache Topology</text>
+  <!-- ============ BRAM via LMB ============ -->
+  <rect class="box" x="40" y="55" width="150" height="85"/>
+  <text class="tb" x="115" y="75" text-anchor="middle">Block RAM</text>
+  <text class="t"  x="115" y="90" text-anchor="middle">128 KB</text>
+  <text class="t"  x="115" y="104" text-anchor="middle">boot &#183; ITCM &#183; DTCM</text>
+  <text class="ti" x="115" y="126" text-anchor="middle">1-cycle, dual-port</text>
+  <line class="bus2" x1="196" y1="97" x2="264" y2="97"/>
+  <text class="ts" x="230" y="88" text-anchor="middle">ILMB &#183; DLMB</text>
+  <line x1="224" y1="106" x2="234" y2="96" stroke="black" stroke-width="1"/>
+  <text class="ts" x="238" y="106">32</text>
 
-  <!-- ════════════ MicroBlaze ════════════ -->
-  <rect x="330" y="44" width="460" height="96" rx="8" fill="#fff9e6" stroke="#f57f17" stroke-width="2"/>
-  <text x="560" y="74" text-anchor="middle" font-weight="bold" font-size="14" fill="#e65100">MicroBlaze RISC-V</text>
-  <text x="560" y="94" text-anchor="middle" fill="#555" font-size="10">RV32IM + Bitmanip · 100 MHz · 16 KB I-cache + 16 KB D-cache</text>
-  <text x="345" y="128" fill="#2e7d32" font-weight="bold" font-size="10">DLMB / ILMB</text>
+  <!-- ============ four AXI masters ============ -->
+  <line class="wire" x1="310" y1="150" x2="310" y2="306"/>
+  <text class="ts" x="314" y="168">M_AXI_IP</text>
+  <line class="bus"  x1="400" y1="150" x2="400" y2="304"/>
+  <text class="ts" x="404" y="182">M_AXI_IC</text>
+  <line x1="392" y1="240" x2="404" y2="230" stroke="black" stroke-width="1"/>
+  <text class="ts" x="407" y="240">32</text>
+  <line class="bus"  x1="480" y1="150" x2="480" y2="304"/>
+  <text class="ts" x="484" y="168">M_AXI_DC</text>
+  <line x1="472" y1="240" x2="484" y2="230" stroke="black" stroke-width="1"/>
+  <text class="ts" x="487" y="240">32</text>
+  <polyline class="wire" points="570,150 570,213 616,213"/>
+  <text class="ts" x="574" y="168">M_AXI_DP</text>
 
-  <!-- master tabs: IP · IC · DC · DP -->
-  <rect x="352" y="140" width="86" height="24" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="1.3"/>
-  <text x="395" y="157" text-anchor="middle" font-weight="bold" fill="#e65100" font-size="10">M_AXI_IP</text>
-  <rect x="452" y="140" width="86" height="24" rx="3" fill="#b2dfdb" stroke="#00695c" stroke-width="1.3"/>
-  <text x="495" y="157" text-anchor="middle" font-weight="bold" fill="#00695c" font-size="10">M_AXI_IC</text>
-  <rect x="582" y="140" width="86" height="24" rx="3" fill="#f8bbd0" stroke="#ad1457" stroke-width="1.3"/>
-  <text x="625" y="157" text-anchor="middle" font-weight="bold" fill="#ad1457" font-size="10">M_AXI_DC</text>
-  <rect x="682" y="140" width="86" height="24" rx="3" fill="#bbdefb" stroke="#1565c0" stroke-width="1.3"/>
-  <text x="725" y="157" text-anchor="middle" font-weight="bold" fill="#1565c0" font-size="10">M_AXI_DP</text>
+  <!-- ============ axi_periph ============ -->
+  <rect class="box" x="620" y="190" width="220" height="46"/>
+  <text class="tb" x="730" y="208" text-anchor="middle">axi_periph</text>
+  <text class="t"  x="730" y="222" text-anchor="middle">AXI SmartConnect &#183; 1 &#8594; 22</text>
 
-  <!-- ════════════ BRAM + LMB ════════════ -->
-  <rect x="30" y="66" width="160" height="56" rx="6" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
-  <text x="110" y="88" text-anchor="middle" font-weight="bold" fill="#2e7d32">Block RAM · 128 KB</text>
-  <text x="110" y="106" text-anchor="middle" fill="#555" font-size="10">boot · ITCM · DTCM · 1-cycle</text>
+  <!-- peripherals -->
+  <line class="wire" x1="730" y1="236" x2="730" y2="286"/>
+  <rect class="box" x="620" y="290" width="220" height="56"/>
+  <text class="tb" x="730" y="308" text-anchor="middle">Peripherals &#215;21</text>
+  <text class="t"  x="730" y="322" text-anchor="middle">0x40xx_xxxx</text>
+  <text class="ti" x="730" y="337" text-anchor="middle">registers &#8212; never cached</text>
 
-  <line x1="190" y1="86" x2="330" y2="86" stroke="#1b5e20" stroke-width="1.8" marker-end="url(#a-lmb)"/>
-  <line x1="330" y1="104" x2="190" y2="104" stroke="#1b5e20" stroke-width="1.8" marker-end="url(#a-lmb)"/>
-  <text x="260" y="80" text-anchor="middle" fill="#1b5e20" font-size="9" font-weight="bold">LMB · not cached</text>
+  <!-- M21: DP window to SRAM -->
+  <polyline class="wire" points="640,236 640,268 560,268 560,332 504,332"/>
+  <text class="ti" x="600" y="262" text-anchor="middle">M21: DP &#8594; SRAM</text>
 
-  <!-- ════════════ DP → crossbar ════════════ -->
-  <line x1="725" y1="164" x2="725" y2="230" stroke="#1565c0" stroke-width="2" marker-end="url(#a-dp)"/>
+  <!-- ============ smartconnect_0 ============ -->
+  <rect class="box" x="300" y="310" width="200" height="44"/>
+  <text class="tb" x="400" y="328" text-anchor="middle">smartconnect_0</text>
+  <text class="t"  x="400" y="342" text-anchor="middle">4 masters &#8594; 1</text>
 
-  <!-- ════════════ axi_periph crossbar ════════════ -->
-  <rect x="360" y="230" width="740" height="56" rx="6" fill="#ede7f6" stroke="#4a148c" stroke-width="2"/>
-  <text x="730" y="253" text-anchor="middle" font-weight="bold" fill="#4a148c" font-size="12">axi_periph  ·  AXI SmartConnect</text>
-  <text x="730" y="271" text-anchor="middle" fill="#4a148c" font-size="10">1 slave (DP) → 22 masters · uncached</text>
+  <!-- ============ EMC + SRAM ============ -->
+  <line class="wire" x1="400" y1="354" x2="400" y2="384"/>
+  <rect class="box" x="300" y="388" width="200" height="34"/>
+  <text class="t" x="400" y="409" text-anchor="middle">AXI EMC</text>
+  <line class="bus" x1="400" y1="422" x2="400" y2="452"/>
+  <rect class="box" x="300" y="456" width="200" height="70"/>
+  <text class="tb" x="400" y="476" text-anchor="middle">SRAM 512 KB</text>
+  <text class="t"  x="400" y="492" text-anchor="middle">0x6000_0000 &#8211; 0x6007_FFFF</text>
+  <text class="ti" x="400" y="510" text-anchor="middle">the only cached range</text>
 
-  <!-- crossbar → peripherals / QSPI -->
-  <line x1="610" y1="286" x2="610" y2="320" stroke="#1565c0" stroke-width="2" marker-end="url(#a-dp)"/>
-  <line x1="1000" y1="286" x2="1000" y2="320" stroke="#1565c0" stroke-width="2" marker-end="url(#a-dp)"/>
-
-  <!-- ════════════ Peripherals ════════════ -->
-  <rect x="360" y="320" width="500" height="80" rx="6" fill="#ffecb3" stroke="#ef6c00" stroke-width="1.5"/>
-  <text x="610" y="344" text-anchor="middle" font-weight="bold" fill="#ef6c00">Peripherals · 0x40xx_xxxx</text>
-  <text x="610" y="366" text-anchor="middle" fill="#3a3a3a" font-size="10">GPIO · Timer · PWM · UART · INTC · XADC · I2C · SPI</text>
-  <text x="610" y="386" text-anchor="middle" fill="#555" font-size="9" font-style="italic">memory-mapped registers · never cached</text>
-
-  <!-- ════════════ QSPI flash ════════════ -->
-  <rect x="900" y="320" width="200" height="80" rx="6" fill="#e1bee7" stroke="#4a148c" stroke-width="1.5"/>
-  <text x="1000" y="344" text-anchor="middle" font-weight="bold" fill="#4a148c">QSPI Flash · 4 MB</text>
-  <text x="1000" y="364" text-anchor="middle" fill="#4a148c" font-size="10">0x4050_0000 · register mode</text>
-  <text x="1000" y="384" text-anchor="middle" fill="#555" font-size="9" font-style="italic">bitstream + app storage</text>
-
-  <!-- ════════════ IP / IC / DC rails (left, staggered — no crossings) ════════════ -->
-  <polyline points="395,164 395,190 240,190 240,436 420,436 420,456"
-            fill="none" stroke="#e65100" stroke-width="2" stroke-linejoin="miter" marker-end="url(#a-ip)"/>
-  <polyline points="495,164 495,202 285,202 285,424 500,424 500,456"
-            fill="none" stroke="#00695c" stroke-width="2" stroke-linejoin="miter" marker-end="url(#a-ic)"/>
-  <polyline points="625,164 625,214 315,214 315,412 580,412 580,456"
-            fill="none" stroke="#ad1457" stroke-width="2" stroke-linejoin="miter" marker-end="url(#a-dc)"/>
-
-  <!-- DP data → smartconnect (uncached path to SRAM) -->
-  <polyline points="880,286 880,482 766,482"
-            fill="none" stroke="#1565c0" stroke-width="2" stroke-linejoin="miter" marker-end="url(#a-dp)"/>
-
-  <!-- ════════════ smartconnect_0 ════════════ -->
-  <rect x="360" y="456" width="400" height="52" rx="6" fill="#ede7f6" stroke="#4a148c" stroke-width="2"/>
-  <text x="560" y="479" text-anchor="middle" font-weight="bold" fill="#4a148c" font-size="12">smartconnect_0</text>
-  <text x="560" y="496" text-anchor="middle" fill="#4a148c" font-size="10">IP · IC · DC · DP  →  SRAM</text>
-
-  <!-- smartconnect → SRAM -->
-  <line x1="560" y1="508" x2="560" y2="534" stroke="#4a148c" stroke-width="2" marker-end="url(#a-both)"/>
-
-  <!-- ════════════ SRAM ════════════ -->
-  <rect x="420" y="534" width="280" height="42" rx="6" fill="#f3e5f5" stroke="#4a148c" stroke-width="1.5"/>
-  <text x="560" y="551" text-anchor="middle" font-weight="bold" fill="#4a148c" font-size="11">SRAM · 512 KB · 0x6000_0000</text>
-  <text x="560" y="567" text-anchor="middle" fill="#555" font-size="9">application code + data · I/D-cached</text>
-
-  <!-- ════════════ Legend ════════════ -->
-  <rect x="30" y="320" width="190" height="160" rx="6" fill="#ffffff" stroke="#bdbdbd" stroke-width="1"/>
-  <text x="125" y="342" text-anchor="middle" font-weight="bold" fill="#3a3a3a">Legend</text>
-  <line x1="44" y1="362" x2="74" y2="362" stroke="#1565c0" stroke-width="2" marker-end="url(#a-dp)"/>
-  <text x="82" y="366" fill="#3a3a3a" font-size="10">DP · uncached data</text>
-  <line x1="44" y1="384" x2="74" y2="384" stroke="#e65100" stroke-width="2" marker-end="url(#a-ip)"/>
-  <text x="82" y="388" fill="#3a3a3a" font-size="10">IP · uncached fetch</text>
-  <line x1="44" y1="406" x2="74" y2="406" stroke="#00695c" stroke-width="2" marker-end="url(#a-ic)"/>
-  <text x="82" y="410" fill="#3a3a3a" font-size="10">IC · I-cache fill</text>
-  <line x1="44" y1="428" x2="74" y2="428" stroke="#ad1457" stroke-width="2" marker-end="url(#a-dc)"/>
-  <text x="82" y="432" fill="#3a3a3a" font-size="10">DC · D-cache fill</text>
-  <line x1="44" y1="450" x2="74" y2="450" stroke="#1b5e20" stroke-width="1.8" marker-end="url(#a-lmb)"/>
-  <text x="82" y="454" fill="#3a3a3a" font-size="10">LMB · local BRAM</text>
-  <text x="44" y="472" fill="#555" font-size="9" font-style="italic">Only SRAM is cached.</text>
-
+  <!-- ============ routing note ============ -->
+  <text class="tb" x="40" y="430" font-size="9">Port routing = pure address decode:</text>
+  <text class="ts" x="40" y="446">0x6000_0000 &#8211; 0x6007_FFFF &#8594; IC / DC (cached)</text>
+  <text class="ts" x="40" y="460">all other addresses &#8594; IP / DP (uncached)</text>
+  <text class="ts" x="40" y="482">thick lines = cache-line / local buses</text>
+  <text class="ts" x="40" y="496">thin lines = single-beat uncached access</text>
 </svg>
