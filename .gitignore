@@ -182,6 +182,15 @@ workspace-example/SRAM_app_template/src/*
 !workspace-example/SRAM_app_template/src/*.h
 !workspace-example/SRAM_app_template/src/*.ld
 
+!workspace-example/showcase/
+workspace-example/showcase/*
+!workspace-example/showcase/README.md
+!workspace-example/showcase/src/
+workspace-example/showcase/src/*
+!workspace-example/showcase/src/*.c
+!workspace-example/showcase/src/*.h
+!workspace-example/showcase/src/*.ld
+
 # deployment flash image is a release artifact, keep it
 !release/*.mcs
 
