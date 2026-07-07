@@ -70,7 +70,7 @@ Peripheral registers and base addresses are documented in the
 | 32 | GPIO_D0 | W2 | I/O | General purpose GPIO, Group D bit 0 |
 | 33 | INTR_3 | V2 | Input | External interrupt input 3 |
 | 34 | PWM_1 | W3 | Output | PWM output channel 1 |
-| 35 | SPI_SCLK | V3 | Output | SPI clock, 6.25 MHz |
+| 35 | SPI_SCLK | V3 | Output | SPI clock (software-settable, up to 25 MHz) |
 | 36 | SPI_MOSI | W5 | Output | SPI master-out slave-in |
 | 37 | SPI_MISO | V4 | Input | SPI master-in slave-out |
 | 38 | SPI_SS0 | U4 | Output | SPI slave select 0 (active low) |
@@ -160,7 +160,7 @@ The XADC expects an input range of 0–1 V. The board includes a resistive volta
 |---------|----------|--------|-------------|
 | 13 | L1 | I2C_SCL | I2C clock, 100 kHz |
 | 14 | L2 | I2C_SDA | I2C data |
-| 35 | V3 | SPI_SCLK | SPI clock, 6.25 MHz |
+| 35 | V3 | SPI_SCLK | SPI clock (software-settable, up to 25 MHz) |
 | 36 | W5 | SPI_MOSI | Master out, slave in |
 | 37 | V4 | SPI_MISO | Master in, slave out |
 | 38 | U4 | SPI_SS0 | Slave select 0 (active low) |
@@ -176,7 +176,8 @@ The XADC expects an input range of 0–1 V. The board includes a resistive volta
 | Function | FPGA Pins |
 |----------|-----------|
 | LEDs (2) | A17, C16 |
-| Push button | A18 |
+| User button (BTN1) | B18 |
+| Reset button (BTN0) | A18 |
 | RGB LED | B17, B16, C17 |
 
 ---

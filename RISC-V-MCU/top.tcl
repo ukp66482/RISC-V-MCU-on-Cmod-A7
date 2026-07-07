@@ -386,7 +386,7 @@ proc create_root_design { parentCell } {
   # Create instance: microblaze_riscv_0_axi_periph, and set properties
   set microblaze_riscv_0_axi_periph [ create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 microblaze_riscv_0_axi_periph ]
   set_property -dict [list \
-    CONFIG.NUM_MI {22} \
+    CONFIG.NUM_MI {23} \
     CONFIG.NUM_SI {1} \
   ] $microblaze_riscv_0_axi_periph
 
@@ -593,10 +593,21 @@ proc create_root_design { parentCell } {
   # Create instance: spi_0, and set properties
   set spi_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_quad_spi:3.2 spi_0 ]
   set_property -dict [list \
+    CONFIG.Async_Clk {1} \
     CONFIG.C_NUM_SS_BITS {2} \
-    CONFIG.C_SCK_RATIO {16} \
+    CONFIG.C_SCK_RATIO {4} \
     CONFIG.C_USE_STARTUP {0} \
   ] $spi_0
+
+
+  # Create instance: spi_0_clk, and set properties
+  set spi_0_clk [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 spi_0_clk ]
+  set_property -dict [list \
+    CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {25.000} \
+    CONFIG.USE_DYN_RECONFIG {true} \
+    CONFIG.USE_LOCKED {true} \
+    CONFIG.USE_RESET {true} \
+  ] $spi_0_clk
 
 
   # Create interface connections
@@ -636,6 +647,7 @@ proc create_root_design { parentCell } {
   connect_bd_intf_net -intf_net microblaze_riscv_0_axi_periph_M19_AXI [get_bd_intf_pins microblaze_riscv_0_axi_periph/M19_AXI] [get_bd_intf_pins axi_quad_spi_0/AXI_LITE]
   connect_bd_intf_net -intf_net microblaze_riscv_0_axi_periph_M20_AXI [get_bd_intf_pins microblaze_riscv_0_axi_periph/M20_AXI] [get_bd_intf_pins i2c_0/S_AXI]
   connect_bd_intf_net -intf_net microblaze_riscv_0_axi_periph_M21_AXI [get_bd_intf_pins microblaze_riscv_0_axi_periph/M21_AXI] [get_bd_intf_pins spi_0/AXI_LITE]
+  connect_bd_intf_net -intf_net microblaze_riscv_0_axi_periph_M22_AXI [get_bd_intf_pins microblaze_riscv_0_axi_periph/M22_AXI] [get_bd_intf_pins spi_0_clk/s_axi_lite]
   connect_bd_intf_net -intf_net microblaze_riscv_0_debug [get_bd_intf_pins mdm_1/MBDEBUG_0] [get_bd_intf_pins microblaze_riscv_0/DEBUG]
   connect_bd_intf_net -intf_net microblaze_riscv_0_dlmb_1 [get_bd_intf_pins microblaze_riscv_0/DLMB] [get_bd_intf_pins microblaze_riscv_0_local_memory/DLMB]
   connect_bd_intf_net -intf_net microblaze_riscv_0_ilmb_1 [get_bd_intf_pins microblaze_riscv_0/ILMB] [get_bd_intf_pins microblaze_riscv_0_local_memory/ILMB]
@@ -693,7 +705,8 @@ proc create_root_design { parentCell } {
   [get_bd_pins smartconnect_0/aclk] \
   [get_bd_pins i2c_0/s_axi_aclk] \
   [get_bd_pins spi_0/s_axi_aclk] \
-  [get_bd_pins spi_0/ext_spi_clk]
+  [get_bd_pins spi_0_clk/clk_in1] \
+  [get_bd_pins spi_0_clk/s_axi_aclk]
   connect_bd_net -net microblaze_riscv_0_intr  [get_bd_pins microblaze_riscv_0_xlconcat/dout] \
   [get_bd_pins microblaze_riscv_0_axi_intc/intr]
   connect_bd_net -net reset_1  [get_bd_ports reset] \
@@ -726,11 +739,14 @@ proc create_root_design { parentCell } {
   [get_bd_pins xadc_wiz_0/s_axi_aresetn] \
   [get_bd_pins smartconnect_0/aresetn] \
   [get_bd_pins i2c_0/s_axi_aresetn] \
-  [get_bd_pins spi_0/s_axi_aresetn]
+  [get_bd_pins spi_0/s_axi_aresetn] \
+  [get_bd_pins spi_0_clk/s_axi_aresetn]
   connect_bd_net -net sin_0_1  [get_bd_ports uart_0_rx] \
   [get_bd_pins uart_USB/sin]
   connect_bd_net -net sin_0_2  [get_bd_ports uart_1_rx] \
   [get_bd_pins uart_1/sin]
+  connect_bd_net -net spi_0_clk_clk_out1  [get_bd_pins spi_0_clk/clk_out1] \
+  [get_bd_pins spi_0/ext_spi_clk]
   connect_bd_net -net spi_0_ip2intc_irpt  [get_bd_pins spi_0/ip2intc_irpt] \
   [get_bd_pins microblaze_riscv_0_xlconcat/In7]
   connect_bd_net -net sys_clock_1  [get_bd_ports sys_clock] \
@@ -774,6 +790,7 @@ proc create_root_design { parentCell } {
   assign_bd_address -offset 0x40700000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_riscv_0/Data] [get_bd_addr_segs i2c_0/S_AXI/Reg] -force
   assign_bd_address -offset 0x40400000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_riscv_0/Data] [get_bd_addr_segs microblaze_riscv_0_axi_intc/S_AXI/Reg] -force
   assign_bd_address -offset 0x40800000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_riscv_0/Data] [get_bd_addr_segs spi_0/AXI_LITE/Reg] -force
+  assign_bd_address -offset 0x40900000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_riscv_0/Data] [get_bd_addr_segs spi_0_clk/s_axi_lite/Reg] -force
   assign_bd_address -offset 0x40110000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_riscv_0/Data] [get_bd_addr_segs timer_1/S_AXI/Reg] -force
   assign_bd_address -offset 0x40210000 -range 0x00010000 -with_name SEG_timer_2_Reg -target_address_space [get_bd_addr_spaces microblaze_riscv_0/Data] [get_bd_addr_segs PWM_1/S_AXI/Reg] -force
   assign_bd_address -offset 0x40120000 -range 0x00010000 -with_name SEG_timer_2_Reg_1 -target_address_space [get_bd_addr_spaces microblaze_riscv_0/Data] [get_bd_addr_segs timer_2/S_AXI/Reg] -force

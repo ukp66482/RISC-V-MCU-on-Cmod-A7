@@ -1,11 +1,11 @@
 /******************************************************************************
- * demo_all — full-system breadboard demo for the RISC-V MCU on Cmod A7
+ * demo_all - full-system breadboard demo for the RISC-V MCU on Cmod A7
  *
  * One program that exercises EVERY peripheral, stage by stage, narrating on
  * the USB serial port (115200 8N1). Runs forever; press the on-board button
- * (BTN0) to skip to the next stage.
+ * (BTN1) to skip to the next stage.
  *
- * ── Breadboard wiring (all optional — unwired stages just report "skip") ──
+ * ── Breadboard wiring (all optional - unwired stages just report "skip") ──
  *
  *   GPIO LEDs   : DIP 1–7 (group A) → LED + 330 Ω → GND   (walking pattern)
  *   PWM LED     : DIP 10 (PWM_0)    → LED + 330 Ω → GND   (breathing)
@@ -102,7 +102,7 @@ static void stage_sysinfo(void)
 {
     xil_printf("\r\n");
     xil_printf("*************************************************\r\n");
-    xil_printf("*  RISC-V MCU on Cmod A7 — full-system demo     *\r\n");
+    xil_printf("*  RISC-V MCU on Cmod A7 - full-system demo     *\r\n");
     xil_printf("*************************************************\r\n");
     xil_printf("CPU    : MicroBlaze-V RV32IMB @ %d MHz\r\n",
                XPAR_CPU_CORE_CLOCK_FREQ_HZ / 1000000);
@@ -112,7 +112,7 @@ static void stage_sysinfo(void)
     xil_printf("Memory : BRAM 128K @0x0 | SRAM 512K @0x60000000 (cached)\r\n");
     xil_printf("Classes: 0x40[C]x_xxxx  C=0 GPIO 1 TMR 2 PWM 3 UART\r\n");
     xil_printf("         4 INTC 5 QSPI 6 XADC 7 I2C 8 SPI\r\n");
-    xil_printf("Button : press BTN0 anytime to skip a stage\r\n");
+    xil_printf("Button : press BTN1 anytime to skip a stage\r\n");
 }
 
 /* ------------------------------------------------------------------ */
@@ -192,7 +192,7 @@ out:
 }
 
 /* ------------------------------------------------------------------ */
-/* Stage 4: XADC — die temperature + 2 external channels              */
+/* Stage 4: XADC - die temperature + 2 external channels              */
 /* ------------------------------------------------------------------ */
 static XSysMon sysmon;
 
@@ -201,7 +201,7 @@ static void stage_adc(void)
     stage_banner(4, "XADC (pot on DIP 15/16; temperature needs nothing)");
     XSysMon_Config *cfg = XSysMon_LookupConfig(XPAR_XADC_WIZ_0_BASEADDR);
     if (!cfg || XSysMon_CfgInitialize(&sysmon, cfg, cfg->BaseAddress) != XST_SUCCESS) {
-        xil_printf("  sysmon init failed — skip\r\n");
+        xil_printf("  sysmon init failed - skip\r\n");
         return;
     }
     for (int i = 0; i < 8; i++) {
@@ -209,7 +209,7 @@ static void stage_adc(void)
         u16 a4 = XSysMon_GetAdcData(&sysmon, XSM_CH_AUX_MIN + 4);
         u16 a12= XSysMon_GetAdcData(&sysmon, XSM_CH_AUX_MIN + 12);
         /* temp(C) = code*503.975/65536 - 273.15 ; pin V = code/65536 * 3.32V
-         * (64-bit intermediate: code*503975 overflows 32 bits — real bug we hit) */
+         * (64-bit intermediate: code*503975 overflows 32 bits - real bug we hit) */
         int tc  = (int)((u64)t * 503975 / 65536) - 273150;   /* milli-degC */
         int mv4 = (int)((u32)a4  * 3320 / 65536);            /* mV at pin  */
         int mv12= (int)((u32)a12 * 3320 / 65536);
@@ -234,7 +234,7 @@ static void stage_i2c(void)
         }
     }
     if (!found)
-        xil_printf("  no devices found (bus idle — wire a sensor to try)\r\n");
+        xil_printf("  no devices found (bus idle - wire a sensor to try)\r\n");
     else
         xil_printf("  %d device(s) on the bus\r\n", found);
 }
@@ -251,7 +251,7 @@ static void stage_spi(void)
     if (!spi_ready) {
         XSpi_Config *cfg = XSpi_LookupConfig(SPI_BASE);
         if (!cfg || XSpi_CfgInitialize(&spi, cfg, cfg->BaseAddress) != XST_SUCCESS) {
-            xil_printf("  spi init failed — skip\r\n");
+            xil_printf("  spi init failed - skip\r\n");
             return;
         }
         XSpi_SetOptions(&spi, XSP_MASTER_OPTION | XSP_MANUAL_SSELECT_OPTION);
@@ -261,14 +261,30 @@ static void stage_spi(void)
     }
 
     u8 tx[8] = {0xA5, 0x5A, 0x0F, 0xF0, 0x12, 0x34, 0x56, 0x78}, rx[8] = {0};
-    XSpi_SetSlaveSelect(&spi, 1);                    /* pulse SS0 */
-    XSpi_Transfer(&spi, tx, rx, 8);
-    XSpi_SetSlaveSelect(&spi, 0);
+    /* Register-level transfer: the SPI unit runs on its own (adjustable)
+     * clock, so its resets need a moment to land and its status flags lag
+     * a little - the stock XSpi_Transfer trips over both. Rules: settle
+     * after every reset, and drain by the RX-empty flag. */
+    {
+        volatile u32 *R = (volatile u32 *)SPI_BASE;
+        R[0x40/4] = 0xA;                              /* soft reset      */
+        for (volatile int w = 0; w < 400; w++) ;      /* let it land     */
+        R[0x60/4] = 0x1E6;                            /* cfg + inhibit   */
+        for (volatile int w = 0; w < 400; w++) ;
+        R[0x70/4] = ~1u;                              /* assert SS0      */
+        R[0x60/4] = 0xE6;                             /* run             */
+        for (int i = 0; i < 8; i++) R[0x68/4] = tx[i];
+        for (int i = 0; i < 8; ) {
+            if (!(R[0x64/4] & 1)) rx[i++] = (u8)R[0x6C/4];
+        }
+        R[0x70/4] = ~0u;                              /* release SS      */
+        R[0x60/4] = 0x1E6;                            /* back to idle    */
+    }
 
     int ok = 1;
     for (int i = 0; i < 8; i++) if (rx[i] != tx[i]) ok = 0;
     if (ok)  xil_printf("  loopback PASS (8/8 bytes, SCK 6.25 MHz)\r\n");
-    else     xil_printf("  no loopback — jumper DIP36<->37 to see it PASS\r\n");
+    else     xil_printf("  no loopback - jumper DIP36<->37 to see it PASS\r\n");
 }
 
 /* ------------------------------------------------------------------ */
@@ -291,12 +307,17 @@ static void stage_uart_ext(void)
         }
     }
     if (ok == 4) xil_printf("  loopback PASS (4/4 bytes @115200)\r\n");
-    else         xil_printf("  no loopback (%d/4) — jumper DIP11<->12 to test\r\n", ok);
+    else         xil_printf("  no loopback (%d/4) - jumper DIP11<->12 to test\r\n", ok);
 }
 
 /* ------------------------------------------------------------------ */
 /* Stage 8: memory hierarchy benchmark                                */
 /* ------------------------------------------------------------------ */
+/* O2 + noinline: Vitis builds apps at -O0, where loop overhead (i kept on
+ * the stack) drowns the cache signal and warm reads look as slow as cold
+ * ones. Compiling just this function at O2 keeps the loop in registers so
+ * the numbers show the memory system, not the compiler. */
+__attribute__((optimize("O2"), noinline))
 static u32 bench(volatile u32 *buf, int write_pass)
 {
     Xil_Out32(TIMER2_BASE + TLR0, 0);
@@ -311,7 +332,7 @@ static u32 bench(volatile u32 *buf, int write_pass)
     return cyc;
 }
 
-static volatile u32 bram_buf[4096];                  /* lands in BRAM .bss? no — SRAM .bss */
+static volatile u32 bram_buf[4096];                  /* static buffer in SRAM .bss (cached) */
 
 static void stage_memory(void)
 {
@@ -322,7 +343,7 @@ static void stage_memory(void)
     xil_printf("  SRAM  read (cold)  : %u cyc  (line fills, 8 words/miss)\r\n",
                bench(sram, 0));
     xil_printf("  SRAM  read (warm)  : %u cyc  (D$ hits)\r\n", bench(sram, 0));
-    xil_printf("  .bss  read (cached): %u cyc\r\n", bench(bram_buf, 0));
+    xil_printf("  .bss  read (cold) : %u cyc\r\n", bench(bram_buf, 0));
     xil_printf("  note: stack lives in BRAM (1-cycle, uncached by design)\r\n");
 }
 
@@ -348,7 +369,7 @@ static void stage_interrupt(void)
     static int intc_ready;                           /* init once, reuse */
     if (!intc_ready) {
         if (XIntc_Initialize(&intc, XPAR_XINTC_0_BASEADDR) != XST_SUCCESS) {
-            xil_printf("  intc init failed — skip\r\n");
+            xil_printf("  intc init failed - skip\r\n");
             return;
         }
         /* timer_0 -> xlconcat In0 -> INTC input 0 (see IP reference §1.4) */
@@ -372,7 +393,7 @@ static void stage_interrupt(void)
     Xil_Out32(TIMER0_BASE + TCSR0, 0);               /* stop timer      */
     Xil_ExceptionDisable();
     XIntc_Disable(&intc, 0);
-    xil_printf("  ISR fired %u times (expected ~12) — INTC + mtvec path OK\r\n",
+    xil_printf("  ISR fired %u times (expected ~12) - INTC + mtvec path OK\r\n",
                ticks);
     led(0);
 }

@@ -13,7 +13,7 @@ toolchain needed) or a raw .bin (specify --entry, image assumed based at
 0x60000000).
 
 Protocol counterpart: bootloader.c running from BRAM on the board.
-Hold the on-board button while plugging in USB to force bootloader mode.
+Hold the user button (BTN1) while plugging in USB to force bootloader mode.
 """
 import argparse
 import struct
@@ -48,7 +48,7 @@ def parse_elf(data: bytes):
         if p_type == 1 and p_filesz > 0:  # PT_LOAD
             # Place segments by LMA (p_paddr), like xsdb "dow": ITCM code has
             # its run address (vaddr) in BRAM but is stored inside the SRAM
-            # image and copied out by the app's tcm_init() at startup.
+            # image and copied out by the app's mcu_init() at startup.
             lma = p_paddr if p_paddr else p_vaddr
             segs.append((lma, data[p_offset:p_offset + p_filesz]))
 
@@ -88,7 +88,8 @@ class Board:
             sys.exit(f"{what}: board answered {r!r} (expected 'K')")
 
     def sync(self, seconds=8):
-        print("syncing (power-cycle the board now, or hold BTN while plugging in)…")
+        print("syncing — press the reset button (BTN0) now; "
+              "or hold BTN1 while plugging in…")
         end = time.time() + seconds
         self.s.timeout = 0.05
         while time.time() < end:
@@ -136,6 +137,8 @@ def main():
     ap.add_argument("--ram", action="store_true", help="run from RAM, don't touch flash")
     ap.add_argument("--entry", type=lambda x: int(x, 0), default=SRAM_BASE,
                     help="entry address for raw .bin (default SRAM base)")
+    ap.add_argument("--monitor", action="store_true",
+                    help="stay connected and print the app's UART output")
     args = ap.parse_args()
 
     data = open(args.image, "rb").read()
@@ -157,6 +160,15 @@ def main():
     b.go(args.ram)
     print("running from RAM (volatile)" if args.ram
           else "programmed to flash — app now runs at every power-on")
+    if args.monitor:
+        print("--- UART monitor (Ctrl-C to stop watching; app keeps running)")
+        b.s.timeout = 1
+        try:
+            while True:
+                sys.stdout.write(b.s.read(4096).decode("ascii", "replace"))
+                sys.stdout.flush()
+        except KeyboardInterrupt:
+            print("\n--- monitor stopped")
 
 
 if __name__ == "__main__":

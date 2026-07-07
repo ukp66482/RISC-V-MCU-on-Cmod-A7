@@ -24,8 +24,6 @@ SOURCES = {
     "pin":  os.path.join(DOCS, "Pin-Specification/Cmod_A7_Pin_Specification.md"),
     "pwr":  os.path.join(DOCS, "Power-Specification/Cmod_A7_Power_Specification.md"),
     "sa":   os.path.join(DOCS, "guides/Standalone-Boot-Mode/Standalone-Boot-Mode.md"),
-    "jtag": os.path.join(DOCS, "guides/JTAG-Debug-Mode/JTAG-Debug-Mode.md"),
-    "vit":  os.path.join(DOCS, "guides/README.md"),
 }
 
 # Datasheet outline. Entry types:
@@ -98,23 +96,6 @@ RECIPE = [
     ("sec", "sa", "One-Time Board Setup (Instructor)", 2, None),
     ("sec", "sa", "How the Deployment Image Is Made (Instructor Reference)", 2, None),
     ("sec", "sa", "Troubleshooting", 2, None),
-
-    ("h1", "Software Development with Vitis"),
-    ("intro", "vit"),
-    ("sec", "vit", "Core Concepts", 2, None),
-    ("sec", "vit", "Typical Workflow", 2, None),
-    ("h2", "JTAG Debug Walkthrough"),
-    ("intro", "jtag"),
-    ("sec", "jtag", "Prerequisites", 3, None),
-    ("sec", "jtag", "Open Vitis Workspace", 3, None),
-    ("sec", "jtag", "Create a Platform", 3, None),
-    ("sec", "jtag", "Create an Application", 3, None),
-    ("sec", "jtag", "Write Application Code", 3, None),
-    ("sec", "jtag", "Configure the Linker Script", 3, None),
-    ("sec", "jtag", "Configure Platform BSP", 3, None),
-    ("sec", "jtag", "Build", 3, None),
-    ("sec", "jtag", "Run and Debug over JTAG", 3, None),
-    ("sec", "jtag", "Advanced Inspection Tools", 3, None),
 ]
 
 # Sections deliberately left out, with the reason (coverage check enforces this)
@@ -125,7 +106,6 @@ DROPPED = {
     ("pin", "UART Interfaces"): "duplicates the UART sections in Peripherals",
     ("pin", "Analog Inputs (XADC)"): "channel table duplicates the XADC section (circuit subsection kept)",
     ("pin", "Serial Expansion Pins (I2C / SPI)"): "duplicates the I2C/SPI sections in Peripherals",
-    ("vit", "Guides in This Directory"): "navigation links, meaningless inside one PDF",
 }
 
 HEADING = re.compile(r"^(#{2,5})\s+([\d.]+)?\.?\s*(.*?)\s*$")
@@ -483,7 +463,6 @@ def main():
             (r"^(== One-Time Board Setup[^\n]*)", "sec-setup"),
             (r"^(== Build Your Application[^\n]*)", "sec-build"),
             (r"^(== How Standalone Boot Works[^\n]*)", "sec-works"),
-            (r"^(== JTAG Debug Walkthrough[^\n]*)", "sec-jtagwalk"),
             (r"^(=== Analog Input Circuit[^\n]*)", "sec-analog"),
         ]
         for pat, label in LABELS:
@@ -497,9 +476,13 @@ def main():
             ("*one-time setup* (§2)", "*one-time setup* (@sec-setup)"),
             ("`SRAM_app_template` (§3)", "`SRAM_app_template` (@sec-build)"),
             ("redo §2.", "redo @sec-setup."),
+            ("power-cycle in §2)", "power-cycle in @sec-setup)"),
+            ("still needs §2 (requires Vivado", "still needs @sec-setup (requires Vivado"),
+            ("or do §2 yourself", "or do @sec-setup yourself"),
+            ("in _building_ the program (§3)", "in _building_ the program (@sec-build)"),
             ("(see the Standalone Boot Mode guide)", "(see @sec-works)"),
-            ("See the\nStandalone Boot Mode guide §3.", "See @sec-build."),
-            ("as in the JTAG guide", "as in @sec-jtagwalk"),
+            ("as in the JTAG guide",
+             "as in the separate JTAG Debug Mode guide"),
             ("Peripheral registers and base addresses are documented in "
              "the IP peripheral reference.",
              "Peripheral registers and base addresses are listed in "
@@ -510,9 +493,6 @@ def main():
             ("(on-board divider scales to the XADC's 0–1 V)",
              "(on-board divider scales to the XADC's 0–1 V; see @sec-analog)"),
             ("This guide shows how", "This chapter shows how"),
-            ("This guide introduces the core concepts",
-             "This chapter introduces the core concepts"),
-            ("This guide walks through", "This section walks through"),
         ]
         for old, new in REFS:
             if old not in body:

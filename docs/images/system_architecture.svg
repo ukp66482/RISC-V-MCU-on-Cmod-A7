@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 640" font-family="Liberation Sans, Helvetica, Arial, sans-serif" fill="black">
+  <rect x="0" y="0" width="880" height="640" fill="white"/>
   <defs>
     <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
       <path d="M0,0 L8,4 L0,8 z"/>
@@ -19,20 +20,15 @@
     .ti   { font-size:8px; font-style:italic; }
   </style>
 
-  <!-- ============ FPGA boundary ============ -->
-  <rect class="bnd" x="48" y="80" width="648" height="465"/>
-  <text class="ti" x="688" y="538" text-anchor="end">Artix-7 FPGA (xc7a35tcpg236-1)</text>
-
   <!-- ============ clocking ============ -->
   <rect class="box" x="60" y="16" width="104" height="34"/>
   <text class="tb" x="112" y="30" text-anchor="middle">12 MHz</text>
   <text class="t"  x="112" y="42" text-anchor="middle">oscillator</text>
   <line class="wire" x1="112" y1="50" x2="112" y2="98"/>
   <rect class="box" x="66" y="100" width="132" height="40"/>
-  <text class="tb" x="132" y="115" text-anchor="middle">Clocking Wizard</text>
-  <text class="t"  x="132" y="128" text-anchor="middle">MMCM &#215;25/3</text>
+  <text class="tb" x="132" y="115" text-anchor="middle">PLL</text>
+  <text class="t"  x="132" y="128" text-anchor="middle">100 MHz</text>
   <line class="wire" x1="198" y1="120" x2="248" y2="120"/>
-  <text class="ts" x="222" y="113" text-anchor="middle">100 MHz</text>
   <text class="ti" x="132" y="152" text-anchor="middle">clocks all blocks</text>
 
   <!-- ============ CPU ============ -->
@@ -49,8 +45,8 @@
 
   <!-- ============ debug ============ -->
   <rect class="box" x="560" y="100" width="120" height="40"/>
-  <text class="tb" x="620" y="115" text-anchor="middle">MDM</text>
-  <text class="t"  x="620" y="128" text-anchor="middle">debug (JTAG)</text>
+  <text class="tb" x="620" y="115" text-anchor="middle">Debug Unit</text>
+  <text class="t"  x="620" y="128" text-anchor="middle">JTAG</text>
   <line class="dash" x1="560" y1="120" x2="534" y2="120" marker-end="url(#arr)"/>
   <line class="dash" x1="680" y1="120" x2="708" y2="120"/>
 
@@ -82,10 +78,10 @@
 
   <!-- ============ memory interconnect -> SRAM ============ -->
   <rect class="box" x="405" y="255" width="110" height="30"/>
-  <text class="t" x="460" y="274" text-anchor="middle">SmartConnect</text>
+  <text class="t" x="460" y="274" text-anchor="middle">Memory Arbiter</text>
   <line class="wire" x1="430" y1="285" x2="430" y2="308"/>
   <rect class="box" x="405" y="310" width="110" height="28"/>
-  <text class="t" x="460" y="328" text-anchor="middle">AXI EMC</text>
+  <text class="t" x="460" y="328" text-anchor="middle">SRAM Controller</text>
   <line class="bus" x1="515" y1="324" x2="706" y2="324"/>
   <rect class="box" x="712" y="300" width="146" height="52"/>
   <text class="tb" x="785" y="316" text-anchor="middle">SRAM 512 KB</text>
@@ -93,7 +89,7 @@
   <text class="ts" x="785" y="343" text-anchor="middle">0x6000_0000 &#183; cached</text>
 
   <!-- ============ peripheral bus bar ============ -->
-  <text class="ts" x="65" y="367">AXI SmartConnect &#8212; 1 master &#8594; 22 endpoints &#183; 0x40xx_xxxx</text>
+  <text class="ts" x="65" y="367">AXI peripheral bus &#8212; 1 master &#8594; 22 endpoints &#183; 0x40xx_xxxx</text>
   <rect x="65" y="371" width="620" height="13" fill="black"/>
 
   <!-- stubs bar -> peripherals -->
@@ -134,7 +130,7 @@
 
   <rect class="box" x="455" y="430" width="72" height="60"/>
   <text class="tb" x="491" y="445" text-anchor="middle">SPI</text>
-  <text class="ts" x="491" y="458" text-anchor="middle">6.25 MHz</text>
+  <text class="ts" x="491" y="458" text-anchor="middle">1.6&#8211;25 MHz</text>
   <text class="ts" x="491" y="470" text-anchor="middle">DIP 35&#8211;39</text>
 
   <rect class="box" x="533" y="430" width="72" height="60"/>

@@ -29,18 +29,31 @@ and work purely at the firmware level.
 
 ## Boot modes
 
+Create and build an application in one command (Vitis project from the course
+template, ready for both modes):
+
+```
+python3 tools/vitis_new_app.py myapp
+```
+
 ### JTAG mode
 
-For development: build the application in Vitis and run it over JTAG — see the
+For development: run over JTAG — code goes to RAM, the debugger works, and a
+power-cycle restores whatever is in flash.
+
+```
+python3 tools/jtag_run.py workspace-example/myapp/build/myapp.elf
+```
+
+or click **Run/Debug** in Vitis — see the
 [JTAG Debug Mode guide](docs/guides/JTAG-Debug-Mode/JTAG-Debug-Mode.md).
-Code runs from RAM and is lost at power-off.
 
 ### Standalone boot
 
 To keep a program on the board, write it to flash over the USB serial port:
 
 ```
-python3 tools/upload.py build/app.elf
+python3 tools/upload.py workspace-example/myapp/build/myapp.elf --monitor
 ```
 
 The application then starts automatically at every power-on. Details are in the
@@ -48,11 +61,13 @@ The application then starts automatically at every power-on. Details are in the
 
 The same ELF works in both modes, and a new board only needs `release/boot.mcs`
 programmed once with Vivado Hardware Manager (guide, section 2).
+`release/boot.bit` is the JTAG-loadable twin — programming it acts as a remote
+power-cycle into the bootloader.
 
 ## Repository layout
 
 ```
-release/                  prebuilt outputs: boot.mcs, top.bit, top_wrapper.xsa
+release/                  prebuilt outputs: boot.mcs, boot.bit, top.bit, top_wrapper.xsa
 RISC-V-MCU/               Vivado project (recreate_project.tcl)
 board/                    Cmod A7 hardware: constraints, board files, KiCad symbol
 docs/                     specs (pin / power / IP), guides (JTAG / standalone boot), diagrams
@@ -61,7 +76,7 @@ workspace-example/
   examples/01...06        course examples: GPIO, assembly, PWM, UART, ADC, memory
   SRAM_app_template/      template for new applications
   bootloader/             UART flash bootloader source
-tools/                    upload.py, make_boot_mcs.sh
+tools/                    vitis_new_app.py, jtag_run.py, upload.py, make_boot_mcs.sh, doc build/check helpers
 ```
 
 ## Rebuilding the hardware

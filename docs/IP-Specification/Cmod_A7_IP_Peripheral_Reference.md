@@ -29,7 +29,7 @@
 | Access | 1 cycle, dual-port — instruction and data sides read simultaneously |
 | Layout | 32 KB bootloader + 32 KB ITCM + 64 KB DTCM |
 
-**Description:** Instruction and data local memory implemented with FPGA Block RAM — functionally this MCU's tightly-coupled memory (TCM): the ILMB/DLMB ports play the same role as ITCM/DTCM on other MCU cores (e.g. Cortex-M7), giving 1-cycle access outside the cache path. Layout: `0x0000`–`0x7FFF` (32 KB) holds the UART bootloader (restored from flash at every configuration); `0x8000`–`0xFFFF` (32 KB) is the application's ITCM for interrupt handlers and timing-critical code (`ITCM_FUNC`, copied out of the SRAM image by `tcm_init()` at startup); `0x10000`–`0x1FFFF` (64 KB) is the DTCM, holding the stack (top-down from `0x20000`) and `DTCM_DATA` fast data.
+**Description:** Instruction and data local memory implemented with FPGA Block RAM — functionally this MCU's tightly-coupled memory (TCM): the ILMB/DLMB ports play the same role as ITCM/DTCM on other MCU cores (e.g. Cortex-M7), giving 1-cycle access outside the cache path. Layout: `0x0000`–`0x7FFF` (32 KB) holds the UART bootloader (restored from flash at every configuration); `0x8000`–`0xFFFF` (32 KB) is the application's ITCM for interrupt handlers and timing-critical code (`ITCM_FUNC`, copied out of the SRAM image by `mcu_init()` at startup); `0x10000`–`0x1FFFF` (64 KB) is the DTCM, holding the stack (top-down from `0x20000`) and `DTCM_DATA` fast data.
 
 ### 1.3 AXI SmartConnect (`microblaze_riscv_0_axi_periph`)
 
@@ -67,7 +67,7 @@
 
 ### 1.7 Processor System Reset (`rst_clk_wiz_1_100M`)
 
-**Description:** Generates synchronized reset signals for the CPU, bus fabric and peripherals, releasing them only after the clock is stable. External reset source: the on-board push button (active-low).
+**Description:** Generates synchronized reset signals for the CPU, bus fabric and peripherals, releasing them only after the clock is stable. External reset source: on-board button BTN0 (A18, active-high).
 
 ---
 
@@ -104,7 +104,7 @@ All GPIO groups are memory-mapped ports with per-bit direction control: the TRI 
 | Instance | Base Address | Width | Direction | Connection | Description |
 |----------|-------------|-------|-----------|------------|-------------|
 | `board_led_2bits` | `0x4000_0000` | 2 | Output | A17, C16 | On-board LEDs × 2 |
-| `board_button` | `0x4001_0000` | 1 | Input | A18 | On-board push button × 1 |
+| `board_button` | `0x4001_0000` | 1 | Input | B18 | On-board user button (BTN1) |
 | `board_rgb` | `0x4002_0000` | 3 | Output | B17, B16, C17 | On-board RGB LED (R/G/B) |
 
 ### 3.2 DIP Connector GPIO (4 Groups × 7-bit)
@@ -235,12 +235,13 @@ Flash contents are **not memory-mapped**: there is no XIP window, and code canno
 | Item | Value |
 |------|-------|
 | Base Address | `0x4080_0000` |
-| SCLK | 6.25 MHz (100 MHz ÷ 16) — fixed in hardware, not software-configurable |
+| SCLK | Software-programmable, ≈1.6 – 25 MHz (**6.25 MHz at reset**) |
+| Clock Control | `0x4090_0000` — runtime clock setting; see `examples/07_spi_clock` for the `spi_set_clock()` helper |
 | Slave Selects | 2 — two devices can share the bus |
 | Pins | DIP 35 SCLK (V3) · 36 MOSI (W5) · 37 MISO (V4) · 38 SS0 (U4) · 39 SS1 (V5) |
 | Interrupt | INTC In7 |
 
-**Description:** SPI master for external devices (displays, ADCs, flash modules). Full-duplex push-pull signaling — no pull-ups needed; the active device is chosen by driving its SS line low. Use the Vitis `XSpi` driver.
+**Description:** SPI master for external devices (displays, ADCs, flash modules). Full-duplex push-pull signaling — no pull-ups needed; the active device is chosen by driving its SS line low. Use the Vitis `XSpi` driver. The serial clock is set at runtime through the clock-control block: slow it down for breadboard wiring or long cables, speed it up for short-wired display modules (`spi_set_clock(hz)` — one call, takes effect immediately).
 
 > **Note:** This is a *second, independent* SPI controller — do not confuse it with
 > `axi_quad_spi_0` (`0x4050_0000`), which is dedicated to the on-board QSPI boot flash.
@@ -254,7 +255,7 @@ Flash contents are **not memory-mapped**: there is no XIP window, and code canno
 Peripheral addresses follow a class-based convention — **`0x40[C]x_xxxx`, where `C` is the
 peripheral class** (1 MB per class, 64 KB per instance). Reading an address immediately tells
 you what kind of device it is: class 0 = GPIO, 1 = Timer, 2 = PWM, 3 = UART, 4 = INTC,
-5 = QSPI control, 6 = XADC, 7 = I2C, 8 = SPI.
+5 = QSPI control, 6 = XADC, 7 = I2C, 8 = SPI, 9 = SPI clock control.
 
 | Base Address | Range | Peripheral | Type | Category |
 |-----------------|-------|------------|---------|----------|
@@ -280,6 +281,7 @@ you what kind of device it is: class 0 = GPIO, 1 = Timer, 2 = PWM, 3 = UART, 4 =
 | `0x4060_0000` | 64K | xadc_wiz_0 | xadc_wiz | ADC |
 | `0x4070_0000` | 64K | i2c_0 (DIP 13/14) | axi_iic | Communication |
 | `0x4080_0000` | 64K | spi_0 (external master, DIP 35–39) | axi_quad_spi | Communication |
+| `0x4090_0000` | 64K | spi_0_clk (SPI clock control) | clock control | Communication |
 | `0x6000_0000` | 512K | axi_emc_0 (exact physical fit, I/D-cached) | axi_emc | Memory |
 
 ---

@@ -1,7 +1,8 @@
 # Documentation
 
 All documentation for the RISC-V MCU platform. Each specification and guide
-also ships as a PDF next to its markdown source (rendered with `pdf-style.css`).
+also ships as a PDF next to its markdown source (rendered with `pdf-style.css`;
+rebuild with `python3 tools/gen_spec_pdfs.py`).
 
 ## Specifications
 

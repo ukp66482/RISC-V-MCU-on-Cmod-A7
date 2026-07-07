@@ -31,7 +31,8 @@ address map designed to be read at a glance.
 - **Timers** — 3 × 32-bit general-purpose timers with interrupts; 3 dedicated
   PWM output channels
 - **Communication** — 2 × 16550 UART (USB + DIP header); I2C master
-  (100 kHz, 50 ns glitch filter); SPI master (6.25 MHz, 2 slave selects)
+  (100 kHz, 50 ns glitch filter); SPI master (software-settable clock
+  ≈1.6 – 25 MHz, 2 slave selects)
 - **Analog** — 2 external ADC inputs (12-bit XADC, 0–3.3 V range) plus on-die
   temperature and supply monitors
 - **I/O** — 48-pin DIP form factor, 3.3 V LVCMOS (not 5 V tolerant)

@@ -3,8 +3,8 @@
 `Cmod_A7_MCU_Datasheet.pdf` is a single datasheet built from the markdown
 under `docs/` — not a concatenation: the build parses every file into
 sections and reassembles them into a real datasheet outline (overview →
-system architecture → pinout → peripherals → electrical/power → boot →
-development), drops sections that duplicate others, and rewrites
+system architecture → pinout → peripherals → electrical/power → boot),
+drops sections that duplicate others, and rewrites
 cross-references that only made sense inside the standalone files into live
 internal section links.
 

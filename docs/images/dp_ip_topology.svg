@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 560" font-family="Liberation Sans, Helvetica, Arial, sans-serif" fill="black">
+  <rect x="0" y="0" width="880" height="560" fill="white"/>
   <defs>
     <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
       <path d="M0,0 L8,4 L0,8 z"/>
@@ -43,22 +44,22 @@
 
   <!-- ============ four AXI masters ============ -->
   <line class="wire" x1="310" y1="150" x2="310" y2="306"/>
-  <text class="ts" x="314" y="168">M_AXI_IP</text>
+  <text class="ts" x="314" y="168">IP &#183; fetch</text>
   <line class="bus"  x1="400" y1="150" x2="400" y2="304"/>
-  <text class="ts" x="404" y="182">M_AXI_IC</text>
+  <text class="ts" x="404" y="182">IC &#183; I$ fill</text>
   <line x1="392" y1="240" x2="404" y2="230" stroke="black" stroke-width="1"/>
   <text class="ts" x="407" y="240">32</text>
   <line class="bus"  x1="480" y1="150" x2="480" y2="304"/>
-  <text class="ts" x="484" y="168">M_AXI_DC</text>
+  <text class="ts" x="484" y="168">DC &#183; D$ fill</text>
   <line x1="472" y1="240" x2="484" y2="230" stroke="black" stroke-width="1"/>
   <text class="ts" x="487" y="240">32</text>
   <polyline class="wire" points="570,150 570,213 616,213"/>
-  <text class="ts" x="574" y="168">M_AXI_DP</text>
+  <text class="ts" x="574" y="168">DP &#183; data</text>
 
   <!-- ============ axi_periph ============ -->
   <rect class="box" x="620" y="190" width="220" height="46"/>
-  <text class="tb" x="730" y="208" text-anchor="middle">axi_periph</text>
-  <text class="t"  x="730" y="222" text-anchor="middle">AXI SmartConnect &#183; 1 &#8594; 22</text>
+  <text class="tb" x="730" y="208" text-anchor="middle">Peripheral Bus Matrix</text>
+  <text class="t"  x="730" y="222" text-anchor="middle">AXI &#183; 1 master &#8594; 22 endpoints</text>
 
   <!-- peripherals -->
   <line class="wire" x1="730" y1="236" x2="730" y2="286"/>
@@ -69,17 +70,17 @@
 
   <!-- M21: DP window to SRAM -->
   <polyline class="wire" points="640,236 640,268 560,268 560,332 504,332"/>
-  <text class="ti" x="600" y="262" text-anchor="middle">M21: DP &#8594; SRAM</text>
+  <text class="ti" x="600" y="262" text-anchor="middle">DP &#8594; SRAM window</text>
 
   <!-- ============ smartconnect_0 ============ -->
   <rect class="box" x="300" y="310" width="200" height="44"/>
-  <text class="tb" x="400" y="328" text-anchor="middle">smartconnect_0</text>
+  <text class="tb" x="400" y="328" text-anchor="middle">Memory Arbiter</text>
   <text class="t"  x="400" y="342" text-anchor="middle">4 masters &#8594; 1</text>
 
   <!-- ============ EMC + SRAM ============ -->
   <line class="wire" x1="400" y1="354" x2="400" y2="384"/>
   <rect class="box" x="300" y="388" width="200" height="34"/>
-  <text class="t" x="400" y="409" text-anchor="middle">AXI EMC</text>
+  <text class="t" x="400" y="409" text-anchor="middle">SRAM Controller</text>
   <line class="bus" x1="400" y1="422" x2="400" y2="452"/>
   <rect class="box" x="300" y="456" width="200" height="70"/>
   <text class="tb" x="400" y="476" text-anchor="middle">SRAM 512 KB</text>
