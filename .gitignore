@@ -184,3 +184,5 @@ workspace-example/SRAM_app_template/src/*
 
 # deployment flash image is a release artifact, keep it
 !release/*.mcs
+
+/.claude/CLAUDE.md
