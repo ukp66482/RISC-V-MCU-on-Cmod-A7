@@ -27,6 +27,13 @@ connect
 {fpga}
 targets -set -nocase -filter {{name =~ "*Hart*"}}
 catch {{stop}}
+# The app we just stopped may have been mid-run with interrupts armed; the
+# fresh image would take the pending interrupt before it installs handlers
+# and spin in its trap handler forever. Quiet the hart and the interrupt
+# controller so the download starts from power-on-like state.
+catch {{rwr mstatus 0x1800}}
+catch {{mwr 0x4040001C 0}}
+catch {{mwr 0x40400008 0}}
 dow "{elf}"
 con
 disconnect

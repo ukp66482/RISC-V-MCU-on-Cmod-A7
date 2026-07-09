@@ -144,25 +144,6 @@ __pycache__/
 ############################################
 workspace-example/*
 
-# unified example whitelist: examples/<nn_name>/src/*.{c,h,S,ld}
-!workspace-example/examples/
-workspace-example/examples/*
-!workspace-example/examples/*/
-workspace-example/examples/*/*
-!workspace-example/examples/*/src/
-workspace-example/examples/*/src/*
-!workspace-example/examples/*/src/*.c
-!workspace-example/examples/*/src/*.h
-!workspace-example/examples/*/src/*.S
-!workspace-example/examples/*/src/*.ld
-
-!workspace-example/demo_all/
-workspace-example/demo_all/*
-!workspace-example/demo_all/src/
-workspace-example/demo_all/src/*
-!workspace-example/demo_all/src/*.c
-!workspace-example/demo_all/src/*.h
-!workspace-example/demo_all/src/*.ld
 ############################################
 # Plan-B pure-MCU additions
 ############################################
@@ -190,6 +171,9 @@ workspace-example/showcase/src/*
 !workspace-example/showcase/src/*.c
 !workspace-example/showcase/src/*.h
 !workspace-example/showcase/src/*.ld
+!workspace-example/showcase/esp32_bridge/
+workspace-example/showcase/esp32_bridge/*
+!workspace-example/showcase/esp32_bridge/*.ino
 
 # deployment flash image is a release artifact, keep it
 !release/*.mcs

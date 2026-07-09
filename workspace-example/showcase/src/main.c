@@ -1,19 +1,25 @@
 /* ===========================================================================
  * showcase - every major MCU feature, one program, one breadboard.
  *
- *   1  I2C  : 16x2 character LCD (PCF8574 backpack)      DIP 13/14
- *   2  SPI  : ILI9341 240x320 color TFT dashboard        DIP 35-38 + 47/48
- *   3  PWM  : hobby servo, 50 Hz / 0.5-2.5 ms            DIP 10
- *   4  ADC  : potentiometer, live millivolts             DIP 15
- *   5  IRQ  : timer_0, 100 Hz system tick (ISR in ITCM)  no wiring
- *   6  IRQ  : external button on INTR_0                  DIP 8 (+10k to 3.3V)
- *   7  UART : telemetry + commands on the DIP UART       DIP 11/12
+ *   1  SPI  : frames to an ESP32 receiver station           DIP 35-38
+ *   2  I2C  : telemetry to the same receiver (slave 0x28)   DIP 13/14
+ *   3  PWM  : hobby servo, 50 Hz / 0.5-2.5 ms               DIP 10
+ *   4  ADC  : potentiometer, live millivolts                DIP 15
+ *   5  IRQ  : timer_0, 100 Hz system tick (ISR in ITCM)     no wiring
+ *   6  IRQ  : external button on INTR_0                     DIP 8 (+10k to 3.3V)
+ *   7  UART : telemetry + commands on the DIP UART          DIP 11/12
+ *
+ * The serial buses are demonstrated against an ESP32 "receiver station"
+ * (see esp32_bridge/): the MCU streams its telemetry over I2C and SPI once
+ * a second, and everything scrolls by on the receiver's USB serial monitor
+ * - no display modules needed.  The 'n' command runs a full round-trip
+ * PASS/FAIL check on both buses.
  *
  * The pieces are wired together, not just demonstrated side by side:
  * the tick interrupt schedules everything; the knob (or the auto sweep,
- * or a UART command) steers the servo; both displays and both serial
- * ports show the same live state; the button - through a real GPIO
- * interrupt - switches the control mode.
+ * or a UART command) steers the servo; both serial ports and both buses
+ * carry the same live state; the button - through a real GPIO interrupt -
+ * switches the control mode.
  *
  * Modes (cycle with the wired button, on-board BTN1, or the 'm' command):
  *   A POT     servo follows the potentiometer
@@ -29,12 +35,13 @@
 #include "adc.h"
 #include "servo.h"
 #include "uart1.h"
-#include "lcd1602.h"
-#include "ili9341.h"
+#include "spi0.h"
 #include "xil_printf.h"
 #include "xuartns550_l.h"
+#include "xiic_l.h"
 #include "xintc.h"
 #include "xil_exception.h"
+#include "sleep.h"
 
 #define UART_USB    XPAR_UART_USB_BASEADDR
 #define TIMER0      XPAR_TIMER_0_BASEADDR
@@ -42,6 +49,7 @@
 #define RGB         XPAR_BOARD_RGB_BASEADDR
 #define LED2        XPAR_BOARD_LED_2BITS_BASEADDR
 #define BTN1        XPAR_BOARD_BUTTON_BASEADDR
+#define I2C         XPAR_I2C_0_BASEADDR
 
 #define TCSR0       0x00
 #define TLR0        0x04
@@ -61,6 +69,13 @@ static void mcu_init(void)
 {
     extern char __itcm_lma[], __itcm_start[], __itcm_end[];
     extern char __dtcm_start[], __dtcm_end[];
+
+    /* start from a quiet state even if loaded over a running program
+     * (JTAG reload): global interrupts off, interrupt controller muted */
+    __asm__ volatile("csrc mstatus, %0" :: "r"(8));
+    Xil_Out32(XPAR_XINTC_0_BASEADDR + 0x1C, 0);        /* MER = 0 */
+    Xil_Out32(XPAR_XINTC_0_BASEADDR + 0x08, 0);        /* IER = 0 */
+
     memcpy(__itcm_start, __itcm_lma, (size_t)(__itcm_end - __itcm_start));
     memset(__dtcm_start, 0, (size_t)(__dtcm_end - __dtcm_start));
     __asm__ volatile("fence.i");
@@ -139,13 +154,92 @@ static const char *const mode_name[] = { "POT", "SWEEP", "MANUAL" };
 
 static int mode = MODE_POT;
 static int manual_angle = 90;
-static int lcd_ok, tft_ok, exti_ok = 1;
+static int exti_ok = 1;
 
-static tft_bar_t bar_pot, bar_servo;
+/* ------------------------------------------------------------------ */
+/* ESP32 receiver station on the serial buses (esp32_bridge/ sketch)  */
+/* ------------------------------------------------------------------ */
+#define BRIDGE_ADDR  0x28
+static int bridge_ok;
 
+/* Never touch the I2C controller while the bus is wedged: a glitched
+ * slave can hold SDA low, and the polled XIic calls would block forever.
+ * Returns 1 when the bus is idle (after one controller-reset attempt). */
+static int i2c_ready(void)
+{
+    if (!(Xil_In32(I2C + 0x104) & 0x4))        /* SR bit2 = bus busy */
+        return 1;
+    Xil_Out32(I2C + 0x40, 0xA);                /* soft-reset controller */
+    usleep(1000);
+    return !(Xil_In32(I2C + 0x104) & 0x4);
+}
+
+static int bridge_init(void)
+{
+    /* reset the I2C controller first: a JTAG reload may have stopped the
+     * previous run in the middle of a transfer, wedging the bus */
+    Xil_Out32(I2C + 0x40, 0xA);
+    usleep(1000);
+
+    spi0_set_clock(2000000);            /* SPI slaves like it gentle */
+
+    u8 d;
+    bridge_ok = i2c_ready() &&
+                (XIic_Recv(I2C, BRIDGE_ADDR, &d, 1, XIIC_STOP) == 1);
+    return bridge_ok;
+}
+
+/* push one telemetry line to the receiver: I2C write + one raw SPI frame */
+static void bridge_push(const char *line, int len)
+{
+    if (i2c_ready())
+        XIic_Send(I2C, BRIDGE_ADDR, (u8 *)line, len, XIIC_STOP);
+
+    u8 tx[32] = {0};
+    memcpy(tx, line, len > 32 ? 32 : len);
+    spi0_xfer(tx, 0, 32);
+}
+
+/* round-trip PASS/FAIL on both buses (ESP32 receiver) */
+static void bridge_test(void)
+{
+    u8 ping[4] = { 'P', 'I', 'N', 'G' }, sum = 0;
+    int sent = 0;
+    if (i2c_ready()) {
+        sent = XIic_Send(I2C, BRIDGE_ADDR, ping, 4, XIIC_STOP);
+        if (i2c_ready())
+            XIic_Recv(I2C, BRIDGE_ADDR, &sum, 1, XIIC_STOP);
+        xil_printf("bridge I2C: sent %d/4, checksum %02X (want 10) -> %s\r\n",
+                   sent, sum, (sent == 4 && sum == 0x10) ? "PASS" : "FAIL");
+    } else {
+        xil_printf("bridge I2C: bus wedged (SDA held low) -> FAIL\r\n");
+    }
+
+    /* SPI: raw 32-byte frames; the receiver's armed reply starts with
+     * "ESP32-OK", so frame 2 carries it back */
+    static const char hello[] = "HELLO FROM RISC-V MCU";
+    u8 tx[32] = {0}, rx[32] = {0};
+    const u8 *reply = 0;
+
+    memcpy(tx, hello, sizeof hello);
+    spi0_xfer(tx, rx, 32);              /* frame 1 arms the reply       */
+    spi0_xfer(tx, rx, 32);              /* frame 2 reads it back        */
+    for (int i = 0; i + 8 <= 32 && !reply; i++)
+        if (memcmp(rx + i, "ESP32-OK", 8) == 0)
+            reply = rx;
+
+    xil_printf("bridge SPI: reply \"");
+    const u8 *show = reply ? reply : rx;
+    for (int i = 0; i < 32; i++)
+        xil_printf("%c", (show[i] >= 32 && show[i] < 127) ? show[i] : '.');
+    xil_printf("\" -> %s\r\n", reply ? "PASS" : "FAIL");
+}
+
+/* ------------------------------------------------------------------ */
 static void console_help(void)
 {
-    xil_printf("commands: m=next mode  a/d=servo -/+10 (MANUAL)  r=reset  h=help\r\n");
+    xil_printf("commands: m=next mode  a/d=servo -/+10 (MANUAL)  r=reset  "
+               "b=re-probe bridge  n=bridge test  h=help\r\n");
 }
 
 static void handle_cmd(int c)
@@ -170,6 +264,25 @@ static void handle_cmd(int c)
         btn_presses = 0;
         xil_printf("button counter reset\r\n");
         break;
+    case 'n':
+        bridge_test();
+        break;
+    case 'b':
+        /* re-probe the bridge without a reset (e.g. it was plugged late) */
+        bridge_ok = 0;
+        for (int i = 0; i < 5 && !bridge_ok; i++) {
+            usleep(500000);
+            u8 d;
+            bridge_ok = i2c_ready() &&
+                        (XIic_Recv(I2C, BRIDGE_ADDR, &d, 1, XIIC_STOP) == 1);
+        }
+        if (bridge_ok) {
+            xil_printf("bridge detected at 0x28 - running round-trip test\r\n");
+            bridge_test();
+        } else {
+            xil_printf("no bridge at 0x28 - check wiring/power\r\n");
+        }
+        break;
     case 'h':
     case '?':
         console_help();
@@ -177,47 +290,6 @@ static void handle_cmd(int c)
     default:                       /* ignore noise (floating DIP-UART RX) */
         break;
     }
-}
-
-/* ------------------------------------------------------------------ */
-/* TFT dashboard                                                      */
-/* ------------------------------------------------------------------ */
-static void dash_init(void)
-{
-    tft_fill_rect(0, 0, TFT_W, 28, C_NAVY);
-    tft_text(46, 6, 2, C_WHITE, C_NAVY, "RISC-V MCU SHOWCASE");
-    tft_text(10, 42, 2, C_CYAN, C_BLACK, "POT");
-    tft_text(10, 100, 2, C_CYAN, C_BLACK, "SERVO");
-    tft_bar_init(&bar_pot,   10, 68, 300, 16, C_GREEN);
-    tft_bar_init(&bar_servo, 10, 126, 300, 16, C_YELLOW);
-    tft_text(10, 218, 1, C_GRAY, C_BLACK,
-             "TICK 100HZ ITCM ISR - BTN IRQ DIP8 - UART1 DIP11/12");
-}
-
-static void dash_fast(u32 mv, int angle)
-{
-    tft_bar_set(&bar_pot,   (int)(mv * 1000 / 3300));
-    tft_bar_set(&bar_servo, angle * 1000 / 180);
-}
-
-static void dash_med(u32 mv, int angle)
-{
-    char t[16];
-    sprintf(t, "%4uMV", (unsigned)mv);
-    tft_text(200, 42, 2, C_WHITE, C_BLACK, t);
-    sprintf(t, "%3dDEG", angle);
-    tft_text(200, 100, 2, C_WHITE, C_BLACK, t);
-}
-
-static void dash_slow(u32 up_s)
-{
-    char t[24];
-    sprintf(t, "MODE %c", 'A' + mode);
-    tft_text(10, 160, 3, C_ORANGE, C_BLACK, t);
-    sprintf(t, "BTN%4u", (unsigned)btn_presses);
-    tft_text(160, 160, 3, C_WHITE, C_BLACK, t);
-    sprintf(t, "UP%5us", (unsigned)up_s);
-    tft_text(10, 192, 2, C_GRAY, C_BLACK, t);
 }
 
 /* ------------------------------------------------------------------ */
@@ -229,9 +301,9 @@ int main(void)
     xil_printf("\r\n=====================================================\r\n");
     xil_printf("  RISC-V MCU showcase - 7 features on one breadboard\r\n");
     xil_printf("=====================================================\r\n");
-    xil_printf("  LCD1602+PCF8574 : DIP13 SCL, DIP14 SDA, 3.3V, GND\r\n");
-    xil_printf("  ILI9341 TFT     : CS38 SCK35 MOSI36 MISO37 DC48 RST47\r\n");
-    xil_printf("                    VCC=VU(5V) LED=3.3V GND\r\n");
+    xil_printf("  ESP32 bridge    : SCL13->G22 SDA14->G21 | SCK35->G18\r\n");
+    xil_printf("                    MOSI36->G23 MISO37<-G19 CS38->G5\r\n");
+    xil_printf("                    common GND (ESP32 on its own USB)\r\n");
     xil_printf("  Servo (SG90)    : signal DIP10, power VU(5V), GND\r\n");
     xil_printf("  Potentiometer   : wiper DIP15, ends 3.3V / GND\r\n");
     xil_printf("  Button          : DIP8 -> button -> GND, 10k DIP8->3.3V\r\n");
@@ -244,33 +316,23 @@ int main(void)
     int adc_ok = (adc_init() == 0);
     servo_init();
     uart1_init();
-    lcd_ok = lcd_init();
-    tft_ok = tft_init();
+    bridge_init();
     int irq_ok = (irq_init() == 0);
     REG32(BTN1 + 0x4) = 1;                             /* BTN1 = input */
 
     xil_printf("  ADC ............ %s\r\n", adc_ok ? "OK" : "FAILED");
     xil_printf("  Servo PWM ...... OK (50 Hz on DIP 10)\r\n");
     xil_printf("  DIP UART ....... OK (telemetry at 1 Hz)\r\n");
-    xil_printf("  LCD1602 ........ %s\r\n",
-               lcd_ok ? "OK" : "not found (wire it, then reset)");
-    xil_printf("  ILI9341 ........ %s\r\n",
-               tft_ok ? "OK (ID 9341)" : "no ID - driving blind (check MISO)");
+    xil_printf("  ESP bridge ..... %s\r\n",
+               bridge_ok ? "OK at 0x28 (I2C+SPI telemetry on, try 'n')"
+                         : "not detected (wire it + reset, or ignore)");
     xil_printf("  Interrupts ..... %s\r\n",
                irq_ok ? "OK (timer_0 + button EXTI)" : "FAILED");
-    {
-        extern char __itcm_start[];
-        xil_printf("  tick ISR runs from ITCM at 0x%08x (see lscript.ld)\r\n",
-                   (unsigned)(UINTPTR)tick_isr);
-        (void)__itcm_start;
-    }
+    xil_printf("  tick ISR runs from ITCM at 0x%08x (see lscript.ld)\r\n",
+               (unsigned)(UINTPTR)tick_isr);
     console_help();
 
-    if (lcd_ok)
-        lcd_line(0, "RISC-V MCU DEMO");
-    dash_init();
-
-    u32 last_fast = 0, last_med = 0, last_slow = 0;
+    u32 last_fast = 0, last_slow = 0;
     u32 seen_presses = 0, exti_raw_last = 0;
     int btn1_prev = 0;
     int angle = 90;
@@ -289,7 +351,7 @@ int main(void)
             seen_presses = btn_presses;
             mode = (mode + 1) % MODE_COUNT;
             xil_printf("button IRQ #%u: mode -> %c (%s)\r\n",
-                       seen_presses, 'A' + mode, mode_name[mode]);
+                       (unsigned)seen_presses, 'A' + mode, mode_name[mode]);
         }
 
         u32 t = g_ticks;
@@ -311,7 +373,6 @@ int main(void)
                 angle = manual_angle;
             }
             servo_set_angle(angle);
-            dash_fast(mv, angle);
 
             /* on-board BTN1 also cycles the mode (works with no wiring) */
             int b = REG32(BTN1) & 1;
@@ -324,35 +385,22 @@ int main(void)
             REG32(LED2) = (u32)mode & 3;               /* mode on LEDs */
         }
 
-        /* every 250 ms: numeric readouts */
-        if (t - last_med >= 25) {
-            last_med = t;
-            dash_med(mv, angle);
-        }
-
-        /* every second: LCD, telemetry, console, floating-pin guard */
+        /* every second: telemetry (UART + both buses), console, guard */
         if (t - last_slow >= 100) {
             last_slow = t;
             u32 up_s = t / 100;
             char line[40];
 
-            if (lcd_ok) {
-                sprintf(line, "%4umV   %3u deg", (unsigned)mv,
-                        (unsigned)angle);
-                lcd_line(0, line);
-                sprintf(line, "M:%c BTN:%2u%5us", 'A' + mode,
-                        (unsigned)btn_presses, (unsigned)up_s);
-                lcd_line(1, line);
-            }
-            dash_slow(up_s);
-
-            sprintf(line, "$MCU,%u,%u,%d,%c,%u\r\n",
-                    (unsigned)up_s, (unsigned)mv, angle, 'A' + mode,
-                    (unsigned)btn_presses);
+            int len = sprintf(line, "$MCU,%u,%u,%d,%c,%u\r\n",
+                              (unsigned)up_s, (unsigned)mv, angle,
+                              'A' + mode, (unsigned)btn_presses);
             uart1_puts(line);
+            if (bridge_ok)
+                bridge_push(line, len - 2);            /* no CRLF */
 
             xil_printf("[%5us] POT %4u mV | servo %3d deg | mode %c | btn %u\r\n",
-                       up_s, mv, angle, 'A' + mode, btn_presses);
+                       (unsigned)up_s, (unsigned)mv, angle, 'A' + mode,
+                       (unsigned)btn_presses);
 
             /* an unwired INTR_0 floats (no pull-up on the pin) and can
              * fire continuously - detect the storm and mute it */

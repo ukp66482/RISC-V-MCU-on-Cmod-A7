@@ -236,12 +236,12 @@ Flash contents are **not memory-mapped**: there is no XIP window, and code canno
 |------|-------|
 | Base Address | `0x4080_0000` |
 | SCLK | Software-programmable, ≈1.6 – 25 MHz (**6.25 MHz at reset**) |
-| Clock Control | `0x4090_0000` — runtime clock setting; see `examples/07_spi_clock` for the `spi_set_clock()` helper |
+| Clock Control | `0x4090_0000` — runtime clock setting; see `showcase/src/spi0.c` for the `spi0_set_clock()` helper |
 | Slave Selects | 2 — two devices can share the bus |
 | Pins | DIP 35 SCLK (V3) · 36 MOSI (W5) · 37 MISO (V4) · 38 SS0 (U4) · 39 SS1 (V5) |
 | Interrupt | INTC In7 |
 
-**Description:** SPI master for external devices (displays, ADCs, flash modules). Full-duplex push-pull signaling — no pull-ups needed; the active device is chosen by driving its SS line low. Use the Vitis `XSpi` driver. The serial clock is set at runtime through the clock-control block: slow it down for breadboard wiring or long cables, speed it up for short-wired display modules (`spi_set_clock(hz)` — one call, takes effect immediately).
+**Description:** SPI master for external devices (displays, ADCs, flash modules). Full-duplex push-pull signaling — no pull-ups needed; the active device is chosen by driving its SS line low. Use the Vitis `XSpi` driver. The serial clock is set at runtime through the clock-control block: slow it down for breadboard wiring or long cables, speed it up for short-wired display modules (`spi0_set_clock(hz)` — one call, takes effect immediately).
 
 > **Note:** This is a *second, independent* SPI controller — do not confuse it with
 > `axi_quad_spi_0` (`0x4050_0000`), which is dedicated to the on-board QSPI boot flash.

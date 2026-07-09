@@ -181,7 +181,7 @@ configuration.
 
 ### 4.2 Add Source Files
 
-Add more source files under the `src` directory as your project grows (e.g. `gpio_init.c`). Assembly files (`.S`) are also supported — add them the same way and they will be compiled and linked together with the rest of the project. See [`workspace-example/examples/02_btn_led_asm/`](../../../workspace-example/examples/02_btn_led_asm/) for an example written entirely in RISC-V assembly.
+Add more source files under the `src` directory as your project grows (e.g. `gpio_init.c`). Assembly files (`.S`) are also supported — add them the same way and they will be compiled and linked together with the rest of the project.
 
 ![Add Source Files](images/image_11.png)
 
