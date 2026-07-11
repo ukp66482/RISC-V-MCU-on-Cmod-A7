@@ -52,15 +52,16 @@ static void mcu_init(void)
 }
 
 /* ==========================================================================
- * Demo: one thing in each memory, then blink. Replace from here down.
+ * Demo: one thing in each memory, then cycle the RGB LED and report on the
+ * UART once per step. Replace from here down.
  * ========================================================================*/
-#define LED_BASE  0x40000000            /* board LEDs (see the datasheet)  */
+#define RGB_BASE  0x40020000            /* on-board RGB LED (see the datasheet) */
 
 DTCM_DATA static u32 blink_count;       /* lives in DTCM (zeroed for you)  */
 
 static ITCM_FUNC void blink_step(u32 v) /* executes from ITCM              */
 {
-    Xil_Out32(LED_BASE, v & 0x3);
+    Xil_Out32(RGB_BASE, v & 0x7);       /* 3 bits = R/G/B -> 8 colors      */
 }
 
 static inline u32 sp_now(void)          /* current stack pointer           */
@@ -84,11 +85,13 @@ int main(void)
     xil_printf("  stack        @ 0x%08x   (DTCM,  grows down)\r\n\r\n",
                sp_now());
 
-    Xil_Out32(LED_BASE + 0x4, 0x0);     /* both LEDs as outputs */
+    Xil_Out32(RGB_BASE + 0x4, 0x0);     /* RGB pins as outputs */
     u32 v = 1;
     while (1) {
         blink_step(v);
-        v ^= 0x3;
+        xil_printf("  alive: blink_count=%u (DTCM)  rgb=0x%x\r\n",
+                   blink_count, v & 0x7);
+        v = (v + 1) & 0x7;              /* watch the 3 bits count in binary */
         blink_count++;
         for (volatile int i = 0; i < 20000000; i++)
             ;

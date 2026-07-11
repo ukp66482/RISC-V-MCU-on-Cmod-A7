@@ -127,8 +127,8 @@ heap take no space in the image.
   quit with Ctrl-]). The board shows up as two ports — the UART is usually the
   higher-numbered one.
 - A useful convention: light an LED near the top of `main()` so a running
-  board is recognizable at a glance. The template's blinking LEDs serve this
-  purpose.
+  board is recognizable at a glance. The template's color-cycling RGB LED
+  serves this purpose.
 
 > **Note:** The reset button (BTN0) restarts the CPU into the bootloader
 > (BRAM is intact), which re-copies your app from flash, so in this design a

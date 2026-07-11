@@ -1,75 +1,91 @@
 # JTAG Debug Mode — Vitis Unified IDE
 
-This guide describes how to load and debug a MicroBlaze RISC-V application over JTAG using the AMD Vitis Unified IDE. JTAG loads the program directly into RAM and provides full debug control. Nothing is written to flash, and a power-cycle returns the board to whatever was last deployed to flash.
+This guide describes how to load and debug a MicroBlaze RISC-V application
+over JTAG using the AMD Vitis Unified IDE. JTAG loads the program directly
+into RAM and provides full debug control. Nothing is written to flash.
 
 ## Prerequisites
 
-- The hardware design as an `.xsa` file — use the prebuilt [`release/top_wrapper.xsa`](../../../release/top_wrapper.xsa) (no Vivado needed)
-- **Vitis Unified IDE 2025.x** installed (the classic pre-2023.2 Vitis GUI looks
-  completely different and is not covered here), with its tools on PATH:
-  `source /opt/Xilinx/2025.2/Vitis/settings64.sh` (adjust to your install)
-- Cmod A7-35T board connected via its micro-USB cable (it carries power, UART,
-  and JTAG all at once)
+- The hardware design as an `.xsa` file — use the prebuilt
+  [`release/top_wrapper.xsa`](../../../release/top_wrapper.xsa)
+- **Vitis Unified IDE 2025.2** installed
+- Cmod A7-35T board connected via its micro-USB cable (it carries power,
+  UART, and JTAG all at once)
+- A serial terminal program (GTKTerm, PuTTY, or pyserial's miniterm) for the
+  board's console output
 
 ---
 
-## 1. Open Vitis Workspace
+## 1. Open the Workspace
 
-Launch the Vitis Unified IDE. On the Welcome page, click **Open Workspace** to select or create a working directory — use the repo's `workspace-example/` folder, which is what the template paths and this guide assume (any empty folder also works if you adjust the paths yourself).
+Launch the Vitis Unified IDE and click **Set Workspace** on the Welcome page.
 
-![Open Workspace](images/image_0.png)
+![Set Workspace](images/image0.png)
+
+Select the repo's `workspace-example/` folder — the template paths and this
+guide assume it (any empty folder also works if you adjust the paths
+yourself).
+
+![Open Folder](images/image1.png)
+
+The first time a Vitis installation opens this workspace it may show an
+**Update Workspace** dialog. Click **Update** — it refreshes only the
+workspace metadata and does not modify any component.
+
+![Update Workspace](images/image2.png)
 
 ---
 
 ## 2. Create a Platform
 
+The platform wraps the hardware design and provides the driver layer (BSP).
+It is created once per workspace and reused by every application. **If the
+workspace already contains a `platform` component, skip to section 3.**
+
 ### 2.1 New Platform Component
 
-From the menu bar, select **File > New > Platform** to create a new platform component.
+From the menu bar, select **File > New Component > Platform**.
 
-![File > New > Platform](images/image_1.png)
+![File > New Component > Platform](images/image3.png)
 
 ### 2.2 Name and Location
 
-On the **Name and Location** page:
+Enter `platform` as the component name and keep the workspace directory as
+the location. Click **Next**.
 
-- **Component name**: enter `platform`
-- **Component location**: choose your workspace directory
+![Platform Name and Location](images/image4.png)
 
-Click **Next** to continue.
+### 2.3 Select the Hardware Design (XSA)
 
-![Platform Name and Location](images/image_2.png)
+On the **Flow** page, select **Hardware Design** and click **Browse** next to
+the *Hardware Design (XSA) For Implementation* field.
 
-### 2.3 Select Hardware Design (XSA)
+![Select Platform Creation Flow](images/image5.png)
 
-On the **Flow** page:
+Pick the prebuilt `release/top_wrapper.xsa` from the repository.
 
-- Select **Hardware Design**
-- In the **Hardware Design (XSA) For Implementation** field, browse to the
-  prebuilt `release/top_wrapper.xsa` (or your own Vivado export)
-
-Wait for the tool to create the System Device Tree and retrieve processor
-details — it takes under a minute; it is done when the next page can list
-`microblaze_riscv_0`.
-
-![Select XSA File](images/image_3.png)
+![Select top_wrapper.xsa](images/image6.png)
 
 ### 2.4 Select Operating System and Processor
-
-On the **OS and Processor** page:
 
 - **Operating system**: `standalone`
 - **Processor**: `microblaze_riscv_0`
 
-Click **Next** to finish.
+Click **Next**.
 
-![OS and Processor](images/image_4.png)
+![OS and Processor](images/image7.png)
 
-### 2.5 Platform Created
+### 2.5 Summary
 
-Once created, Vitis displays the platform's Domain settings where you can verify the processor and configuration.
+Review the settings and click **Finish**.
 
-![Platform Created](images/image_5.png)
+![Platform Summary](images/image8.png)
+
+Vitis generates the platform component. When it finishes, the Explorer shows
+the `platform` component with its `Sources` and `Output` trees, and the
+notification *"Created platform: platform"* appears.
+
+![Platform Created](images/image9.png)
 
 ---
 
@@ -77,245 +93,285 @@ Once created, Vitis displays the platform's Domain settings where you can verify
 
 ### 3.1 Create from Template
 
-Open the **Examples** view (icon in the left activity bar, also linked from the Welcome page — see the screenshot). In the left-side template list, select **Hello World**, then click **Create Application Component from Template**.
+Open the **Examples** view from the left activity bar. Under *Embedded
+Software Examples*, select **Hello World** and click the **+** (Create
+Application Component from Template) button.
 
-![Select Hello World Template](images/image_6.png)
+![Hello World Template](images/image10.png)
 
-### 3.2 Set Application Name
+### 3.2 Name and Location
 
-On the **Name and Location** page:
+Enter your application name (this guide uses `test`). Click **Next**.
 
-- **Component name**: enter your application name (e.g. `GPIO_test`)
+![Application Name](images/image11.png)
 
-Click **Next** to continue.
+### 3.3 Select the Platform
 
-![Set Application Name](images/image_7.png)
+Select the `platform` component created in section 2 (Board: `cmod_a7-35t`).
+Click **Next**.
 
-### 3.3 Select Platform
+![Select Platform](images/image12.png)
 
-On the **Hardware** page, select the previously created **platform** (Board: `cmod_a7-35t`).
+### 3.4 Select the Domain
 
-Click **Next** to continue.
+Select `standalone_microblaze_riscv_0`. Click **Next**.
 
-![Select Platform](images/image_8.png)
+![Select Domain](images/image13.png)
 
-### 3.4 Review Summary and Finish
+### 3.5 Summary
 
-Review the application settings:
+Review the settings and click **Finish**.
 
-| Field | Value |
-|---|---|
-| Name | GPIO_test |
-| Platform | platform |
-| Domain | standalone_microblaze_riscv_0 (OS:standalone, Processor:microblaze_riscv_0) |
+![Application Summary](images/image14.png)
 
-Click **Finish** to create the application.
+The new component appears in the Explorer. Its `src/` folder holds the
+template's generated files: `helloworld.c`, `lscript.ld`, `platform.c`, and
+`platform.h`.
 
-![Summary](images/image_9.png)
+![Application Created](images/image15.png)
 
 ---
 
-## 4. Write Application Code
+## 4. Replace the Sources with the Course Template
 
-### 4.1 Default Source Code
+The generated Hello World sources are replaced entirely by the course
+template — its `main.c` starts with `mcu_init()` and its `lscript.ld` places
+code in the 512 KB SRAM, the stack in DTCM, and provides the
+`ITCM_FUNC`/`DTCM_DATA` fast-memory attributes.
 
-After creation, a default `helloworld.c` file is placed in the `src` directory.
+### 4.1 Delete the Generated Files
 
-![Default Source Code](images/image_10.png)
+In the Explorer, select all four files under `src/` (`helloworld.c`,
+`lscript.ld`, `platform.c`, `platform.h`), right-click, and choose
+**Delete**.
 
-**Replace it with the course template.** A Vitis component's `src/` is a plain
-folder on disk, so do the copy in a file manager or terminal (paths relative to
-the workspace, here `workspace-example/`):
+![Delete Generated Sources](images/image16.png)
 
-```bash
-cd workspace-example
-cp app_template/src/main.c app_template/src/lscript.ld GPIO_test/src/
-rm GPIO_test/src/helloworld.c
+### 4.2 Import the Template Files
+
+Right-click the `src/` folder and choose **Import > Files...**
+
+![Import Files](images/image17.png)
+
+Navigate to `workspace-example/app_template/src/` and select both `main.c`
+and `lscript.ld`. Click **Open**.
+
+![Select Template Files](images/image18.png)
+
+Afterwards `src/` contains exactly `main.c` and `lscript.ld`. Files inside
+`src/` are compiled automatically; no build configuration is needed.
+
+The template's one rule: **`mcu_init();` stays the first line of `main()`.**
+It copies `ITCM_FUNC` code into the ITCM, zeroes the DTCM, and sets the USB
+UART to 115200. The demo loop then cycles the on-board RGB LED and prints a
+status line about once a second.
+
+### 4.3 About the Linker Script
+
+The imported `lscript.ld` defines three memory regions — `sram` (512 KB),
+`itcm` (32 KB), `dtcm` (64 KB) — and maps everything to SRAM except the
+stack (DTCM) and `ITCM_FUNC` code (ITCM). The component settings page
+*Linker Script* can display the regions, but treat it as **read-only**: it
+understands only part of the hand-written script (the section list may look
+incomplete — that is expected), and letting it regenerate the script would
+discard the ITCM/DTCM layout. To resize the stack or heap, edit
+`_STACK_SIZE` / `_HEAP_SIZE` at the top of `lscript.ld` instead.
+
+---
+
+## 5. Set the Console UART (BSP)
+
+The BSP decides which UART carries `xil_printf` output. The default is
+`uart_1` — the DIP-header pins — so with it, nothing appears on the USB
+console.
+
+Open the platform's **Settings > vitis-comp.json**, navigate to
+**standalone** (Board Support Package > microblaze_riscv_0 > standalone).
+The configuration table shows `standalone_stdin` and `standalone_stdout` set
+to `uart_1`:
+
+![BSP Defaults to uart_1](images/image19.png)
+
+Change both to **`uart_USB`**. The output log reports the domain being
+reconfigured.
+
+![stdin/stdout Set to uart_USB](images/image20.png)
+
+> **Note:** If the platform BSP is ever regenerated (for example after
+> changing another BSP option), re-check this page — regeneration can reset
+> stdin/stdout to `uart_1`. After changing it, rebuild the platform **and**
+> the application; the setting is compiled into the application's BSP
+> library.
+
+---
+
+## 6. Build
+
+### 6.1 Build the Platform
+
+In the **FLOW** panel, select the `platform` component and click **Build**.
+Wait for *"Platform Build Finished successfully"*.
+
+![Build Platform](images/image23.png)
+
+### 6.2 Build the Application
+
+Switch the FLOW component to your application and click **Build**.
+
+![Build Application](images/image24.png)
+
+The first application build asks how platform builds should be handled.
+Select **Always build platform with application** and click **Save in
+Workspace Preference** — BSP changes (such as section 5) then propagate
+automatically on every build.
+
+![Platform Build Dependency](images/image25.png)
+
+The build produces `<workspace>/test/build/test.elf`.
+
+> During the build, Vitis automatically links in `boot.S` and `crt.o` from
+> the standalone BSP: `boot.S` runs first after reset (initializes registers,
+> stack pointer, and trap vector), and `crt.o` clears `.bss` before calling
+> `main()`.
+
+---
+
+## 7. Debug over JTAG
+
+### 7.1 Start a Debug Session
+
+In the **FLOW** panel, click **Debug**. Vitis programs the FPGA over JTAG,
+loads the ELF into memory, and pauses execution at `main()`.
+
+![Debug Launched](images/image26.png)
+
+The Debug view shows the target (*RISC-V at USER2*, *Hart #0 — PAUSED ON
+BREAKPOINT*), the call stack, local variables, and breakpoints. Note the call
+stack address: `main()` sits at `0x600009EC` — in SRAM, exactly where the
+linker script placed it.
+
+![Paused at main()](images/image27.png)
+
+### 7.2 Open a Serial Terminal, Then Continue
+
+Open a serial terminal **before** resuming execution. The board shows up as
+two serial ports; the UART is usually the higher-numbered one. Settings:
+**115200 8N1**.
+
+![GTKTerm on the Board UART](images/image32.png)
+
+Click **Continue (F5)**. The application starts: the memory tour prints once,
+followed by a status line about once a second, and the on-board RGB LED
+cycles through its colors.
+
+![Memory Tour and Status Output](images/image33.png)
+
+**✔ Checkpoint** — the memory tour is the proof that everything is wired
+correctly:
+
+```
+RISC-V MCU on Cmod A7 - memory tour
+  main()       @ 0x600009EC   (SRAM,  cached)
+  blink_step() @ 0x00008000   (ITCM,  1-cycle)
+  blink_count  @ 0x00010000   (DTCM,  1-cycle)
+  stack        @ 0x0001FFC0   (DTCM,  grows down)
 ```
 
-Overwrite `lscript.ld` when asked — the generated one is the small all-BRAM
-default you are replacing. Afterwards the Explorer's `src/` shows exactly
-`main.c` and `lscript.ld`:
+Each line matches the memory map in the datasheet: code in SRAM, fast code in
+ITCM, fast data and the stack in DTCM. If the terminal stays silent, see the
+Troubleshooting section.
 
-- `main.c` — starts with `mcu_init()` (the template's one rule: keep it as the
-  first line of `main()`) and prints a memory tour at boot
-- `lscript.ld` — places code in SRAM, the stack in DTCM, and provides the
-  `ITCM_FUNC` / `DTCM_DATA` fast-memory attributes
+### 7.3 Breakpoints and Stepping
 
-Files inside `src/` are compiled automatically — this swap needs no build
-configuration.
+Click in the gutter next to a line number to set a breakpoint. The toolbar
+provides **Continue**, **Step Over**, **Step Into**, and **Step Out**. The
+left panel shows the call stack, variables, and watch expressions while the
+target is paused.
 
-### 4.2 Add Source Files
-
-Add more source files under the `src` directory as your project grows (e.g. `gpio_init.c`). Assembly files (`.S`) are also supported — add them the same way and they will be compiled and linked together with the rest of the project.
-
-![Add Source Files](images/image_11.png)
-
-### 4.3 Configure Compile Sources
-
-Sources inside `src/` build automatically. **UserConfig.cmake** (Explorer → your component → **Settings**) is for files you keep *outside* `src/` — open its **Sources > Compile sources** section to add them:
-
-1. Click **Browse** to select files
-2. Verify the file appears in the list
-3. Use **Delete** to remove unwanted entries
-
-![Configure Compile Sources - 1](images/image_12.png)
-
-![Configure Compile Sources - 2](images/image_13.png)
+To run the application without the debugger, use **Run** in the FLOW panel
+instead — same loading, no pause at `main()`.
 
 ---
 
-## 5. Configure the Linker Script
+## 8. Inspection Tools
 
-### 5.1 Memory Region Settings
+While a debug session is active, the **View** menu provides three inspectors:
 
-Open the **Linker Script** settings page (Explorer → your component →
-**Settings** → *Linker Script*):
+![View Menu](images/image28.png)
 
-- **Available Memory Regions**: you should see the template's three — `sram`
-  (512 KB), `itcm` (32 KB), `dtcm` (64 KB)
-- **Stack Size / Heap Size**: the template defaults (8 KB / 2 KB) are fine —
-  treat this page as read-only unless a build error tells you otherwise
+### 8.1 Memory Inspector
 
-![Linker Script Settings](images/image_14.png)
+Enter an address to inspect memory directly — for example `0x60000000` (the
+application image in SRAM), `0x8000` (ITCM), or `0x10000` (DTCM).
 
-### 5.2 Section to Memory Region Mapping
+![Memory Inspector](images/image29.png)
 
-Verify the section-to-region mapping: everything (`.text`, `.data`, `.bss`, `.heap`, …) in `sram`, except `.stack` in `dtcm` and `.itcm.text` in `itcm`.
+### 8.2 Register Inspector
 
-![Section Mapping](images/image_15.png)
+Shows all processor registers with live values. With the target paused at
+`main()`, `sp` reads `0x00020000` — the top of the DTCM, matching the
+linker script's stack placement.
 
-> **Note:** the Vitis-generated default linker script places everything in the
-> 128 KB BRAM — fine for a quick Hello World over JTAG, but small, and the
-> layout collides with the bootloader flow. The course template's
-> [`lscript.ld`](../../../workspace-example/app_template/src/lscript.ld)
-> (already copied in §4.1) fixes this: code/data in 512 KB SRAM, stack in DTCM,
-> `ITCM_FUNC`/`DTCM_DATA` support — and the same ELF can then also be deployed
-> to flash. See the
-> [Standalone Boot Mode guide](../Standalone-Boot-Mode/Standalone-Boot-Mode.md) §3.
-> Use this GUI page to view the regions or resize the stack and heap. Do not
-> let it regenerate the script — that would discard the template's ITCM/DTCM
-> layout.
+![Register Inspector](images/image30.png)
+
+### 8.3 Disassembly View
+
+Shows the machine code actually executing, with source interleaving. The
+instruction addresses around `main()` all fall in `0x6000_xxxx` — the
+program runs from SRAM.
+
+![Disassembly](images/image31.png)
 
 ---
 
-## 6. Configure Platform BSP
+## 9. Troubleshooting
 
-Open the platform's **Configuration for Os: standalone** settings page and verify the following key parameters:
+1. **Platform build fails with
+   `error: passing argument 2 of 'strcmp' ... [-Wint-conversion]` in
+   `xclk_wiz.c`** (reported as *"Error in generating platform"*). Two things
+   combine to cause this:
 
-- **stdin** and **stdout**: set both to **`uart_USB`**. The default may be
-  `uart_1` (the DIP-pin UART) — with that setting `xil_printf` output never
-  reaches your USB terminal.
-- Adjust other BSP settings as needed
+   - The clock-management driver source that ships with Vitis 2025.2
+     (`clk_wiz` v1_10) contains a misplaced parenthesis in `xclk_wiz.c`
+     line 839.
+   - If another RISC-V toolchain with GCC 14 or newer is on your PATH (for
+     example one installed at `/opt/riscv` for assembly coursework), the BSP
+     build may pick it instead of the Vitis-bundled compiler. GCC 14+ treats
+     this construct as an error; the bundled compiler treats it as a warning.
 
-The project-wide serial convention is 115200 8N1. The course template needs
-no changes here; its `mcu_init()` already sets 115200. Only if you kept the
-stock `helloworld.c` (which prints at whatever rate the UART was last set
-to), add
-`XUartNs550_SetBaud(XPAR_UART_USB_BASEADDR, XPAR_XUARTNS550_0_CLOCK_FREQ, 115200);`
-at the top of its `main()`.
+   The offending line, as the IDE shows it:
 
-![BSP Configuration](images/image_16.png)
+   ![clk_wiz Driver Bug](images/image21.png)
 
----
+   **Fix the source** (works with either compiler): change line 839 from
 
-## 7. Build
+   ```c
+   strcmp(InstancePtr->Config.Name, "xlnx,clkx5-wiz-1.0" >= 0)
+   ```
 
-### 7.1 Build the Platform
+   to
 
-In the **FLOW** panel at the bottom-left, select the **platform** component and click **Build**.
+   ```c
+   strcmp(InstancePtr->Config.Name, "xlnx,clkx5-wiz-1.0") >= 0
+   ```
 
-Wait for the build to complete — confirm the log shows `Platform Build Finished Successfully`.
+   ![After the Fix](images/image22.png)
 
-![Build Platform](images/image_17.png)
+   Then rebuild the platform. Apply the same one-line fix to the Vitis
+   installation copy at
+   `/opt/Xilinx/2025.2/data/embeddedsw/XilinxProcessorIPLib/drivers/clk_wiz_v1_10/src/xclk_wiz.c`
+   — the platform re-imports driver sources whenever the BSP is regenerated,
+   so an unpatched installation brings the error back.
 
-### 7.2 Build the Application
+   To check which compiler configured the BSP, read
+   `platform/.../bsp/libsrc/build_configs/gen_bsp/compile_commands.json`.
+   To force a re-pick, delete `platform/.../bsp/libsrc/build_configs` and
+   rebuild from a session whose PATH does not contain the other toolchain.
 
-Switch to the application component (e.g. `GPIO_test`) and click **Build**.
-
-Verify the build succeeds and produces the `.elf` file at
-`<workspace>/GPIO_test/build/GPIO_test.elf`.
-
-> **Note:** During the build, Vitis automatically links in `boot.S` and `crt.o` from the standalone BSP. You do not need to provide them manually.
-> - **`boot.S`** — the first code that runs after reset. It zeros all general-purpose registers (x0–x31), initializes the stack pointer, sets up exception/interrupt vectors, and jumps to the C runtime entry point.
-> - **`crt.o`** (C Runtime) — runs before `main()`. It zeros the BSS segment (uninitialized global variables) and then calls `main()`.
-
-![Build Application](images/image_18.png)
-
----
-
-## 8. Run and Debug over JTAG
-
-### 8.1 Run the Application
-
-Before debugging, you can first run the application to verify it works correctly. In the **FLOW** panel, click **Run**.
-
-Vitis will automatically:
-1. Download the bitstream to the FPGA via JTAG
-2. Load the `.elf` into the MicroBlaze RISC-V processor
-3. Execute the program from start to finish
-
-**✔ Checkpoint** — open a 115200-baud terminal before clicking Run. The board
-shows up as two serial ports; the UART is usually the higher-numbered one
-(e.g. `/dev/ttyUSB1`). `python3 -m serial.tools.miniterm /dev/ttyUSB1 115200`
-works anywhere pyserial is installed (Ctrl-] quits). The template prints its
-memory tour once at boot; if you miss it, click Run again. The two blinking
-board LEDs are an independent sign that the program is running. If the tour's
-addresses show SRAM/ITCM/DTCM, the linker script, BSP, and UART are all
-configured correctly.
-
-![Run Application](images/image_19.png)
-
-### 8.2 Start a Debug Session
-
-Once the application is verified, click **Debug** in the **FLOW** panel to launch a debug session. This works similarly to GDB — the program is loaded and paused at `main()`, allowing you to inspect and step through the code interactively.
-
-![Start Debug](images/image_20.png)
-
-### 8.3 Debug Controls
-
-In the Debug view, the left panel provides:
-
-- **THREADS**: thread information
-- **CALL STACK**: call stack trace
-- **VARIABLES**: variable inspection
-- **WATCH**: watch expressions
-- **BREAKPOINTS**: breakpoint management
-
-The toolbar at the top provides **Continue**, **Step Over**, **Step Into**, **Step Out**, and other debug controls.
-
-![Debug View](images/image_21.png)
-
-### 8.4 Breakpoints and Stepping
-
-Click in the gutter area next to a line number to set a breakpoint. Use Step Over / Step Into to step through the code line by line.
-
----
-
-## 9. Advanced Inspection Tools
-
-### 9.1 Open the Register Inspector
-
-From the menu, select **View > Register Inspector** to open the register inspection panel.
-
-![Open Register Inspector](images/image_22.png)
-
-### 9.2 View Register Contents
-
-The Register Inspector displays all processor registers and their current values, including:
-
-- General-purpose registers (x0 – x31)
-- Program Counter (PC)
-- HEX values and descriptions for each register
-
-![Register Inspector](images/image_23.png)
-
-### 9.3 View Memory Contents
-
-Open the **Memory Inspector** panel to:
-
-- Enter a memory address (e.g. `0x60000000`) to inspect a specific memory region
-- View data in hexadecimal format
-- Monitor memory changes in real time
-
-![Memory Inspector](images/image_24.png)
+2. **The application runs (RGB LED cycles) but the USB console is silent** —
+   `xil_printf` is going to the DIP-header UART. The BSP's stdout has
+   reverted to `uart_1`: redo section 5, then rebuild the platform **and**
+   the application. The compiled truth is
+   `platform/export/platform/sw/standalone_microblaze_riscv_0/include/bspconfig.h`:
+   `STDOUT_BASEADDRESS` must read `0x40300000` (uart_USB), not `0x40310000`
+   (uart_1).
