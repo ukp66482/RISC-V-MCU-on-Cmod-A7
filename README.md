@@ -1,9 +1,10 @@
 # RISC-V MCU on Cmod A7
 
-Soft-core RISC-V MCU system on the Digilent Cmod A7-35T, used in the NCKU
-"Microprocessor Principles and Applications" course. The FPGA design is
+This repository provides a soft-core RISC-V MCU system on the Digilent Cmod
+A7-35T, used in the NCKU "Microprocessor Principles and Applications" course.
+The FPGA design is
 provided prebuilt, so students can treat the board as a normal microcontroller
-and work purely at the firmware level.
+and work entirely at the firmware level.
 
 ![Digilent Cmod A7-35T](docs/images/cmod-a7-0.png)
 
@@ -13,11 +14,11 @@ and work purely at the firmware level.
   - MicroBlaze-V, RV32IM + Bitmanip, 100 MHz
   - 16 KB I-cache + 16 KB D-cache
 - Memory
-  - 128 KB block RAM — 32 KB bootloader + 32 KB ITCM + 64 KB DTCM
-  - 512 KB SRAM — application code and data
-  - 4 MB QSPI flash — bitstream and application storage
+  - 128 KB block RAM: 32 KB bootloader + 32 KB ITCM + 64 KB DTCM
+  - 512 KB SRAM: application code and data
+  - 4 MB QSPI flash: bitstream and application storage
 - Peripherals
-  - GPIO: 28 pins in 4 groups, plus on-board LED / RGB / button
+  - GPIO: 28 pins in 4 groups, and the on-board LEDs, RGB LED, and buttons
   - PWM: 3 channels
   - UART: 2 (USB and external)
   - I2C and SPI masters
@@ -31,21 +32,23 @@ and work purely at the firmware level.
 
 ### JTAG mode
 
-For development: run over JTAG from Vitis (**Run/Debug**) — code goes to RAM,
-the debugger works, and a power-cycle restores whatever is in flash. See the
-**JTAG Debug Mode** chapter of the
+JTAG mode is intended for development. Run the application over JTAG from
+Vitis (**Run/Debug**): code is loaded into RAM and executes under debugger
+control, and a power cycle restores the application stored in flash. See the
+JTAG Debug Mode chapter of the
 [datasheet](docs/datasheet/Cmod_A7_MCU_Datasheet.pdf).
 
 ### Standalone boot
 
-To keep a program on the board, deploy it into the QSPI flash — it then starts
-automatically at every power-on. The bootloader is AMD/Xilinx's standard SREC
-bootloader, embedded in the hardware image. The datasheet's **Standalone
-Boot** chapter is in preparation; until then the draft procedure is in
+To retain a program on the board, deploy it into the QSPI flash. The program
+then starts automatically at every power-on. The bootloader is AMD/Xilinx's
+standard SREC bootloader, embedded in the hardware image. The Standalone Boot
+chapter of the datasheet is in preparation; until it is available, the draft
+procedure is provided in
 [docs/datasheet/sections/standalone-boot.md](docs/datasheet/sections/standalone-boot.md).
 
-The same ELF works in both modes, and a new board only needs
-`release/official_boot.mcs` programmed once with Vivado Hardware Manager.
+The same ELF file runs in both modes. A new board requires
+`release/official_boot.mcs` to be programmed once with Vivado Hardware Manager.
 
 ## Repository layout
 
@@ -63,7 +66,7 @@ tools/                    maintainer helper scripts (app scaffolding, JTAG run, 
 
 ## Rebuilding the hardware
 
-Requires Vivado 2025.2:
+Rebuilding the hardware requires Vivado 2025.2:
 
 ```tcl
 source RISC-V-MCU/recreate_project.tcl
@@ -74,11 +77,11 @@ After implementation, export the XSA and create a Vitis platform (standalone,
 
 ## Other documents
 
-- [Unified MCU datasheet](docs/datasheet/Cmod_A7_MCU_Datasheet.pdf) — **the** document: overview, architecture, memory, pinout, peripherals, power, and the JTAG debug walkthrough (chapter sources under [docs/datasheet/sections/](docs/datasheet/sections/))
-- [Boot image pipeline](docs/guides/Boot-Image-Pipeline/Boot-Image-Pipeline.md) — how the boot images are built, from block design to power-on
-- [Vitis quick reference](docs/guides/README.md) — platform and application concepts, XSDB commands
-- [Bus topology diagram](docs/images/dp_ip_topology.svg) — AXI masters, caches, and interconnect wiring
+- [Unified MCU datasheet](docs/datasheet/Cmod_A7_MCU_Datasheet.pdf): the primary reference, covering overview, architecture, memory, pinout, peripherals, power, and the JTAG debug walkthrough (chapter sources under [docs/datasheet/sections/](docs/datasheet/sections/))
+- [Boot image pipeline](docs/guides/Boot-Image-Pipeline/Boot-Image-Pipeline.md): how the boot images are built, from block design to power-on
+- [Vitis quick reference](docs/guides/README.md): platform and application concepts, XSDB commands
+- [Bus topology diagram](docs/images/dp_ip_topology.svg): AXI masters, caches, and interconnect wiring
 
 ## License
 
-Developed for educational use at National Cheng Kung University (NCKU).
+This project is developed for educational use at National Cheng Kung University (NCKU).

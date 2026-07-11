@@ -6,11 +6,11 @@ into RAM and provides full debug control. Nothing is written to flash.
 
 ## Prerequisites
 
-- The hardware design as an `.xsa` file — use the prebuilt
+- The hardware design as an `.xsa` file: use the prebuilt
   [`release/top_wrapper.xsa`](../../../release/top_wrapper.xsa)
-- **Vitis Unified IDE 2025.2** installed
-- Cmod A7-35T board connected via its micro-USB cable (it carries power,
-  UART, and JTAG all at once)
+- Vitis Unified IDE 2025.2 installed
+- Cmod A7-35T board connected via its micro-USB cable (the cable carries
+  power, UART, and JTAG)
 - A serial terminal program (GTKTerm, PuTTY, or pyserial's miniterm) for the
   board's console output
 
@@ -22,14 +22,14 @@ Launch the Vitis Unified IDE and click **Set Workspace** on the Welcome page.
 
 ![Set Workspace](images/jtag0.png)
 
-Select the repo's `workspace-example/` folder — the template paths and this
-guide assume it (any empty folder also works if you adjust the paths
-yourself).
+Select the `workspace-example/` folder in the repository. The template paths
+in this guide assume this location; any empty folder can also be used if the
+paths are adjusted accordingly.
 
 ![Open Folder](images/jtag1.png)
 
 The first time a Vitis installation opens this workspace it may show an
-**Update Workspace** dialog. Click **Update** — it refreshes only the
+**Update Workspace** dialog. Click **Update**. This action refreshes only the
 workspace metadata and does not modify any component.
 
 ![Update Workspace](images/jtag2.png)
@@ -39,8 +39,8 @@ workspace metadata and does not modify any component.
 ## 2. Create a Platform
 
 The platform wraps the hardware design and provides the driver layer (BSP).
-It is created once per workspace and reused by every application. **If the
-workspace already contains a `platform` component, skip to section 3.**
+It is created once per workspace and reused by every application. If the
+workspace already contains a `platform` component, skip to section 3.
 
 ### 2.1 New Platform Component
 
@@ -62,7 +62,7 @@ the *Hardware Design (XSA) For Implementation* field.
 
 ![Select Platform Creation Flow](images/jtag5.png)
 
-Pick the prebuilt `release/top_wrapper.xsa` from the repository.
+Select the prebuilt `release/top_wrapper.xsa` from the repository.
 
 ![Select top_wrapper.xsa](images/jtag6.png)
 
@@ -135,9 +135,9 @@ template's generated files: `helloworld.c`, `lscript.ld`, `platform.c`, and
 ## 4. Replace the Sources with the Course Template
 
 The generated Hello World sources are replaced entirely by the course
-template — its `main.c` starts with `mcu_init()` and its `lscript.ld` places
-code in the 512 KB SRAM, the stack in DTCM, and provides the
-`ITCM_FUNC`/`DTCM_DATA` fast-memory attributes.
+template. The template `main.c` starts with `mcu_init()`, and its
+`lscript.ld` places code in the 512 KB SRAM, places the stack in DTCM, and
+provides the `ITCM_FUNC`/`DTCM_DATA` fast-memory attributes.
 
 ### 4.1 Delete the Generated Files
 
@@ -161,29 +161,29 @@ and `lscript.ld`. Click **Open**.
 Afterwards `src/` contains exactly `main.c` and `lscript.ld`. Files inside
 `src/` are compiled automatically; no build configuration is needed.
 
-The template's one rule: **`mcu_init();` stays the first line of `main()`.**
-It copies `ITCM_FUNC` code into the ITCM, zeroes the DTCM, and sets the USB
-UART to 115200. The demo loop then cycles the on-board RGB LED and prints a
-status line about once a second.
+The `mcu_init();` call must remain the first line of `main()`. It copies
+`ITCM_FUNC` code into the ITCM, zeroes the DTCM, and sets the USB UART to
+115200. The demo loop then cycles the on-board RGB LED and prints a status
+line about once a second.
 
 ### 4.3 About the Linker Script
 
-The imported `lscript.ld` defines three memory regions — `sram` (512 KB),
-`itcm` (32 KB), `dtcm` (64 KB) — and maps everything to SRAM except the
+The imported `lscript.ld` defines three memory regions: `sram` (512 KB),
+`itcm` (32 KB), and `dtcm` (64 KB). It maps everything to SRAM except the
 stack (DTCM) and `ITCM_FUNC` code (ITCM). The component settings page
-*Linker Script* can display the regions, but treat it as **read-only**: it
-understands only part of the hand-written script (the section list may look
-incomplete — that is expected), and letting it regenerate the script would
-discard the ITCM/DTCM layout. To resize the stack or heap, edit
+*Linker Script* can display the regions, but treat it as read-only: it
+understands only part of the hand-written script (an incomplete section list
+is expected), and letting it regenerate the script would discard the
+ITCM/DTCM layout. To resize the stack or heap, edit
 `_STACK_SIZE` / `_HEAP_SIZE` at the top of `lscript.ld` instead.
 
 ---
 
 ## 5. Set the Console UART (BSP)
 
-The BSP decides which UART carries `xil_printf` output. The default is
-`uart_1` — the DIP-header pins — so with it, nothing appears on the USB
-console.
+The BSP determines which UART carries `xil_printf` output. The default is
+`uart_1` (the DIP-header pins); with the default setting, no output appears
+on the USB console.
 
 Open the platform's **Settings > vitis-comp.json**, navigate to
 **standalone** (Board Support Package > microblaze_riscv_0 > standalone).
@@ -192,14 +192,14 @@ to `uart_1`:
 
 ![BSP Defaults to uart_1](images/jtag19.png)
 
-Change both to **`uart_USB`**. The output log reports the domain being
+Change both to `uart_USB`. The output log reports the domain being
 reconfigured.
 
 ![stdin/stdout Set to uart_USB](images/jtag20.png)
 
 > **Note:** If the platform BSP is ever regenerated (for example after
-> changing another BSP option), re-check this page — regeneration can reset
-> stdin/stdout to `uart_1`. After changing it, rebuild the platform **and**
+> changing another BSP option), re-check this page; regeneration can reset
+> stdin/stdout to `uart_1`. After changing it, rebuild both the platform and
 > the application; the setting is compiled into the application's BSP
 > library.
 
@@ -222,7 +222,7 @@ Switch the FLOW component to your application and click **Build**.
 
 The first application build asks how platform builds should be handled.
 Select **Always build platform with application** and click **Save in
-Workspace Preference** — BSP changes (such as section 5) then propagate
+Workspace Preference**. BSP changes (such as section 5) then propagate
 automatically on every build.
 
 ![Platform Build Dependency](images/jtag25.png)
@@ -247,16 +247,16 @@ loads the ELF into memory, and pauses execution at `main()`.
 
 The Debug view shows the target (*RISC-V at USER2*, *Hart #0 — PAUSED ON
 BREAKPOINT*), the call stack, local variables, and breakpoints. Note the call
-stack address: `main()` sits at `0x600009EC` — in SRAM, exactly where the
-linker script placed it.
+stack address: `main()` is located at `0x600009EC`, in SRAM, exactly where
+the linker script placed it.
 
 ![Paused at main()](images/jtag27.png)
 
 ### 7.2 Open a Serial Terminal, Then Continue
 
-Open a serial terminal **before** resuming execution. The board shows up as
-two serial ports; the UART is usually the higher-numbered one. Settings:
-**115200 8N1**.
+Open a serial terminal before resuming execution. The board enumerates as
+two serial ports; the UART is usually the higher-numbered port. Set the
+terminal to 115200 8N1.
 
 ![GTKTerm on the Board UART](images/jtag32.png)
 
@@ -266,8 +266,7 @@ cycles through its colors.
 
 ![Memory Tour and Status Output](images/jtag33.png)
 
-**✔ Checkpoint** — the memory tour is the proof that everything is wired
-correctly:
+The memory tour output confirms that the memory layout is correct:
 
 ```
 RISC-V MCU on Cmod A7 - memory tour
@@ -278,7 +277,7 @@ RISC-V MCU on Cmod A7 - memory tour
 ```
 
 Each line matches the memory map in the datasheet: code in SRAM, fast code in
-ITCM, fast data and the stack in DTCM. If the terminal stays silent, see the
+ITCM, fast data and the stack in DTCM. If no output appears on the terminal, see the
 Troubleshooting section.
 
 ### 7.3 Breakpoints and Stepping
@@ -289,7 +288,8 @@ left panel shows the call stack, variables, and watch expressions while the
 target is paused.
 
 To run the application without the debugger, use **Run** in the FLOW panel
-instead — same loading, no pause at `main()`.
+instead. The loading sequence is the same, but execution does not pause at
+`main()`.
 
 ---
 
@@ -301,24 +301,24 @@ While a debug session is active, the **View** menu provides three inspectors:
 
 ### 8.1 Memory Inspector
 
-Enter an address to inspect memory directly — for example `0x60000000` (the
+Enter an address to inspect memory directly, for example `0x60000000` (the
 application image in SRAM), `0x8000` (ITCM), or `0x10000` (DTCM).
 
 ![Memory Inspector](images/jtag29.png)
 
 ### 8.2 Register Inspector
 
-Shows all processor registers with live values. With the target paused at
-`main()`, `sp` reads `0x00020000` — the top of the DTCM, matching the
-linker script's stack placement.
+The Register Inspector shows all processor registers with live values. With
+the target paused at `main()`, `sp` reads `0x00020000`, the top of the DTCM,
+matching the linker script's stack placement.
 
 ![Register Inspector](images/jtag30.png)
 
 ### 8.3 Disassembly View
 
-Shows the machine code actually executing, with source interleaving. The
-instruction addresses around `main()` all fall in `0x6000_xxxx` — the
-program runs from SRAM.
+The Disassembly view shows the executing machine code with source
+interleaving. The instruction addresses around `main()` all fall in
+`0x6000_xxxx`; the program runs from SRAM.
 
 ![Disassembly](images/jtag31.png)
 
@@ -328,22 +328,22 @@ program runs from SRAM.
 
 1. **Platform build fails with
    `error: passing argument 2 of 'strcmp' ... [-Wint-conversion]` in
-   `xclk_wiz.c`** (reported as *"Error in generating platform"*). Two things
-   combine to cause this:
+   `xclk_wiz.c`** (reported as *"Error in generating platform"*). Two conditions
+   combine to cause this error:
 
    - The clock-management driver source that ships with Vitis 2025.2
      (`clk_wiz` v1_10) contains a misplaced parenthesis in `xclk_wiz.c`
      line 839.
    - If another RISC-V toolchain with GCC 14 or newer is on your PATH (for
      example one installed at `/opt/riscv` for assembly coursework), the BSP
-     build may pick it instead of the Vitis-bundled compiler. GCC 14+ treats
+     build may select it instead of the Vitis-bundled compiler. GCC 14+ treats
      this construct as an error; the bundled compiler treats it as a warning.
 
-   The offending line, as the IDE shows it:
+   The offending line as displayed in the IDE:
 
    ![clk_wiz Driver Bug](images/jtag21.png)
 
-   **Fix the source** (works with either compiler): change line 839 from
+   Fix the source (this fix works with either compiler): change line 839 from
 
    ```c
    strcmp(InstancePtr->Config.Name, "xlnx,clkx5-wiz-1.0" >= 0)
@@ -359,19 +359,19 @@ program runs from SRAM.
 
    Then rebuild the platform. Apply the same one-line fix to the Vitis
    installation copy at
-   `/opt/Xilinx/2025.2/data/embeddedsw/XilinxProcessorIPLib/drivers/clk_wiz_v1_10/src/xclk_wiz.c`
-   — the platform re-imports driver sources whenever the BSP is regenerated,
-   so an unpatched installation brings the error back.
+   `/opt/Xilinx/2025.2/data/embeddedsw/XilinxProcessorIPLib/drivers/clk_wiz_v1_10/src/xclk_wiz.c`.
+   The platform re-imports driver sources whenever the BSP is regenerated,
+   so an unpatched installation reintroduces the error.
 
    To check which compiler configured the BSP, read
    `platform/.../bsp/libsrc/build_configs/gen_bsp/compile_commands.json`.
-   To force a re-pick, delete `platform/.../bsp/libsrc/build_configs` and
+   To force reselection, delete `platform/.../bsp/libsrc/build_configs` and
    rebuild from a session whose PATH does not contain the other toolchain.
 
-2. **The application runs (RGB LED cycles) but the USB console is silent** —
-   `xil_printf` is going to the DIP-header UART. The BSP's stdout has
-   reverted to `uart_1`: redo section 5, then rebuild the platform **and**
-   the application. The compiled truth is
+2. **The application runs (RGB LED cycles) but the USB console is silent.**
+   `xil_printf` output is directed to the DIP-header UART. The BSP stdout has
+   reverted to `uart_1`: redo section 5, then rebuild both the platform and
+   the application. The compiled setting is recorded in
    `platform/export/platform/sw/standalone_microblaze_riscv_0/include/bspconfig.h`:
    `STDOUT_BASEADDRESS` must read `0x40300000` (uart_USB), not `0x40310000`
    (uart_1).

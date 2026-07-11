@@ -2,7 +2,7 @@
 
 ## 1. DIP Connector Overview
 
-The Cmod A7-35T has a 48-pin DIP connector (J1). All digital I/O pins operate at **LVCMOS33** (3.3 V logic level) with **no series resistors**.
+The Cmod A7-35T has a 48-pin DIP connector (J1). All digital I/O pins operate at LVCMOS33 (3.3 V logic level) with no series resistors.
 
 ![Cmod A7-35T DIP Pinout](./images/pinout_diagram.svg)
 
@@ -150,7 +150,7 @@ The XADC expects an input range of 0–1 V. The board includes a resistive volta
 | Divider ratio | 1 KΩ / (2.32 KΩ + 1 KΩ) ≈ 0.301 |
 | Resistor tolerance | 1% |
 
-> **Note:** Pins 15 and 16 are routed through on-board voltage dividers. If used as analog inputs, they must **not** be assigned as digital I/O in the constraints file. Do not exceed 3.3 V on these pins.
+> **Note:** Pins 15 and 16 are routed through on-board voltage dividers. If used as analog inputs, they must not be assigned as digital I/O in the constraints file. Do not exceed 3.3 V on these pins.
 
 ---
 
@@ -167,7 +167,7 @@ The XADC expects an input range of 0–1 V. The board includes a resistive volta
 | 39 | V5 | SPI_SS1 | Slave select 1 (active low) |
 
 > **I2C pull-ups:** SCL/SDA are open-drain. Weak FPGA-internal pull-ups are enabled as a
-> fallback, but connect external 4.7 kΩ resistors to 3.3 V when wiring real devices.
+> fallback. Connect external 4.7 kΩ resistors to 3.3 V when interfacing with external devices.
 
 ---
 

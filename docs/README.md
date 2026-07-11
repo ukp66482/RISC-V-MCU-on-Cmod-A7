@@ -1,6 +1,6 @@
 # Documentation
 
-The deliverable document is the **unified datasheet** —
+The deliverable document is the unified datasheet,
 [datasheet/Cmod_A7_MCU_Datasheet.pdf](datasheet/Cmod_A7_MCU_Datasheet.pdf).
 It covers the device overview, system architecture, memory hierarchy, pinout,
 peripherals, electrical characteristics, power, and the JTAG debug
@@ -8,8 +8,8 @@ walkthrough in one PDF. Rebuild it with
 `python3 docs/datasheet/build_datasheet.py`.
 
 The chapter sources are the markdown files under
-[datasheet/sections/](datasheet/sections/) — they are the single source of
-truth; the PDF is a build artifact.
+[datasheet/sections/](datasheet/sections/). These files are the single source
+of truth; the PDF is a build artifact.
 
 | Chapter source | Contents |
 |----------------|----------|

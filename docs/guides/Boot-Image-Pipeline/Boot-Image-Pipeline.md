@@ -16,10 +16,11 @@ A bitstream describes more than logic and routing: it also contains the
 initial contents of every block RAM on the chip. The CPU's 128 KB local
 memory is built from BRAM, so whatever program those initialization frames
 hold is present the moment the FPGA finishes configuring, before any software
-has run. This is why a bootloader can be built into the hardware image, why
-it comes back at every power-on and cannot be bricked, and why `updatemem`
-can swap a program into an already-built bitstream in seconds — only the BRAM
-init frames change, while logic, routing, and timing stay untouched.
+has run. As a result, a bootloader can be built into the hardware image, is
+restored at every power-on, and cannot be rendered unbootable by software.
+For the same reason, `updatemem` can replace a program in an already-built
+bitstream in seconds: only the BRAM init frames change, while logic, routing,
+and timing stay untouched.
 
 ## Pipeline overview
 
@@ -54,37 +55,37 @@ RAMB36 primitive. At this point the BRAM init values are all zeros, so
 UART silent. `top.bit` is deliberately kept in this blank state; the
 bootloader is stitched in afterwards (Stage 3).
 
-> Vivado can also bake an ELF in at `write_bitstream` time (ELF association).
-> This repo does not: keeping `top.bit` generic means a bootloader change never
-> requires re-running the implementation.
+> Vivado can also embed an ELF at `write_bitstream` time (ELF association).
+> This repository does not use that flow: keeping `top.bit` generic means a
+> bootloader change never requires re-running the implementation.
 
 ## Stage 2 — `top_wrapper.mmi`: the address-to-BRAM map (Vivado, one-time)
 
-The 128 KB local memory is not one physical block — it is 32 RAMB36
-primitives (4 KB each) scattered across the die, each holding only a few bits
-of every 32-bit word. Which physical cell stores the byte at CPU address
-`0x1234` is only known **after placement**, so Vivado writes this mapping into
+The 128 KB local memory is not one physical block. It consists of 32 RAMB36
+primitives (4 KB each) distributed across the die, each holding only a few
+bits of every 32-bit word. Which physical cell stores the byte at CPU address
+`0x1234` is known only after placement, so Vivado writes this mapping into
 `top_wrapper.mmi` (shipped inside `release/top_wrapper.xsa`). Any hardware
 rebuild changes the placement, so the MMI must always be re-extracted from the
 matching XSA.
 
-## Stage 3 — `updatemem`: stitch an ELF into the bitstream (seconds, no re-synthesis)
+## Stage 3 — `updatemem`: merge an ELF into the bitstream (seconds, no re-synthesis)
 
 ```bash
 updatemem -force -meminfo top_wrapper.mmi -data <bootloader>.elf \
           -bit release/top.bit -proc top_i/microblaze_riscv_0 -out <boot>.bit
 ```
 
-`updatemem` reads the ELF's loadable segments (the bootloader lives at
-`0x0–0x8000`), uses the MMI to scatter each byte into the right INIT frame of
-the right RAMB36, and rewrites **only those frames**. Logic and timing are
+`updatemem` reads the ELF's loadable segments (the bootloader occupies
+`0x0–0x8000`), uses the MMI to scatter each byte into the correct INIT frame
+of the correct RAMB36, and rewrites only those frames. Logic and timing are
 bit-for-bit unchanged, which is why this takes ~6 seconds instead of a
 20-minute implementation run. `release/boot_srec.bit` is exactly `top.bit`
-with the bootloader ELF stitched in.
+with the bootloader ELF merged in.
 
 ## Stage 4 — `write_cfgmem`: lay out the flash image (Vivado)
 
-The FPGA's configuration engine expects the bitstream to sit at flash offset
+The FPGA's configuration engine expects the bitstream to reside at flash offset
 `0x0` in a specific byte order. `write_cfgmem` produces that image, and can
 place additional raw data at other offsets in the same file:
 
@@ -103,42 +104,44 @@ write_cfgmem -force -format mcs -size 4 -interface SPIx4 \
 | `0x220000–0x3FFFFF` | Application slot (SREC text, 1.875 MB) | `srec_spi_bootloader` |
 
 The slot starts immediately after the bitstream region (an uncompressed
-xc7a35t bitstream is at most `0x217214` bytes, so `0x220000` is the safe
-ceiling); its offset is a bootloader configuration constant (`blconfig.h`).
+xc7a35t bitstream is at most `0x217214` bytes, so `0x220000` is a safe
+boundary); its offset is a bootloader configuration constant (`blconfig.h`).
 
 ## Stage 5 — `program_hw_cfgmem`: write the flash over JTAG (Vivado Hardware Manager)
 
-The FPGA has no direct "write my flash" JTAG command, so Vivado first programs
-a temporary *bridge* bitstream that turns the FPGA into a JTAG↔SPI programmer,
-then erases, writes, and verifies. The important property setting:
+The FPGA provides no direct JTAG command for writing the flash. Vivado
+therefore first programs a temporary bridge bitstream that turns the FPGA into
+a JTAG↔SPI programmer, then erases, writes, and verifies. The important
+property setting is:
 
 ```tcl
 set_property PROGRAM.ADDRESS_RANGE {use_file} $cfg
 ```
 
 `use_file` scopes the erase and program to the address ranges present in the
-MCS, which is what makes it safe to update one region without touching the
-others. Afterward, `boot_hw_device` forces the FPGA to reconfigure from
-flash — functionally the same as a power-cycle, useful for checking the real
-boot path without touching the board.
+MCS, which makes it safe to update one region without affecting the others.
+Afterward, `boot_hw_device` forces the FPGA to reconfigure from flash. This is
+functionally equivalent to a power cycle and allows the actual boot path to be
+verified without handling the board.
 
 ## Stage 6 — Power-on: one flash, two readers
 
-The same QSPI flash is read twice, by two different "readers":
+The same QSPI flash is read twice, by two different readers:
 
-1. **The configuration engine** — dedicated silicon that exists before your
-   design does. With the mode pins set to Master-SPI it streams the bitstream
-   from offset `0x0` into the chip. Once the BRAM init frames load, the
-   bootloader is already in memory. No software was involved, which is why it
-   is restored at every power-on no matter what the previous program did.
-2. **The design's own QSPI flash controller** — once the design is alive, the
-   CPU leaves reset at address `0x0`, runs the bootloader, and the bootloader
-   uses this controller to read the *application* from its flash slot, copy it
+1. **The configuration engine.** This is dedicated silicon, present
+   independently of the user design. With the mode pins set to Master-SPI it
+   streams the bitstream from offset `0x0` into the chip. Once the BRAM init
+   frames load, the bootloader is already in memory. No software is involved,
+   so the bootloader is restored at every power-on regardless of what the
+   previous program did.
+2. **The QSPI flash controller in the design.** Once the design is running,
+   the CPU leaves reset at address `0x0` and executes the bootloader, which
+   uses this controller to read the application from its flash slot, copy it
    to SRAM, and jump to it.
 
-The block design therefore provides the container (BRAM) and the mover (flash
-controller); `updatemem` decides what the container holds at power-on, and the
-flash layout decides what gets moved.
+The block design therefore provides the storage (BRAM) and the transfer path
+(flash controller); `updatemem` determines what the BRAM holds at power-on,
+and the flash layout determines what is copied to SRAM.
 
 ## Which tool does what
 
@@ -152,14 +155,14 @@ flash layout decides what gets moved.
 | Build flash image (`write_cfgmem`) | Vivado Tcl | **Yes** |
 | Program flash, range-scoped (`program_hw_cfgmem` + `use_file`) | Vivado Hardware Manager | **Yes** |
 
-In short, all software work needs only Vitis, and once the hardware is frozen
-even the ELF-into-bitstream step needs nothing from Vivado. Vivado remains
+In summary, all software work requires only Vitis, and once the hardware is
+frozen even the ELF-into-bitstream step requires nothing from Vivado. Vivado remains
 necessary for the one-time hardware build and for the flash-image and
 programming steps.
 
 > Vitis also ships a standalone `program_flash` CLI that can write an image to
 > a given flash offset through the FPGA. It has not been validated on this
-> board; the flows in this repo use the Vivado Hardware Manager path above,
+> board; the flows in this repository use the Vivado Hardware Manager path above,
 > which is board-verified.
 
 ## The prebuilt artifacts in `release/`

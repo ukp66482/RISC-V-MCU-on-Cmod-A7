@@ -19,7 +19,7 @@
 | Cache | 16 KB I-Cache + 16 KB D-Cache, write-through, 32 B lines — covers exactly the 512 KB SRAM (`0x6000_0000`–`0x6007_FFFF`) |
 | Debug | JTAG: breakpoints, register inspection, memory read/write |
 
-**Description:** The main processor core. Executes user firmware and reaches every peripheral through the AXI interconnect. Only the SRAM range is cached — BRAM is already single-cycle, and peripheral registers must never be cached.
+**Description:** The main processor core executes user firmware and reaches every peripheral through the AXI interconnect. Only the SRAM range is cached: BRAM access is already single-cycle, and peripheral registers must never be cached.
 
 ### 1.2 Local Memory
 
@@ -29,13 +29,13 @@
 | Access | 1 cycle, dual-port — instruction and data sides read simultaneously |
 | Layout | 32 KB bootloader + 32 KB ITCM + 64 KB DTCM |
 
-**Description:** Instruction and data local memory implemented with FPGA Block RAM — functionally this MCU's tightly-coupled memory (TCM): the ILMB/DLMB ports play the same role as ITCM/DTCM on other MCU cores (e.g. Cortex-M7), giving 1-cycle access outside the cache path. Layout: `0x0000`–`0x7FFF` (32 KB) holds the bootloader (restored from flash at every configuration); `0x8000`–`0xFFFF` (32 KB) is the application's ITCM for interrupt handlers and timing-critical code (`ITCM_FUNC`, copied out of the SRAM image by `mcu_init()` at startup); `0x10000`–`0x1FFFF` (64 KB) is the DTCM, holding the stack (top-down from `0x20000`) and `DTCM_DATA` fast data.
+**Description:** Instruction and data local memory is implemented with FPGA Block RAM and functions as this MCU's tightly-coupled memory (TCM): the ILMB/DLMB ports serve the same role as ITCM/DTCM on other MCU cores (e.g. Cortex-M7), giving 1-cycle access outside the cache path. The layout is as follows: `0x0000`–`0x7FFF` (32 KB) holds the bootloader (restored from flash at every configuration); `0x8000`–`0xFFFF` (32 KB) is the application's ITCM for interrupt handlers and timing-critical code (`ITCM_FUNC`, copied out of the SRAM image by `mcu_init()` at startup); `0x10000`–`0x1FFFF` (64 KB) is the DTCM, holding the stack (top-down from `0x20000`) and `DTCM_DATA` fast data.
 
 ### 1.3 AXI SmartConnect (`microblaze_riscv_0_axi_periph`)
 
 ![Bus & Cache Topology](../../images/dp_ip_topology.svg)
 
-**Description:** AXI crossbar that fans the processor's data port out to all peripheral endpoints. Routing is pure address decoding — the diagram above shows which path each address range takes (a second, smaller interconnect merges the cache and debug masters in front of the SRAM controller).
+**Description:** An AXI crossbar fans the processor's data port out to all peripheral endpoints. Routing is determined entirely by address decoding. The diagram above shows the path taken by each address range; a second, smaller interconnect merges the cache and debug masters in front of the SRAM controller.
 
 ### 1.4 AXI Interrupt Controller (`microblaze_riscv_0_axi_intc`)
 
@@ -59,15 +59,15 @@
 
 ### 1.5 Debug Module (`mdm_1`)
 
-**Description:** MicroBlaze Debug Module providing JTAG debug access for breakpoints, register inspection, and memory read/write. It can also trigger a system reset from the debugger (used by `xsdb` / Vitis debug sessions).
+**Description:** The MicroBlaze Debug Module provides JTAG debug access for breakpoints, register inspection, and memory read/write. It can also trigger a system reset from the debugger (used by `xsdb` / Vitis debug sessions).
 
 ### 1.6 Clocking Wizard (`clk_wiz_1`)
 
-**Description:** Multiplies the 12 MHz on-board oscillator up to the 100 MHz system clock with an MMCM/PLL. Its `locked` signal indicates clock stability and gates the release of system reset.
+**Description:** This block multiplies the 12 MHz on-board oscillator up to the 100 MHz system clock with an MMCM/PLL. Its `locked` signal indicates clock stability and gates the release of system reset.
 
 ### 1.7 Processor System Reset (`rst_clk_wiz_1_100M`)
 
-**Description:** Generates synchronized reset signals for the CPU, bus fabric and peripherals, releasing them only after the clock is stable. External reset source: on-board button BTN0 (A18, active-high).
+**Description:** This block generates synchronized reset signals for the CPU, bus fabric and peripherals, releasing them only after the clock is stable. The external reset source is the on-board button BTN0 (A18, active-high).
 
 ---
 
@@ -81,7 +81,7 @@
 | TX / RX Pins | J18 / J17 — routed to the on-board Micro-USB connector |
 | Interrupt | INTC In4 |
 
-**Description:** 16550-compatible UART for host PC communication through the on-board Micro-USB connector. Baud rate is software-configured via the divisor latch: at 100 MHz system clock, divisor 54 (0x36) gives 115200 baud. Typically mapped as STDIN/STDOUT.
+**Description:** A 16550-compatible UART provides host PC communication through the on-board Micro-USB connector. The baud rate is software-configured via the divisor latch: at a 100 MHz system clock, divisor 54 (0x36) gives 115200 baud. This UART is typically mapped as STDIN/STDOUT.
 
 ### 2.2 External UART (`uart_1`)
 
@@ -91,13 +91,13 @@
 | TX / RX Pins | J1 (DIP 11) / K2 (DIP 12) |
 | Interrupt | INTC In3 |
 
-**Description:** Second 16550 UART exposed on the DIP connector for communication with external devices (e.g., sensor modules, Bluetooth modules).
+**Description:** A second 16550 UART is exposed on the DIP connector for communication with external devices (e.g., sensor modules, Bluetooth modules).
 
 ---
 
 ## 3. GPIO (General Purpose I/O)
 
-All GPIO groups are memory-mapped ports with per-bit direction control: the TRI register sets each pin's direction, the DATA register reads/writes the pin. Vitis driver: `XGpio`.
+All GPIO groups are memory-mapped ports with per-bit direction control: the TRI register sets each pin's direction, and the DATA register reads or writes the pin. The Vitis driver is `XGpio`.
 
 ### 3.1 On-Board GPIO
 
@@ -127,13 +127,13 @@ All GPIO groups are memory-mapped ports with per-bit direction control: the TRI 
 | DIP Pins | Pin 8 (INTR_0), Pin 9 (INTR_1), Pin 41 (INTR_2), Pin 33 (INTR_3) |
 | Interrupt | INTC In5 |
 
-**Description:** Four external interrupt inputs grouped into a single GPIO instance with interrupt generation enabled — a change on any of the four pins can raise INTC In5.
+**Description:** Four external interrupt inputs are grouped into a single GPIO instance with interrupt generation enabled. A change on any of the four pins can raise INTC In5.
 
 ---
 
 ## 4. Timers & PWM
 
-Six 32-bit AXI timer instances (Vitis driver: `XTmrCtr`) — three as general-purpose timers with interrupts, three with their outputs routed to pins as PWM channels.
+The device provides six 32-bit AXI timer instances (Vitis driver: `XTmrCtr`): three serve as general-purpose timers with interrupts, and three have their outputs routed to pins as PWM channels.
 
 ### 4.1 System Timers
 
@@ -151,7 +151,7 @@ Six 32-bit AXI timer instances (Vitis driver: `XTmrCtr`) — three as general-pu
 | `PWM_1` | `0x4021_0000` | W3 | Pin 34 | PWM Channel 1 |
 | `PWM_2` | `0x4022_0000` | W4 | Pin 40 | PWM Channel 2 |
 
-**Description:** Timer instances configured in PWM mode to generate square-wave outputs. Useful for LED dimming, motor speed control, buzzer tone generation, etc. Frequency and duty cycle are configured through the Timer Load Registers and the PWM enable bit.
+**Description:** These timer instances are configured in PWM mode to generate square-wave outputs, suitable for applications such as LED dimming, motor speed control, and buzzer tone generation. Frequency and duty cycle are configured through the Timer Load Registers and the PWM enable bit.
 
 ---
 
@@ -166,14 +166,14 @@ Six 32-bit AXI timer instances (Vitis driver: `XTmrCtr`) — three as general-pu
 | Mode | CPU-programmable register mode — flash contents are **not** memory-mapped |
 | FIFO | 256 B TX/RX — one full flash page (256 B) per transfer |
 
-**Description:** Controls the on-board Quad-SPI NOR Flash. The full register set (control, status, TX/RX FIFO, slave select) is exposed at `0x4050_0000`, so the CPU can issue any SPI command — read (`0x0B`), Write Enable (`0x06`), Sector/Block Erase (`0x20`/`0xD8`), Page Program (`0x02`), status poll (`0x05`). This keeps the flash fully CPU-programmable at runtime (the Vitis `XSpi` driver wraps the register protocol).
+**Description:** This controller manages the on-board Quad-SPI NOR Flash. The full register set (control, status, TX/RX FIFO, slave select) is exposed at `0x4050_0000`, so the CPU can issue any SPI command: read (`0x0B`), Write Enable (`0x06`), Sector/Block Erase (`0x20`/`0xD8`), Page Program (`0x02`), and status poll (`0x05`). The flash therefore remains fully CPU-programmable at runtime (the Vitis `XSpi` driver wraps the register protocol).
 
-Flash contents are **not memory-mapped**: there is no XIP window, and code cannot execute from flash directly. The standalone-boot design instead copies the application from flash into SRAM at power-on (see the Standalone Boot Mode guide).
+Flash contents are not memory-mapped: there is no XIP window, and code cannot execute from flash directly. The standalone-boot design instead copies the application from flash into SRAM at power-on (see the Standalone Boot Mode guide).
 
-> **Design note:** a read-only memory-mapped XIP window and CPU-programmable register mode are
-> mutually exclusive in this controller. This project chooses register mode: keeping the
+> **Design note:** A read-only memory-mapped XIP window and CPU-programmable register mode are
+> mutually exclusive in this controller. This project uses register mode: keeping the
 > flash CPU-programmable at runtime was judged more valuable for the course than
-> execute-in-place, and the 512 KB SRAM + I-cache serves execution instead.
+> execute-in-place, and execution is served by the 512 KB SRAM and the I-cache instead.
 
 ### 5.2 SRAM / Cellular RAM (`axi_emc_0`)
 
@@ -184,7 +184,7 @@ Flash contents are **not memory-mapped**: there is no XIP window, and code canno
 | Memory | On-board asynchronous SRAM (Cellular RAM) |
 | Cache | Fully covered by the I-Cache and D-Cache |
 
-**Description:** External memory controller for the on-board 512 KB SRAM — the main application memory: standalone boot copies the program here and executes it. Raw access latency is higher than Block RAM, but with both caches covering this range, hot code and data run near BRAM speed.
+**Description:** This external memory controller interfaces to the on-board 512 KB SRAM, the main application memory: standalone boot copies the program here and executes it. Raw access latency is higher than Block RAM, but with both caches covering this range, frequently accessed code and data run at close to BRAM speed.
 
 ---
 
@@ -209,9 +209,9 @@ Flash contents are **not memory-mapped**: there is no XIP window, and code canno
 | VCCINT | Internal | Core voltage monitor (1.0 V) |
 | VCCAUX | Internal | Auxiliary voltage monitor (1.8 V) |
 
-**Description:** The Artix-7 built-in 12-bit ADC capable of measuring external analog signals and monitoring internal FPGA temperature and supply voltages. External input pins pass through an on-board resistive voltage divider (2.32 KΩ / 1 KΩ, ratio ≈ 0.301), accepting up to 3.3 V at the DIP pin.
+**Description:** The Artix-7 built-in 12-bit ADC measures external analog signals and monitors internal FPGA temperature and supply voltages. External input pins pass through an on-board resistive voltage divider (2.32 KΩ / 1 KΩ, ratio ≈ 0.301), accepting up to 3.3 V at the DIP pin.
 
-**Effective Per-Channel Sampling Rate:** The sequencer continuously cycles through all 5 enabled channels (VAUX4, VAUX12, Temperature, VCCINT, VCCAUX). The aggregate conversion rate is 500 KSPS, giving each channel an effective rate of 500 K ÷ 5 = **100 KSPS**.
+**Effective Per-Channel Sampling Rate:** The sequencer continuously cycles through all 5 enabled channels (VAUX4, VAUX12, Temperature, VCCINT, VCCAUX). The aggregate conversion rate is 500 KSPS, giving each channel an effective rate of 500 K ÷ 5 = 100 KSPS.
 
 ---
 
@@ -228,7 +228,7 @@ Flash contents are **not memory-mapped**: there is no XIP window, and code canno
 | Pull-ups | Weak FPGA internal pull-ups enabled; **external 4.7 kΩ to 3.3 V recommended** for real devices |
 | Interrupt | INTC In6 |
 
-**Description:** AXI IIC master for external I2C devices (sensors, EEPROMs, OLED displays). Open-drain signaling: any device may only pull the line low; the pull-up resistor returns it high. Devices are addressed by their 7-bit I2C address. Use the Vitis `XIic` driver.
+**Description:** An AXI IIC master controls external I2C devices (sensors, EEPROMs, OLED displays). The bus uses open-drain signaling: any device may only pull the line low, and the pull-up resistor returns it high. Devices are addressed by their 7-bit I2C address. Use the Vitis `XIic` driver.
 
 ### 7.2 External SPI Master (`spi_0`)
 
@@ -241,9 +241,9 @@ Flash contents are **not memory-mapped**: there is no XIP window, and code canno
 | Pins | DIP 35 SCLK (V3) · 36 MOSI (W5) · 37 MISO (V4) · 38 SS0 (U4) · 39 SS1 (V5) |
 | Interrupt | INTC In7 |
 
-**Description:** SPI master for external devices (displays, ADCs, flash modules). Full-duplex push-pull signaling — no pull-ups needed; the active device is chosen by driving its SS line low. Use the Vitis `XSpi` driver. The serial clock is set at runtime through the clock-control block: slow it down for breadboard wiring or long cables, speed it up for short-wired display modules (`spi0_set_clock(hz)` — one call, takes effect immediately).
+**Description:** An SPI master controls external devices (displays, ADCs, flash modules). The interface uses full-duplex push-pull signaling and requires no pull-up resistors; the active device is selected by driving its SS line low. Use the Vitis `XSpi` driver. The serial clock is set at runtime through the clock-control block: select a lower rate for breadboard wiring or long cables, and a higher rate for short-wired display modules. A single call to `spi0_set_clock(hz)` takes effect immediately.
 
-> **Note:** This is a *second, independent* SPI controller — do not confuse it with
+> **Note:** This is a second, independent SPI controller. Do not confuse it with
 > `axi_quad_spi_0` (`0x4050_0000`), which is dedicated to the on-board QSPI boot flash.
 > Firmware should select controllers by instance macro (`XPAR_SPI_0_BASEADDR` vs
 > `XPAR_AXI_QUAD_SPI_0_BASEADDR`), never by generic `XPAR_XSPI_n_*` numbering.
@@ -252,9 +252,9 @@ Flash contents are **not memory-mapped**: there is no XIP window, and code canno
 
 ## 8. Complete Address Map
 
-Peripheral addresses follow a class-based convention — **`0x40[C]x_xxxx`, where `C` is the
-peripheral class** (1 MB per class, 64 KB per instance). Reading an address immediately tells
-you what kind of device it is: class 0 = GPIO, 1 = Timer, 2 = PWM, 3 = UART, 4 = INTC,
+Peripheral addresses follow a class-based convention: `0x40[C]x_xxxx`, where `C` is the
+peripheral class (1 MB per class, 64 KB per instance). The device type is identifiable
+directly from the address: class 0 = GPIO, 1 = Timer, 2 = PWM, 3 = UART, 4 = INTC,
 5 = QSPI control, 6 = XADC, 7 = I2C, 8 = SPI, 9 = SPI clock control.
 
 | Base Address | Range | Peripheral | Type | Category |
