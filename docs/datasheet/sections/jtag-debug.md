@@ -359,9 +359,10 @@ interleaving. The instruction addresses around `main()` all fall in
 
    Then rebuild the platform. Apply the same one-line fix to the Vitis
    installation copy at
-   `/opt/Xilinx/2025.2/data/embeddedsw/XilinxProcessorIPLib/drivers/clk_wiz_v1_10/src/xclk_wiz.c`.
-   The platform re-imports driver sources whenever the BSP is regenerated,
-   so an unpatched installation reintroduces the error.
+   `<install>/2025.2/data/embeddedsw/XilinxProcessorIPLib/drivers/clk_wiz_v1_10/src/xclk_wiz.c`,
+   where `<install>` is the Xilinx installation directory (`/opt/Xilinx` by
+   default on Linux). The platform re-imports driver sources whenever the BSP
+   is regenerated, so an unpatched installation reintroduces the error.
 
    To check which compiler configured the BSP, read
    `platform/.../bsp/libsrc/build_configs/gen_bsp/compile_commands.json`.
