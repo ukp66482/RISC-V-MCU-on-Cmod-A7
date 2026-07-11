@@ -6,7 +6,7 @@ flash_app.py — deploy an application to QSPI flash, in one command.
     python3 tools/flash_app.py app.elf --monitor    # then watch the UART
 
 The ELF is converted to SREC, written into the flash application slot
-(0x340000), and the board is rebooted from flash — the application then
+(0x220000), and the board is rebooted from flash — the application then
 starts automatically at every power-on, no PC needed. The write is
 range-scoped: the bitstream (with the bootloader inside) is never touched.
 
@@ -24,7 +24,7 @@ import tempfile
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BOOT_BIT = os.path.join(REPO, "release", "boot_srec.bit")
-APP_SLOT = 0x00340000
+APP_SLOT = 0x00220000
 FLASH_END = 0x00400000          # 4 MB part
 SRAM_LO, SRAM_HI = 0x60000000, 0x60080000
 

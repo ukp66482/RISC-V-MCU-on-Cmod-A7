@@ -8,8 +8,8 @@ bootloader). Use these directly without rebuilding the Vivado project.
 
 | File | Description |
 |------|-------------|
-| `official_boot.mcs` | **Deployment flash image** — bitstream with the SREC bootloader baked into BRAM, plus the preloaded demo application at `0x340000`. Program once (see below); the board then boots stand-alone |
-| `boot_srec.bit` | The same bitstream+bootloader as a JTAG image — programming it acts as a *remote power-cycle* (the bootloader restarts and reloads the app from flash) |
+| `official_boot.mcs` | **Deployment flash image** — bitstream with the SREC bootloader baked into BRAM, plus the preloaded demo application at `0x220000`. Program once (see below); the board then boots stand-alone |
+| `boot_srec.bit` | The same bitstream and bootloader as a JTAG image. Programming it over JTAG restarts the bootloader, which reloads the application from flash — equivalent to a power-cycle |
 | `top.bit` | Plain bitstream, blank BRAM (no bootloader) — what Vitis programs during JTAG Run/Debug |
 | `top_wrapper.xsa` | Hardware export (XSA) for creating a Vitis platform; contains `top_wrapper.mmi` for `updatemem` |
 
@@ -32,7 +32,7 @@ built from the pre-cache XSA must be recreated.)
 ### Rebuilding
 
 `boot_srec.bit` = `top.bit` + the SREC-bootloader ELF merged via `updatemem`;
-`official_boot.mcs` adds the application SREC at `0x340000` via `write_cfgmem`.
+`official_boot.mcs` adds the application SREC at `0x220000` via `write_cfgmem`.
 The full mechanics are in the
 [Boot Image Pipeline guide](../docs/guides/Boot-Image-Pipeline/Boot-Image-Pipeline.md).
 To modify the hardware itself, rebuild the Vivado project from source with

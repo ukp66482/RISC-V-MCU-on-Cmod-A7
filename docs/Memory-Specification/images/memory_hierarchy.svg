@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 560" font-family="Liberation Sans, Helvetica, Arial, sans-serif" fill="black">
+  <rect x="0" y="0" width="880" height="560" fill="white"/>
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z"/>
+    </marker>
+    <marker id="arrb" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto">
+      <path d="M0,0 L5,2.5 L0,5 z"/>
+    </marker>
+  </defs>
+  <style>
+    .box  { fill:white; stroke:black; stroke-width:1.3; }
+    .bus  { stroke:black; stroke-width:4;   fill:none; marker-end:url(#arrb); }
+    .wire { stroke:black; stroke-width:1;   fill:none; marker-end:url(#arr); }
+    .dash { stroke:black; stroke-width:1;   fill:none; stroke-dasharray:5 3; marker-end:url(#arr); }
+    .t    { font-size:9px; }
+    .tb   { font-size:10px; font-weight:bold; }
+    .ts   { font-size:8px; }
+    .ti   { font-size:8px; font-style:italic; }
+  </style>
+
+  <!-- ============ CPU ============ -->
+  <rect class="box" x="290" y="28" width="300" height="130"/>
+  <text class="tb" x="440" y="48" text-anchor="middle" font-size="12">MicroBlaze-V CPU</text>
+  <text class="t"  x="440" y="63" text-anchor="middle">RV32IM &#183; bit-manip &#183; 100 MHz</text>
+  <rect class="box" x="305" y="78" width="130" height="30"/>
+  <text class="t" x="370" y="96" text-anchor="middle">16 KB I-Cache</text>
+  <rect class="box" x="445" y="78" width="130" height="30"/>
+  <text class="t" x="510" y="96" text-anchor="middle">16 KB D-Cache</text>
+  <text class="ts" x="440" y="124" text-anchor="middle">write-through &#183; 32-byte lines &#183; cover the SRAM range only</text>
+  <text class="ts" x="440" y="146" text-anchor="middle">always on &#8212; no software enable/disable</text>
+
+  <!-- ============ TCM (left) ============ -->
+  <rect class="box" x="60" y="250" width="210" height="230"/>
+  <text class="tb" x="165" y="270" text-anchor="middle">Local Memory (TCM)</text>
+  <text class="t"  x="165" y="284" text-anchor="middle">128 KB on-chip RAM &#183; 1 cycle</text>
+  <rect class="box" x="75" y="296" width="180" height="42"/>
+  <text class="t"  x="165" y="313" text-anchor="middle">Bootloader &#8212; 32 KB</text>
+  <text class="ts" x="165" y="327" text-anchor="middle">0x0000 0000 &#183; reserved</text>
+  <rect class="box" x="75" y="346" width="180" height="42"/>
+  <text class="t"  x="165" y="363" text-anchor="middle">ITCM &#8212; 32 KB</text>
+  <text class="ts" x="165" y="377" text-anchor="middle">0x0000 8000 &#183; fast code</text>
+  <rect class="box" x="75" y="396" width="180" height="70"/>
+  <text class="t"  x="165" y="413" text-anchor="middle">DTCM &#8212; 64 KB</text>
+  <text class="ts" x="165" y="427" text-anchor="middle">0x0001 0000 &#183; fast data</text>
+  <text class="ts" x="165" y="441" text-anchor="middle">stack, top-down from</text>
+  <text class="ts" x="165" y="453" text-anchor="middle">0x0002 0000</text>
+
+  <!-- bus CPU -> TCM -->
+  <path class="bus" d="M 350 158 L 350 205 L 165 205 L 165 248"/>
+  <text class="t"  x="253" y="198" text-anchor="middle">dedicated memory bus</text>
+  <text class="ti" x="253" y="220" text-anchor="middle">1 cycle, fixed &#183; dual-port</text>
+
+  <!-- ============ SRAM (right) ============ -->
+  <rect class="box" x="620" y="250" width="200" height="100"/>
+  <text class="tb" x="720" y="272" text-anchor="middle">External SRAM</text>
+  <text class="t"  x="720" y="288" text-anchor="middle">512 KB &#183; 0x6000 0000</text>
+  <text class="ts" x="720" y="303" text-anchor="middle">application code &#183; data &#183; heap</text>
+  <text class="ts" x="720" y="317" text-anchor="middle">async &#183; reached through the caches</text>
+  <text class="ti" x="720" y="368" text-anchor="middle">read hit &#8776;7.2 cyc/word (= TCM speed)</text>
+  <text class="ti" x="720" y="381" text-anchor="middle">read miss &#8776;26 &#183; store &#8776;23.6 (write-through)</text>
+
+  <!-- bus CPU -> SRAM with /32 slash -->
+  <path class="bus" d="M 530 158 L 530 205 L 720 205 L 720 248"/>
+  <line x1="620" y1="211" x2="630" y2="199" stroke="black" stroke-width="1"/>
+  <text class="ts" x="634" y="200">32</text>
+  <text class="t"  x="625" y="222" text-anchor="middle">via caches &#183; 32-byte line fill</text>
+
+  <!-- ============ flash path (bottom middle) ============ -->
+  <rect class="box" x="380" y="300" width="160" height="44"/>
+  <text class="tb" x="460" y="318" text-anchor="middle">Flash Controller</text>
+  <text class="ts" x="460" y="332" text-anchor="middle">register access only</text>
+  <path class="wire" d="M 440 158 L 440 298"/>
+  <text class="ts" x="448" y="240" text-anchor="start">uncached</text>
+  <text class="ts" x="448" y="251" text-anchor="start">register access</text>
+  <path class="wire" d="M 460 344 L 460 398"/>
+
+  <rect class="box" x="360" y="400" width="200" height="80"/>
+  <text class="tb" x="460" y="420" text-anchor="middle">QSPI Flash &#8212; 4 MB</text>
+  <text class="t"  x="460" y="435" text-anchor="middle">firmware storage</text>
+  <text class="ts" x="460" y="449" text-anchor="middle">not memory-mapped &#8212; no address window</text>
+  <text class="ts" x="460" y="462" text-anchor="middle">holds the hardware image + application image</text>
+
+  <!-- boot copy: flash -> SRAM -->
+  <path class="dash" d="M 560 440 L 760 440 L 760 352"/>
+  <text class="ti" x="662" y="456" text-anchor="middle">application image copied</text>
+  <text class="ti" x="662" y="468" text-anchor="middle">to SRAM at power-on</text>
+</svg>

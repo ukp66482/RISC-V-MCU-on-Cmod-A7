@@ -20,6 +20,7 @@ DOCS = [
     "docs/IP-Specification/Cmod_A7_IP_Peripheral_Reference.md",
     "docs/Pin-Specification/Cmod_A7_Pin_Specification.md",
     "docs/Power-Specification/Cmod_A7_Power_Specification.md",
+    "docs/Memory-Specification/Cmod_A7_Memory_Specification.md",
     "docs/guides/Standalone-Boot-Mode/Standalone-Boot-Mode.md",
     "docs/guides/JTAG-Debug-Mode/JTAG-Debug-Mode.md",
     "docs/guides/Boot-Image-Pipeline/Boot-Image-Pipeline.md",

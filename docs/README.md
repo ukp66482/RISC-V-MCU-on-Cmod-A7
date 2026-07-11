@@ -10,6 +10,7 @@ rebuild with `python3 tools/gen_spec_pdfs.py`).
 |----------|-------------|
 | [datasheet/](datasheet/Cmod_A7_MCU_Datasheet.pdf) | **Unified datasheet** — all specs and guides below in one PDF (`build_datasheet.py`) |
 | [IP-Specification/](IP-Specification/Cmod_A7_IP_Peripheral_Reference.md) | Peripheral capabilities, register base addresses, interrupt mapping |
+| [Memory-Specification/](Memory-Specification/Cmod_A7_Memory_Specification.md) | Memory hierarchy, address map, caches, measured latencies, placement guidance |
 | [Pin-Specification/](Pin-Specification/Cmod_A7_Pin_Specification.md) | DIP pin assignments, directions, electrical characteristics |
 | [Power-Specification/](Power-Specification/Cmod_A7_Power_Specification.md) | Power rails, input options, VU pin behavior |
 

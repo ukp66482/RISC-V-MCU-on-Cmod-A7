@@ -40,13 +40,12 @@ streams the telemetry line over **both buses** once a second — `[I2C]`
 and `[SPI]` lines scroll by on the monitor. The `n` command runs a
 round-trip PASS/FAIL test on both buses.
 
-Everything is 3.3 V — direct wires, no level shifting. The ESP32 has
-hardware I2C and SPI slaves, so it needs no special power-up order and the
-buses just work.
+Everything is 3.3 V, wired directly with no level shifting. The ESP32 has
+hardware I2C and SPI slaves, so no particular power-up order is required.
 
 ## Wiring
 
-Power rails first — read this before plugging anything:
+Read the power-rail notes before wiring anything:
 
 - **VU = DIP 24** is the 5 V rail (from USB). **GND = DIP 25.**
 - **3.3 V comes from the Pmod connector (J2) VCC pins** — the DIP header
@@ -71,8 +70,8 @@ Notes:
 - DIP 8 has no internal pull-up; without the external 10 k the pin floats.
   The firmware detects a floating/noisy INTR_0 (interrupt storm) and mutes
   the button IRQ with a console message instead of hanging.
-- The servo draws its current from VU; a single unloaded SG90 is fine on
-  USB power, anything bigger deserves its own 5 V supply (common GND).
+- The servo draws its current from VU. A single unloaded SG90 runs fine on
+  USB power; anything larger should have its own 5 V supply (common GND).
 
 ## Build and run
 
@@ -117,10 +116,10 @@ your own project on its own:
 | `showcase.h` | shared tick counter and register helpers |
 | `esp32_bridge/` | Arduino sketch for the receiver station |
 
-Teaching hooks baked in: the tick ISR runs from ITCM (the boot log prints
-its address — compare with `lscript.ld`), `spi0.c` documents the
-flow-control rules for the adjustable-clock SPI unit, and the SPI clock
-itself is just a function call (`spi0_set_clock()`).
+Points worth studying: the tick ISR runs from ITCM (the boot log prints its
+address; compare with `lscript.ld`), `spi0.c` documents the flow-control
+rules for the adjustable-clock SPI unit, and the SPI clock is set with a
+single function call (`spi0_set_clock()`).
 
 ## Troubleshooting
 
@@ -129,4 +128,4 @@ itself is just a function call (`spi0_set_clock()`).
 | `ESP bridge ... not detected` | bridge not powered/wired, or wrong pins — its monitor must show "ready" first; then press `b` to re-probe |
 | bridge SPI FAIL, I2C PASS | check MISO (DIP 37 ← GPIO 19); to isolate the MCU side, jumper DIP 36 ↔ DIP 37 and the SPI leg should echo |
 | `button IRQ muted: INTR_0 is floating` | add the 10 k pull-up to 3.3 V, then reset |
-| servo twitches but won't hold | weak 5 V supply — use an external one, common GND |
+| servo twitches but does not hold | weak 5 V supply — use an external one, common GND |

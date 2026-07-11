@@ -1,6 +1,6 @@
 # JTAG Debug Mode — Vitis Unified IDE
 
-This guide walks through loading and debugging a MicroBlaze RISC-V application over JTAG using the **AMD Vitis Unified IDE**. JTAG puts your program straight into RAM and hands you a debugger — nothing is written to flash, and a power-cycle returns the board to whatever was last deployed to flash.
+This guide describes how to load and debug a MicroBlaze RISC-V application over JTAG using the AMD Vitis Unified IDE. JTAG loads the program directly into RAM and provides full debug control. Nothing is written to flash, and a power-cycle returns the board to whatever was last deployed to flash.
 
 ## Prerequisites
 
@@ -193,8 +193,9 @@ Verify the section-to-region mapping: everything (`.text`, `.data`, `.bss`, `.he
 > `ITCM_FUNC`/`DTCM_DATA` support — and the same ELF can then also be deployed
 > to flash. See the
 > [Standalone Boot Mode guide](../Standalone-Boot-Mode/Standalone-Boot-Mode.md) §3.
-> Use this GUI page to *view* the regions or resize stack/heap — don't let it
-> regenerate the script (that would discard the template's ITCM/DTCM layout).
+> Use this GUI page to view the regions or resize the stack and heap. Do not
+> let it regenerate the script — that would discard the template's ITCM/DTCM
+> layout.
 
 ---
 
@@ -207,9 +208,9 @@ Open the platform's **Configuration for Os: standalone** settings page and verif
   reaches your USB terminal.
 - Adjust other BSP settings as needed
 
-The project-wide serial convention is **115200 8N1**. The course template
-needs nothing here — its `mcu_init()` already sets 115200. **Only if** you kept
-the stock `helloworld.c` (which prints at whatever rate the UART was last set
+The project-wide serial convention is 115200 8N1. The course template needs
+no changes here; its `mcu_init()` already sets 115200. Only if you kept the
+stock `helloworld.c` (which prints at whatever rate the UART was last set
 to), add
 `XUartNs550_SetBaud(XPAR_UART_USB_BASEADDR, XPAR_XUARTNS550_0_CLOCK_FREQ, 115200);`
 at the top of its `main()`.
@@ -254,14 +255,14 @@ Vitis will automatically:
 2. Load the `.elf` into the MicroBlaze RISC-V processor
 3. Execute the program from start to finish
 
-**✔ Checkpoint** — open a 115200-baud terminal **before** clicking Run. The
-board shows up as two serial ports; the UART is usually the higher-numbered
-(e.g. `/dev/ttyUSB1`) — `python3 -m serial.tools.miniterm /dev/ttyUSB1 115200`
+**✔ Checkpoint** — open a 115200-baud terminal before clicking Run. The board
+shows up as two serial ports; the UART is usually the higher-numbered one
+(e.g. `/dev/ttyUSB1`). `python3 -m serial.tools.miniterm /dev/ttyUSB1 115200`
 works anywhere pyserial is installed (Ctrl-] quits). The template prints its
-memory tour **once at boot** — missed it? just click Run again. The two board
-LEDs blinking is an independent sign the program is alive. If the tour's
-addresses show SRAM/ITCM/DTCM, everything — linker script, BSP, UART — is
-wired correctly.
+memory tour once at boot; if you miss it, click Run again. The two blinking
+board LEDs are an independent sign that the program is running. If the tour's
+addresses show SRAM/ITCM/DTCM, the linker script, BSP, and UART are all
+configured correctly.
 
 ![Run Application](images/image_19.png)
 

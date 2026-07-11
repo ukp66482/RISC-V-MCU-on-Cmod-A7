@@ -16,7 +16,7 @@ cable, with no jumpers or mode switching.
 The system is built around a MicroBlaze-V (RISC-V) processor with a
 three-level memory hierarchy — tightly-coupled BRAM (ITCM/DTCM), cached
 external SRAM, and QSPI flash storage — and a class-based AXI peripheral
-address map designed to be read at a glance.
+address map.
 
 ## Features
 

@@ -56,6 +56,7 @@ docs/                     specs (pin / power / IP), guides (JTAG / standalone bo
 workspace-example/
   showcase/               full-feature demo: SPI+I2C to an ESP32, servo, ADC, interrupts (preloaded on the board)
   app_template/           template for new applications
+  mem_bench/              measures the memory-hierarchy latencies in the datasheet
 tools/                    maintainer helper scripts (app scaffolding, JTAG run, flash deploy, doc builds)
 ```
 
@@ -74,6 +75,7 @@ After implementation, export the XSA and create a Vitis platform (standalone,
 
 - [Unified MCU datasheet](docs/datasheet/Cmod_A7_MCU_Datasheet.pdf) — every spec and guide below in one datasheet-style PDF
 - [IP peripheral reference](docs/IP-Specification/Cmod_A7_IP_Peripheral_Reference.md) — peripheral capabilities, register base addresses, interrupt mapping
+- [Memory specification](docs/Memory-Specification/Cmod_A7_Memory_Specification.md) — memory hierarchy, address map, caches, measured latencies
 - [Pin specification](docs/Pin-Specification/Cmod_A7_Pin_Specification.md) — DIP pin assignments and electrical characteristics
 - [Power specification](docs/Power-Specification/Cmod_A7_Power_Specification.md) — power rails and supply options
 - [Vitis quick reference](docs/guides/README.md) — platform and application concepts, XSDB commands

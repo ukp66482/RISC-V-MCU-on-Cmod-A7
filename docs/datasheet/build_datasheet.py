@@ -23,6 +23,7 @@ SOURCES = {
     "ip":   os.path.join(DOCS, "IP-Specification/Cmod_A7_IP_Peripheral_Reference.md"),
     "pin":  os.path.join(DOCS, "Pin-Specification/Cmod_A7_Pin_Specification.md"),
     "pwr":  os.path.join(DOCS, "Power-Specification/Cmod_A7_Power_Specification.md"),
+    "mem":  os.path.join(DOCS, "Memory-Specification/Cmod_A7_Memory_Specification.md"),
     "sa":   os.path.join(DOCS, "guides/Standalone-Boot-Mode/Standalone-Boot-Mode.md"),
 }
 
@@ -43,15 +44,22 @@ RECIPE = [
 
     ("h1", "System Architecture"),
     ("sec", "ip", "MicroBlaze RISC-V (`microblaze_riscv_0`)", 2, "MicroBlaze RISC-V Core"),
-    ("sec", "ip", "Local Memory", 2, "Local Memory (ITCM / DTCM / Bootloader)"),
-    ("sec", "ip", "SRAM / Cellular RAM (`axi_emc_0`)", 2, "External SRAM (Cellular RAM)"),
-    ("sec", "ip", "QSPI Flash (`axi_quad_spi_0`)", 2, "QSPI Flash"),
     ("sec", "ip", "AXI SmartConnect (`microblaze_riscv_0_axi_periph`)", 2, "Bus Architecture"),
     ("sec", "ip", "AXI Interrupt Controller (`microblaze_riscv_0_axi_intc`)", 2, "Interrupt Controller"),
     ("sec", "ip", "Clocking Wizard (`clk_wiz_1`)", 2, "Clocking"),
     ("sec", "ip", "Processor System Reset (`rst_clk_wiz_1_100M`)", 2, "Reset"),
     ("sec", "ip", "Debug Module (`mdm_1`)", 2, "Debug Module"),
     ("sec", "ip", "Complete Address Map", 2, None),
+
+    ("h1", "Memory Hierarchy"),
+    ("sec", "mem", "Memory Hierarchy Overview", 2, None),
+    ("sec", "mem", "Memory Map", 2, None),
+    ("sec", "ip", "Local Memory", 2, "Local Memory (ITCM / DTCM / Bootloader)"),
+    ("sec", "ip", "SRAM / Cellular RAM (`axi_emc_0`)", 2, "External SRAM (Cellular RAM)"),
+    ("sec", "ip", "QSPI Flash (`axi_quad_spi_0`)", 2, "QSPI Flash"),
+    ("sec", "mem", "Caches", 2, None),
+    ("sec", "mem", "Measured Access Latencies", 2, None),
+    ("sec", "mem", "Memory Placement Guidance", 2, None),
 
     ("h1", "Pinout"),
     ("sec", "pin", "DIP Connector Overview", 2, None),
@@ -387,7 +395,8 @@ def main():
 
     build = tempfile.mkdtemp(prefix="cmod_datasheet_")
     ok = False
-    used_nodes, used_intros = set(), {"ip", "ov"}  # ip intro = metadata block
+    # ip/mem intros = standalone-doc metadata blocks, not datasheet content
+    used_nodes, used_intros = set(), {"ip", "ov", "mem"}
     try:
         conv = Converter(build)
         for entry in RECIPE:
@@ -474,7 +483,6 @@ def main():
         # dangle after integration (stale intra-file § numbers, old doc names)
         REFS = [
             ("redo §2.", "redo @sec-setup."),
-            ("configuration constant (§7)", "configuration constant (@sec-image)"),
             ("(see the Standalone Boot Mode guide)", "(see @sec-works)"),
             ("as in the JTAG guide",
              "as in the separate JTAG Debug Mode guide"),
@@ -487,7 +495,7 @@ def main():
              "Interrupt routing is listed in @sec-intc."),
             ("(on-board divider scales to the XADC's 0–1 V)",
              "(on-board divider scales to the XADC's 0–1 V; see @sec-analog)"),
-            ("This guide explains how", "This chapter explains how"),
+            ("This guide describes how", "This chapter describes how"),
         ]
         for old, new in REFS:
             if old not in body:
