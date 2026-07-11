@@ -33,18 +33,19 @@ and work purely at the firmware level.
 
 For development: run over JTAG from Vitis (**Run/Debug**) — code goes to RAM,
 the debugger works, and a power-cycle restores whatever is in flash. See the
-[JTAG Debug Mode guide](docs/guides/JTAG-Debug-Mode/JTAG-Debug-Mode.md).
+**JTAG Debug Mode** chapter of the
+[datasheet](docs/datasheet/Cmod_A7_MCU_Datasheet.pdf).
 
 ### Standalone boot
 
 To keep a program on the board, deploy it into the QSPI flash — it then starts
 automatically at every power-on. The bootloader is AMD/Xilinx's standard SREC
-bootloader, embedded in the hardware image. Details are in the
-[Standalone Boot Mode guide](docs/guides/Standalone-Boot-Mode/Standalone-Boot-Mode.md).
+bootloader, embedded in the hardware image. The datasheet's **Standalone
+Boot** chapter is in preparation; until then the draft procedure is in
+[docs/datasheet/sections/standalone-boot.md](docs/datasheet/sections/standalone-boot.md).
 
 The same ELF works in both modes, and a new board only needs
-`release/official_boot.mcs` programmed once with Vivado Hardware Manager
-(guide, section 2).
+`release/official_boot.mcs` programmed once with Vivado Hardware Manager.
 
 ## Repository layout
 
@@ -73,11 +74,8 @@ After implementation, export the XSA and create a Vitis platform (standalone,
 
 ## Other documents
 
-- [Unified MCU datasheet](docs/datasheet/Cmod_A7_MCU_Datasheet.pdf) — every spec and guide below in one datasheet-style PDF
-- [IP peripheral reference](docs/IP-Specification/Cmod_A7_IP_Peripheral_Reference.md) — peripheral capabilities, register base addresses, interrupt mapping
-- [Memory specification](docs/Memory-Specification/Cmod_A7_Memory_Specification.md) — memory hierarchy, address map, caches, measured latencies
-- [Pin specification](docs/Pin-Specification/Cmod_A7_Pin_Specification.md) — DIP pin assignments and electrical characteristics
-- [Power specification](docs/Power-Specification/Cmod_A7_Power_Specification.md) — power rails and supply options
+- [Unified MCU datasheet](docs/datasheet/Cmod_A7_MCU_Datasheet.pdf) — **the** document: overview, architecture, memory, pinout, peripherals, power, and the JTAG debug walkthrough (chapter sources under [docs/datasheet/sections/](docs/datasheet/sections/))
+- [Boot image pipeline](docs/guides/Boot-Image-Pipeline/Boot-Image-Pipeline.md) — how the boot images are built, from block design to power-on
 - [Vitis quick reference](docs/guides/README.md) — platform and application concepts, XSDB commands
 - [Bus topology diagram](docs/images/dp_ip_topology.svg) — AXI masters, caches, and interconnect wiring
 

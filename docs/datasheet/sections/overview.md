@@ -41,7 +41,7 @@ address map.
 
 ## System Block Diagram
 
-![System Architecture](../images/system_architecture.svg)
+![System Architecture](../../images/system_architecture.svg)
 
 ## Reference Documents
 

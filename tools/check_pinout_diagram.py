@@ -2,7 +2,7 @@
 """Verify the pinout diagram against the pin specification.
 
 Diffs every (pin number, signal name) pair in
-docs/Pin-Specification/images/pinout_diagram.svg against the two authoritative
+docs/datasheet/sections/images/pinout_diagram.svg against the two authoritative
 pin-map tables (sections 2 and 3) of the pin spec markdown, and checks that
 every drawn row pairs pin k with pin 49-k (the DIP's physical mirror, verified
 on hardware). Run after ANY edit to the pinout SVG.
@@ -14,8 +14,8 @@ left signal x=148 (anchor=end), right signal x=392.
 import os, re, sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MD = os.path.join(REPO, "docs/Pin-Specification/Cmod_A7_Pin_Specification.md")
-SVG = os.path.join(REPO, "docs/Pin-Specification/images/pinout_diagram.svg")
+MD = os.path.join(REPO, "docs/datasheet/sections/pins.md")
+SVG = os.path.join(REPO, "docs/datasheet/sections/images/pinout_diagram.svg")
 XL_NUM, XR_NUM, XL_SIG, XR_SIG = 176, 364, 148, 392
 
 body = open(MD).read().split("## 2. Pin Map")[1].split("## 4.")[0]

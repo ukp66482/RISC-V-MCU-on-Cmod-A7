@@ -1,25 +1,30 @@
 # Documentation
 
-All documentation for the RISC-V MCU platform. Each specification and guide
-also ships as a PDF next to its markdown source (rendered with `pdf-style.css`;
-rebuild with `python3 tools/gen_spec_pdfs.py`).
+The deliverable document is the **unified datasheet** —
+[datasheet/Cmod_A7_MCU_Datasheet.pdf](datasheet/Cmod_A7_MCU_Datasheet.pdf).
+It covers the device overview, system architecture, memory hierarchy, pinout,
+peripherals, electrical characteristics, power, and the JTAG debug
+walkthrough in one PDF. Rebuild it with
+`python3 docs/datasheet/build_datasheet.py`.
 
-## Specifications
+The chapter sources are the markdown files under
+[datasheet/sections/](datasheet/sections/) — they are the single source of
+truth; the PDF is a build artifact.
 
-| Document | Description |
-|----------|-------------|
-| [datasheet/](datasheet/Cmod_A7_MCU_Datasheet.pdf) | **Unified datasheet** — all specs and guides below in one PDF (`build_datasheet.py`) |
-| [IP-Specification/](IP-Specification/Cmod_A7_IP_Peripheral_Reference.md) | Peripheral capabilities, register base addresses, interrupt mapping |
-| [Memory-Specification/](Memory-Specification/Cmod_A7_Memory_Specification.md) | Memory hierarchy, address map, caches, measured latencies, placement guidance |
-| [Pin-Specification/](Pin-Specification/Cmod_A7_Pin_Specification.md) | DIP pin assignments, directions, electrical characteristics |
-| [Power-Specification/](Power-Specification/Cmod_A7_Power_Specification.md) | Power rails, input options, VU pin behavior |
+| Chapter source | Contents |
+|----------------|----------|
+| [sections/overview.md](datasheet/sections/overview.md) | Device overview, features, block diagram |
+| [sections/memory.md](datasheet/sections/memory.md) | Memory hierarchy, address map, caches, measured latencies |
+| [sections/pins.md](datasheet/sections/pins.md) | DIP pin assignments, directions, electrical characteristics |
+| [sections/peripherals.md](datasheet/sections/peripherals.md) | Peripheral capabilities, register base addresses, interrupt mapping |
+| [sections/power.md](datasheet/sections/power.md) | Power rails, input options, VU pin behavior |
+| [sections/jtag-debug.md](datasheet/sections/jtag-debug.md) | JTAG debug walkthrough (Vitis Unified IDE) |
+| [sections/standalone-boot.md](datasheet/sections/standalone-boot.md) | Standalone boot — draft; datasheet chapter in preparation |
 
 ## Guides
 
 | Document | Description |
 |----------|-------------|
-| [JTAG Debug Mode](guides/JTAG-Debug-Mode/JTAG-Debug-Mode.md) | Develop and debug over JTAG in Vitis (code runs from RAM) |
-| [Standalone Boot Mode](guides/Standalone-Boot-Mode/Standalone-Boot-Mode.md) | Deploy applications to flash; boots at every power-on (AMD/Xilinx SREC bootloader) |
 | [Boot Image Pipeline](guides/Boot-Image-Pipeline/Boot-Image-Pipeline.md) | From block design to power-on: bitstream, BRAM init, `updatemem`, flash layout |
 | [Vitis quick reference](guides/README.md) | Platform and application concepts, XSDB commands |
 
@@ -27,5 +32,8 @@ rebuild with `python3 tools/gen_spec_pdfs.py`).
 
 | File | Description |
 |------|-------------|
-| [system_architecture.svg](images/system_architecture.svg) | System overview: CPU, memories, peripherals |
-| [dp_ip_topology.svg](images/dp_ip_topology.svg) | Bus and cache topology: AXI masters and interconnects |
+| [images/system_architecture.svg](images/system_architecture.svg) | System overview: CPU, memories, peripherals |
+| [images/dp_ip_topology.svg](images/dp_ip_topology.svg) | Bus and cache topology: AXI masters and interconnects |
+
+Diagram wiring for the pinout figure is checked against the pin tables with
+`python3 tools/check_pinout_diagram.py`.

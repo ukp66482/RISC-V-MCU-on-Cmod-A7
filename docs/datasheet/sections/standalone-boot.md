@@ -61,7 +61,7 @@ Students never repeat this step; from here on the board is a pure MCU.
 ## 3. Build Your Application
 
 Create a Vitis application as in the
-[JTAG guide](../JTAG-Debug-Mode/JTAG-Debug-Mode.md) (sections 1–7), using the
+[JTAG chapter](jtag-debug.md) (sections 1–7), using the
 course template `workspace-example/app_template/src/` — its `main.c` and
 `lscript.ld` replace the generated Hello World sources.
 

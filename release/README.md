@@ -21,7 +21,7 @@ Program `official_boot.mcs` into the QSPI flash: Vivado **Hardware Manager >
 Add Configuration Memory Device** (`mx25l3273f-spi-x1_x2_x4` for Macronix, or
 `n25q32-3.3v-spi-x1_x2_x4` per the IC3 marking) > **Program Configuration
 Memory Device**. Full steps:
-[Standalone Boot Mode guide](../docs/guides/Standalone-Boot-Mode/Standalone-Boot-Mode.md) §2.
+[standalone-boot draft](../docs/datasheet/sections/standalone-boot.md) §2.
 
 ### Create a Vitis Platform
 

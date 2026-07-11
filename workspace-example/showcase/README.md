@@ -81,7 +81,7 @@ python3 tools/jtag_run.py workspace-example/showcase/build/showcase.elf  # volat
 ```
 
 To make it permanent, deploy the ELF to flash — see the
-[Standalone Boot Mode guide](../../docs/guides/Standalone-Boot-Mode/Standalone-Boot-Mode.md).
+[standalone-boot draft](../../docs/datasheet/sections/standalone-boot.md).
 
 Receiver sketch (one-time, with arduino-cli):
 

@@ -19,12 +19,12 @@ DOCS = os.path.dirname(HERE)
 OUT_PDF = os.path.join(HERE, "Cmod_A7_MCU_Datasheet.pdf")
 
 SOURCES = {
-    "ov":   os.path.join(HERE, "overview.md"),
-    "ip":   os.path.join(DOCS, "IP-Specification/Cmod_A7_IP_Peripheral_Reference.md"),
-    "pin":  os.path.join(DOCS, "Pin-Specification/Cmod_A7_Pin_Specification.md"),
-    "pwr":  os.path.join(DOCS, "Power-Specification/Cmod_A7_Power_Specification.md"),
-    "mem":  os.path.join(DOCS, "Memory-Specification/Cmod_A7_Memory_Specification.md"),
-    "sa":   os.path.join(DOCS, "guides/Standalone-Boot-Mode/Standalone-Boot-Mode.md"),
+    "ov":   os.path.join(HERE, "sections/overview.md"),
+    "ip":   os.path.join(HERE, "sections/peripherals.md"),
+    "pin":  os.path.join(HERE, "sections/pins.md"),
+    "pwr":  os.path.join(HERE, "sections/power.md"),
+    "mem":  os.path.join(HERE, "sections/memory.md"),
+    "jtag": os.path.join(HERE, "sections/jtag-debug.md"),
 }
 
 # Datasheet outline. Entry types:
@@ -93,16 +93,25 @@ RECIPE = [
     ("sec", "pwr", "Dual Power Source (USB + External)", 2, None),
     ("sec", "pwr", "Quick Reference for External Power Design", 2, None),
 
-    ("h1", "Boot and Deployment"),
-    ("intro", "sa"),
-    ("sec", "sa", "Working with JTAG Debug Mode", 2, "Boot Modes: JTAG vs Standalone"),
-    ("sec", "sa", "How Standalone Boot Works", 2, None),
-    ("sec", "sa", "Build Your Application", 2, None),
-    ("sec", "sa", "Deploy to Flash", 2, None),
-    ("sec", "sa", "Boot and Verify", 2, None),
-    ("sec", "sa", "One-Time Board Setup (Instructor)", 2, None),
-    ("sec", "sa", "How the Deployment Image Is Made (Instructor Reference)", 2, None),
-    ("sec", "sa", "Troubleshooting", 2, None),
+    ("h1", "JTAG Debug Mode"),
+    ("intro", "jtag"),
+    ("sec", "jtag", "Prerequisites", 2, None),
+    ("sec", "jtag", "Open the Workspace", 2, None),
+    ("sec", "jtag", "Create a Platform", 2, None),
+    ("sec", "jtag", "Create an Application", 2, None),
+    ("sec", "jtag", "Replace the Sources with the Course Template", 2, None),
+    ("sec", "jtag", "Set the Console UART (BSP)", 2, None),
+    ("sec", "jtag", "Build", 2, None),
+    ("sec", "jtag", "Debug over JTAG", 2, None),
+    ("sec", "jtag", "Inspection Tools", 2, None),
+    ("sec", "jtag", "Troubleshooting", 2, None),
+
+    ("h1", "Standalone Boot"),
+    ("text", "At every power-on the MCU loads the application stored in the "
+             "QSPI flash into SRAM and starts it — no PC attached. The full "
+             "walkthrough for deploying an application to flash is in "
+             "preparation and will be added in a future revision of this "
+             "datasheet."),
 ]
 
 # Sections deliberately left out, with the reason (coverage check enforces this)
@@ -468,10 +477,11 @@ def main():
             (r"^(= Pinout[^\n]*)", "ch-pinout"),
             (r"^(= Peripherals[^\n]*)", "ch-periph"),
             (r"^(== QSPI Flash[^\n]*)", "sec-flash"),
-            (r"^(== One-Time Board Setup[^\n]*)", "sec-setup"),
-            (r"^(== Build Your Application[^\n]*)", "sec-build"),
-            (r"^(== How Standalone Boot Works[^\n]*)", "sec-works"),
-            (r"^(== How the Deployment Image Is Made[^\n]*)", "sec-image"),
+            (r"^(= Standalone Boot[^\n]*)", "ch-standalone"),
+            (r"^(== Create a Platform[^\n]*)", "sec-platform"),
+            (r"^(== Create an Application[^\n]*)", "sec-createapp"),
+            (r"^(== Set the Console UART[^\n]*)", "sec-uart"),
+            (r"^(== Troubleshooting[^\n]*)", "sec-jtag-ts"),
             (r"^(=== Analog Input Circuit[^\n]*)", "sec-analog"),
         ]
         for pat, label in LABELS:
@@ -482,10 +492,12 @@ def main():
         # repair references that were correct in the standalone files but
         # dangle after integration (stale intra-file § numbers, old doc names)
         REFS = [
-            ("redo §2.", "redo @sec-setup."),
-            ("(see the Standalone Boot Mode guide)", "(see @sec-works)"),
-            ("as in the JTAG guide",
-             "as in the separate JTAG Debug Mode guide"),
+            ("(see the Standalone Boot Mode guide)", "(see @ch-standalone)"),
+            ("skip to section 3.", "skip to @sec-createapp."),
+            ("created in section 2", "created in @sec-platform"),
+            ("(such as section 5)", "(such as @sec-uart)"),
+            ("redo section 5,", "redo @sec-uart,"),
+            ("see the Troubleshooting section.", "see @sec-jtag-ts."),
             ("Peripheral registers and base addresses are documented in "
              "the IP peripheral reference.",
              "Peripheral registers and base addresses are listed in "

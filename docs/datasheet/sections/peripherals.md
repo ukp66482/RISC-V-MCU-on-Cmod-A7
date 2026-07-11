@@ -33,7 +33,7 @@
 
 ### 1.3 AXI SmartConnect (`microblaze_riscv_0_axi_periph`)
 
-![Bus & Cache Topology](../images/dp_ip_topology.svg)
+![Bus & Cache Topology](../../images/dp_ip_topology.svg)
 
 **Description:** AXI crossbar that fans the processor's data port out to all peripheral endpoints. Routing is pure address decoding — the diagram above shows which path each address range takes (a second, smaller interconnect merges the cache and debug masters in front of the SRAM controller).
 

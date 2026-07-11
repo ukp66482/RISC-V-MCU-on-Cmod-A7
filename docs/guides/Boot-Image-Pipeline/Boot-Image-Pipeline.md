@@ -5,7 +5,7 @@ board boots on its own: how the block design becomes a bitstream, how the
 bootloader ELF is merged into that bitstream without re-running synthesis,
 how the QSPI flash is laid out, and what happens at power-on. It is the
 background reference for the
-[Standalone Boot Mode guide](../Standalone-Boot-Mode/Standalone-Boot-Mode.md).
+[Standalone Boot chapter of the datasheet](../../datasheet/sections/standalone-boot.md).
 
 None of this is required to use the board. It is intended for rebuilding the
 boot images or understanding how the pieces fit together.

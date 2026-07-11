@@ -83,6 +83,8 @@ Vivado                          Vitis
 
 ## Guides in This Directory
 
-- [JTAG Debug Mode](JTAG-Debug-Mode/JTAG-Debug-Mode.md) — Load and debug applications over JTAG
-- [Standalone Boot Mode](Standalone-Boot-Mode/Standalone-Boot-Mode.md) — Deploy applications to flash; boots at every power-on (AMD/Xilinx SREC bootloader)
 - [Boot Image Pipeline](Boot-Image-Pipeline/Boot-Image-Pipeline.md) — how the boot images are built: bitstream, BRAM init, `updatemem`, flash layout, and what happens at power-on
+
+The JTAG debug walkthrough and the standalone-boot chapter live in the
+[unified datasheet](../datasheet/Cmod_A7_MCU_Datasheet.pdf); their markdown
+sources are under `docs/datasheet/sections/`.

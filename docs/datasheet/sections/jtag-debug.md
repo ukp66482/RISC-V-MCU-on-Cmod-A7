@@ -48,7 +48,7 @@ From the menu bar, select **File > New Component > Platform**.
 
 ![File > New Component > Platform](images/image3.png)
 
-### 2.2 Name and Location
+### 2.2 Platform Name and Location
 
 Enter `platform` as the component name and keep the workspace directory as
 the location. Click **Next**.
@@ -75,7 +75,7 @@ Click **Next**.
 
 ![OS and Processor](images/image7.png)
 
-### 2.5 Summary
+### 2.5 Platform Summary
 
 Review the settings and click **Finish**.
 
@@ -99,7 +99,7 @@ Application Component from Template) button.
 
 ![Hello World Template](images/image10.png)
 
-### 3.2 Name and Location
+### 3.2 Application Name and Location
 
 Enter your application name (this guide uses `test`). Click **Next**.
 
@@ -118,7 +118,7 @@ Select `standalone_microblaze_riscv_0`. Click **Next**.
 
 ![Select Domain](images/image13.png)
 
-### 3.5 Summary
+### 3.5 Application Summary
 
 Review the settings and click **Finish**.
 
