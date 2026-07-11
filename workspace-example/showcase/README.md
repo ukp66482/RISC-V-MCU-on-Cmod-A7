@@ -79,8 +79,10 @@ Notes:
 ```
 python3 tools/vitis_build.py showcase                                     # build
 python3 tools/jtag_run.py workspace-example/showcase/build/showcase.elf  # volatile
-python3 tools/upload.py   workspace-example/showcase/build/showcase.elf  # boots from flash
 ```
+
+To make it permanent, deploy the ELF to flash — see the
+[Standalone Boot Mode guide](../../docs/guides/Standalone-Boot-Mode/Standalone-Boot-Mode.md).
 
 Receiver sketch (one-time, with arduino-cli):
 

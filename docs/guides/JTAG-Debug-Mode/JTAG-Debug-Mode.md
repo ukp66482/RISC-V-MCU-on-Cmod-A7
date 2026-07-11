@@ -1,6 +1,6 @@
 # JTAG Debug Mode — Vitis Unified IDE
 
-This guide walks through loading and debugging a MicroBlaze RISC-V application over JTAG using the **AMD Vitis Unified IDE**. JTAG puts your program straight into RAM and hands you a debugger — nothing is written to flash, and a power-cycle returns the board to whatever `upload.py` last shipped.
+This guide walks through loading and debugging a MicroBlaze RISC-V application over JTAG using the **AMD Vitis Unified IDE**. JTAG puts your program straight into RAM and hands you a debugger — nothing is written to flash, and a power-cycle returns the board to whatever was last deployed to flash.
 
 ## Prerequisites
 
@@ -224,8 +224,8 @@ Verify the section-to-region mapping: everything (`.text`, `.data`, `.bss`, `.he
 > layout collides with the bootloader flow. The course template's
 > [`lscript.ld`](../../../workspace-example/app_template/src/lscript.ld)
 > (already copied in §4.1) fixes this: code/data in 512 KB SRAM, stack in DTCM,
-> `ITCM_FUNC`/`DTCM_DATA` support — and the same ELF then also works with
-> `upload.py`. See the
+> `ITCM_FUNC`/`DTCM_DATA` support — and the same ELF can then also be deployed
+> to flash. See the
 > [Standalone Boot Mode guide](../Standalone-Boot-Mode/Standalone-Boot-Mode.md) §3.
 > Use this GUI page to *view* the regions or resize stack/heap — don't let it
 > regenerate the script (that would discard the template's ITCM/DTCM layout).

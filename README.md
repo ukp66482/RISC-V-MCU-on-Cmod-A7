@@ -50,32 +50,26 @@ or click **Run/Debug** in Vitis — see the
 
 ### Standalone boot
 
-To keep a program on the board, write it to flash over the USB serial port:
-
-```
-python3 tools/upload.py workspace-example/myapp/build/myapp.elf --monitor
-```
-
-The application then starts automatically at every power-on. Details are in the
+To keep a program on the board, deploy it into the QSPI flash — it then starts
+automatically at every power-on. The bootloader is AMD/Xilinx's standard SREC
+bootloader, embedded in the hardware image. Details are in the
 [Standalone Boot Mode guide](docs/guides/Standalone-Boot-Mode/Standalone-Boot-Mode.md).
 
-The same ELF works in both modes, and a new board only needs `release/boot.mcs`
-programmed once with Vivado Hardware Manager (guide, section 2).
-`release/boot.bit` is the JTAG-loadable twin — programming it acts as a remote
-power-cycle into the bootloader.
+The same ELF works in both modes, and a new board only needs
+`release/official_boot.mcs` programmed once with Vivado Hardware Manager
+(guide, section 2).
 
 ## Repository layout
 
 ```
-release/                  prebuilt outputs: boot.mcs, boot.bit, top.bit, top_wrapper.xsa
+release/                  prebuilt outputs: official_boot.mcs, boot_srec.bit, top.bit, top_wrapper.xsa
 RISC-V-MCU/               Vivado project (recreate_project.tcl)
 board/                    Cmod A7 hardware: constraints, board files, KiCad symbol
 docs/                     specs (pin / power / IP), guides (JTAG / standalone boot), diagrams
 workspace-example/
   showcase/               full-feature demo: SPI+I2C to an ESP32, servo, ADC, interrupts (preloaded on the board)
-  app_template/      template for new applications
-  bootloader/             UART flash bootloader source
-tools/                    vitis_new_app.py, vitis_build.py, jtag_run.py, upload.py, make_boot_mcs.sh, doc build/check helpers
+  app_template/           template for new applications
+tools/                    vitis_new_app.py, vitis_build.py, jtag_run.py, flash_app.py, doc build/check helpers
 ```
 
 ## Rebuilding the hardware

@@ -77,7 +77,7 @@ def main():
     rel = os.path.relpath(elf, REPO)
     print("\nBUILD OK:", rel)
     print("run:   python3 tools/jtag_run.py " + rel)
-    print("flash: python3 tools/upload.py   " + rel)
+    print("flash: python3 tools/flash_app.py " + rel)
 
 
 main()

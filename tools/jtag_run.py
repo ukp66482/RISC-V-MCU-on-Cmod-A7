@@ -7,8 +7,8 @@ jtag_run.py — load an application over JTAG and run it, in one command.
     python3 tools/jtag_run.py app.elf --no-monitor     # just start it and exit
 
 This is the CLI equivalent of clicking "Run" in Vitis: the program goes to
-RAM and runs until power-off (nothing is written to flash — use upload.py to
-make it permanent). Use --bit on a factory-blank board or after a failed
+RAM and runs until power-off (nothing is written to flash — use flash_app.py
+to make it permanent). Use --bit on a factory-blank board or after a failed
 flash; a board that boots normally already has the FPGA configured.
 
 Requires xsdb on PATH (comes with Vivado/Vitis). Ctrl-C stops the UART
@@ -95,7 +95,7 @@ def main():
                      "(try --bit release/top.bit)")
     finally:
         os.unlink(script)
-    print("running (RAM only — power-off wipes it; upload.py makes it permanent)")
+    print("running (RAM only — power-off wipes it; flash_app.py makes it permanent)")
     if not args.no_monitor:
         monitor(args.baud)
 

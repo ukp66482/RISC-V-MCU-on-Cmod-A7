@@ -1,33 +1,10 @@
-# Standalone Boot Mode — UART Bootloader
+# Standalone Boot Mode
 
-This guide shows how to program your firmware into the board over a single USB cable. The application is stored in QSPI flash and runs automatically at every power-on, exactly like a commercial MCU. **Uploading needs nothing but Python** — the Vitis toolchain is only involved in *building* the program (§3).
-
-The whole loop, once you have an `.elf` (the compiled program file the build produces):
-
-```bash
-python3 tools/upload.py workspace-example/<app>/build/<app>.elf --monitor
-```
-
-press the reset button when asked, and watch your program print. That's it.
-
-## Prerequisites
-
-- **Run all commands from the repository root** (`cd RISC-V-MCU-on-Cmod-A7`) —
-  every path in this guide is relative to it.
-- One micro-USB cable to the board. It carries power, the serial port, and
-  JTAG all at once — there is no separate power supply.
-- Know the two push-buttons: **BTN0 = reset**, **BTN1 = user button** (labels
-  are printed on the board; see the pinout figure in the Pin Specification).
-- A board that has been through the **one-time setup** (§2) — lab boards are
-  usually pre-programmed. Health check: hold BTN1 while plugging in → LED0
-  lights. If nothing lights, the board still needs §2 (requires Vivado — ask
-  your instructor, or do §2 yourself).
-- Python 3 with `pyserial`: `sudo apt install python3-serial` — or
-  `python3 -m pip install --user pyserial`; if pip refuses with
-  *externally-managed-environment*, use the apt package.
-- If the port gives `PermissionError: /dev/ttyUSB…`, add yourself to its group
-  once: `sudo usermod -aG dialout $USER`, then log out and back in.
-- An application ELF built from the `app_template` (§3)
+This guide explains how firmware is stored on the board and started at every
+power-on, exactly like a commercial flash-based MCU. The application lives in
+the QSPI flash; a small bootloader (AMD/Xilinx's standard `srec_spi_bootloader`,
+part of the hardware image) copies it into SRAM and runs it — no PC, no
+debugger, under a second after power is applied.
 
 ---
 
@@ -35,58 +12,57 @@ press the reset button when asked, and watch your program print. That's it.
 
 ```
 Power-on ──► FPGA configures itself from QSPI flash (<1 s)
-        ──► Bootloader (in Block RAM, part of the bitstream) starts
-        ──► Listens on UART for ~1 s:
-              upload request?  ──► receive app ──► write to flash ──► run
-              silence?         ──► copy app from flash to SRAM ──► run
+        ──► Bootloader (in Block RAM, part of the hardware image) starts
+        ──► Reads the application image (SREC) from flash @ 0x340000
+        ──► Copies it to the addresses the image names (SRAM)
+        ──► Jumps to the application's entry point
 ```
+
+The application is stored as an **SREC image** (Motorola S-record — a plain
+text format in which every line carries its own destination address). The
+bootloader simply honors those addresses, so the application's linker script
+decides where it runs: linked to SRAM (`0x6000_0000`), it is copied to SRAM.
 
 Memory roles:
 
 | Memory | Size | Role |
 |---|---|---|
-| QSPI flash | 4 MB | bitstream (2.1 MB) + application slot @ `0x300000` (non-volatile) |
+| QSPI flash | 4 MB | hardware image + bootloader (first 2.2 MB) · application slot @ `0x340000` (non-volatile) |
 | SRAM @ `0x60000000` | 512 KB | where your application executes (code/data/heap, I/D-cached) |
 | BRAM @ `0x00000000` | 128 KB | 32 KB bootloader (untouchable) · 32 KB ITCM @ `0x8000` (your fast code) · 64 KB DTCM @ `0x10000` (stack + fast data) |
 
-> **Note:** The bootloader is part of the bitstream, so it is restored from flash at every
-> power-on — like a mask ROM, it cannot be bricked from software. Holding the on-board
-> user button (BTN1) while plugging in USB forces the board to stay in the bootloader.
+> **Note:** The bootloader is part of the hardware image, so it is restored
+> from flash at every power-on — like a mask ROM, it cannot be bricked from
+> software.
 
 ---
 
 ## 2. One-Time Board Setup (Instructor)
 
-Program the deployment image `release/boot.mcs` (bitstream + bootloader) into the QSPI flash:
+Program the deployment image `release/official_boot.mcs` (hardware image +
+bootloader + preloaded demo application) into the QSPI flash:
 
 1. Open Vivado **Hardware Manager > Open Target > Auto Connect**.
-2. Right-click `xc7a35t_0` > **Add Configuration Memory Device** — pick the part matching the IC3 chip: `mx25l3273f-spi-x1_x2_x4` (Vivado's catalog entry covering the board's Macronix MX25L3233F — verified working) or `n25q32-3.3v-spi-x1_x2_x4` (Micron, older boards).
-3. Right-click the memory device > **Program Configuration Memory Device**, select `release/boot.mcs`, keep **Erase / Program / Verify** checked, **OK**.
-4. Power-cycle. LED0 lights (bootloader alive), then blinks slowly (no app yet).
+2. Right-click `xc7a35t_0` > **Add Configuration Memory Device** — pick the
+   part matching the IC3 chip: `mx25l3273f-spi-x1_x2_x4` (Vivado's catalog
+   entry covering the board's Macronix MX25L3233F — verified working) or
+   `n25q32-3.3v-spi-x1_x2_x4` (Micron, older boards).
+3. Right-click the memory device > **Program Configuration Memory Device**,
+   select `release/official_boot.mcs`, keep **Erase / Program / Verify**
+   checked, **OK**.
+4. Power-cycle. The preloaded demo application starts (its banner appears on
+   the USB serial console at 115200 baud).
 
 Students never repeat this step; from here on the board is a pure MCU.
-
-> **Tip:** `release/boot.bit` is the same bitstream+bootloader as a JTAG image.
-> In Hardware Manager (or `xsdb` + `fpga release/boot.bit`) it acts as a
-> *remote power-cycle*: the board reboots into the bootloader without touching
-> the flash — handy for automated tests and for recovering a board whose USB
-> you cannot reach.
 
 ---
 
 ## 3. Build Your Application
 
-**Fast path — one command** (creates the Vitis project, applies the template, builds):
-
-```bash
-python3 tools/vitis_new_app.py myapp
-# -> workspace-example/myapp/build/myapp.elf
-```
-
-**Manual path:** copy `main.c` and `lscript.ld` from
-`workspace-example/app_template/src/` into a Vitis application as in the JTAG
-guide (its sections 1–5; substitute the template files at its step 4.1). Either way
-you end up with a normal Vitis project you can open in the GUI.
+Create a Vitis application as in the
+[JTAG guide](../JTAG-Debug-Mode/JTAG-Debug-Mode.md) (sections 1–7), using the
+course template `workspace-example/app_template/src/` — its `main.c` and
+`lscript.ld` replace the generated Hello World sources.
 
 The template's linker script places:
 
@@ -110,59 +86,51 @@ RISC-V MCU on Cmod A7 - memory tour
   stack        @ 0x0001FFC0   (DTCM,  grows down)
 ```
 
-Size check: `upload.py` prints `image N B` when it runs — N must stay under
-524288 (512 KB). You rarely need to watch it: if the program were too big, the
-build would already have failed with `region 'sram' overflowed`.
-
-> **Note:** The same ELF works unchanged in **both** modes — Vitis **Run/Debug** over JTAG
-> during development, `upload.py` for deployment. No rebuild, no reconfiguration.
+> **Note:** The same ELF works unchanged in **both** modes — Vitis
+> **Run/Debug** over JTAG during development, flash deployment to ship it.
+> No rebuild, no reconfiguration.
 
 ---
 
-## 4. Upload
+## 4. Deploy to Flash
 
-```bash
-python3 tools/upload.py workspace-example/myapp/build/myapp.elf --monitor   # flash + run + watch
-python3 tools/upload.py workspace-example/myapp/build/myapp.elf --ram      # test run from RAM (flash untouched)
-```
+Deployment = converting the built ELF to SREC and writing it into the flash
+application slot at `0x340000`:
 
-When the script says it is **syncing**, press the **reset button (BTN0)** — the
-bootloader listens during its 1-second boot window after every reset. Do **not**
-unplug the cable while the script is running (the port would vanish from under
-it). If the board isn't plugged in yet: hold **BTN1**, plug in, *then* start the
-script — holding BTN1 makes the bootloader wait forever. A typical upload takes
-a few seconds (chunked transfer with CRC32 verification, then sector-erase +
-page-program + read-back verify).
+1. **Convert to SREC** with the toolchain's `objcopy`
+   (`riscv32-amd-linux-gnu-objcopy -O srec app.elf app.srec`). The record
+   addresses come from the linker script — with the course template they all
+   fall in SRAM.
+2. **Write the SREC file's bytes to flash offset `0x340000`** over JTAG. The
+   erase and write are scoped to the application slot, so the hardware image
+   at the start of flash is never touched.
+3. **Power-cycle (or reboot from flash)** — the bootloader picks up the new
+   image.
 
-**✔ Checkpoint** — a successful flash upload looks like this:
+*(Step-by-step GUI walkthrough with screenshots: to be added.)*
 
-```
-ELF: entry=0x60000000, image 8736 B @0x60000000
-syncing — press the reset button (BTN0) now; or hold BTN1 while plugging in…
-  8736/8736 bytes (100%)
-programmed to flash — app now runs at every power-on
---- UART monitor (Ctrl-C to stop watching; app keeps running)
-RISC-V MCU on Cmod A7 - memory tour
-  ...
-```
-
-Useful flags: `--monitor` to watch the app's output right away, `--port /dev/ttyUSBx` if auto-detection picks the wrong port, `--entry` for raw `.bin` files.
+The slot holds 768 KB of SREC text (roughly a 270 KB application — SREC is a
+text format, about 2.8× the binary size). The course applications are far
+below this; if the build ever outgrows it, the slot offset is a bootloader
+configuration constant (§7) and can be moved.
 
 ---
 
 ## 5. Boot and Verify
 
 - **Power-cycle** → the board boots your flashed app automatically. No PC needed.
-- `xil_printf` (the SDK's lightweight `printf`) output arrives on the same USB cable at **115200 baud** (the template sets this; the bootloader uses the same rate, so one terminal session covers both).
-- To watch the output at any time, open a serial terminal:
+- `xil_printf` (the SDK's lightweight `printf`) output arrives on the same USB
+  cable at **115200 baud**. To watch it, open any serial terminal, e.g.
   `python3 -m serial.tools.miniterm /dev/ttyUSB1 115200` (ships with pyserial;
   quit with Ctrl-]). The board shows up as two ports — the UART is usually the
   higher-numbered one.
-- Convention: light an LED first thing in `main()` so "configured, booted, and running" is visible at a glance — the template's blinking LEDs are exactly this.
+- Convention: light an LED first thing in `main()` so "configured, booted, and
+  running" is visible at a glance — the template's blinking LEDs are exactly this.
 
-> **Note:** The reset button (BTN0) restarts the CPU into the **bootloader** (BRAM is intact), which
-> reloads your app from flash — so reset ≈ power-cycle in this design. Modified `.data`
-> globals are restored because the image is re-copied from flash each boot.
+> **Note:** The reset button (BTN0) restarts the CPU into the **bootloader**
+> (BRAM is intact), which re-copies your app from flash — so reset ≈
+> power-cycle in this design. Modified `.data` globals are restored because
+> the image is re-read from flash each boot.
 
 ---
 
@@ -170,60 +138,71 @@ Useful flags: `--monitor` to watch the app's output right away, `--port /dev/tty
 
 Both modes coexist on the same board with no switching:
 
-| | JTAG (Vitis Run/Debug) | Standalone (`upload.py`) |
+| | JTAG (Vitis Run/Debug) | Standalone (flash) |
 |---|---|---|
 | Code goes to | RAM directly (volatile) | Flash (persistent) |
 | After power-cycle | back to the flashed app | your app boots |
 | Breakpoints / stepping | yes | no |
-| Needs | Vivado/Vitis installed | Python + USB cable |
+| Typical use | daily development loop | shipping a finished program |
 
-Daily development loop: **edit → build → JTAG Run/Debug** (or
-`python3 tools/jtag_run.py <elf>` from a terminal); when it works,
-`upload.py` once to "ship" it. JTAG always has priority — it halts the CPU
-before the bootloader runs, so nothing in flash can interfere with a debug session.
+Daily development loop: **edit → build → JTAG Run/Debug**; when it works,
+deploy to flash once to "ship" it. JTAG always has priority — it halts the CPU
+before the bootloader runs, so nothing in flash can interfere with a debug
+session.
 
 ---
 
 ## 7. How the Deployment Image Is Made (Instructor Reference)
 
-`release/boot.mcs` = bitstream with the bootloader merged into its BRAM initialization:
+`release/official_boot.mcs` = the hardware image with the bootloader merged
+into its BRAM initialization, plus the demo application's SREC at `0x340000`.
+The full mechanics (BRAM init frames, `updatemem`, `write_cfgmem`, flash
+layout) are in the
+[Boot Image Pipeline guide](../Boot-Image-Pipeline/Boot-Image-Pipeline.md).
 
-```bash
-# 1. build workspace-example/bootloader/ in Vitis
-#    (its checked-in lscript.ld confines it to the lower 32 KB of BRAM)
-# 2. merge the ELF into the bitstream BRAM init:
-tools/make_boot_mcs.sh bootloader.elf --hw release/top_wrapper/
-#    (wraps: updatemem -proc top_i/microblaze_riscv_0 + write_cfgmem -interface SPIx4)
+The bootloader itself is **not custom code**: it is Vitis's stock
+**"SREC SPI Bootloader"** application template, built with exactly one
+configuration change — `src/blconfig.h`:
+
+```c
+#define FLASH_IMAGE_BASEADDR  0x00340000
 ```
 
-The same `updatemem` merge with `-out` produces `release/boot.bit` (the JTAG-loadable
-variant used as a remote power-cycle in §2). The bootloader source
-(`workspace-example/bootloader/src/bootloader.c`, ~300 lines) is deliberately readable —
-it doubles as course material for: reset vectors, loaders, UART protocols, SPI flash
-command sequences (WREN/erase/program/status-poll), CRC verification, and `fence.i`.
+Board-verified facts for anyone rebuilding it:
+
+1. **The flash controller is auto-selected correctly.** Vitis 2025.2 (System
+   Device Tree flow) picks `XPAR_AXI_QUAD_SPI_0_BASEADDR` — this board's
+   flash controller. No manual fix needed.
+2. **Keep `VERBOSE` off.** The template's debug prints assume an initialized
+   UART divisor; on this board they hang before the jump (the CPU parks in
+   `XUartNs550_SendByte`). Undefined by default — leave it that way, or call
+   `XUartNs550_SetBaud(...)` first.
+3. The bootloader links to BRAM (`0x0`), so it can copy the application into
+   SRAM without overwriting itself. Merging its ELF into the bitstream uses
+   `updatemem` (~6 s, no re-implementation) — see the Boot Image Pipeline
+   guide.
+4. Applications must set their own UART baud before printing — the course
+   template's `mcu_init()` does.
 
 ---
 
 ## 8. Troubleshooting
 
-1. **`upload.py` can't sync** — The bootloader only listens for ~1 s after each
-   reset: start `upload.py` *first*, then press the reset button (BTN0) when it
-   says "syncing" — never unplug the cable mid-script. Or hold the user button
-   (BTN1) while plugging in — that forces the bootloader to listen forever.
-   Check the port: the board exposes two serial ports — the UART is usually the
-   higher-numbered (`ls /dev/ttyUSB*`; select with `--port`). Close any open
-   serial terminal first (the port is exclusive).
-2. **`PermissionError: /dev/ttyUSB…`** — your user isn't in the port's group:
-   `sudo usermod -aG dialout $USER`, then log out and back in.
-3. **Upload OK but app misbehaves** — Ensure the app was built with the template's
-   `lscript.ld` (sections must live in SRAM; a default all-BRAM ELF uploads but its
-   addresses collide with the bootloader). `upload.py` warns about segments outside SRAM.
-4. **No memory tour / garbage addresses** — `mcu_init()` is not the first line of
-   `main()`, or it was removed: nothing tagged `ITCM_FUNC`/`DTCM_DATA` works before it runs.
-5. **Board boots an old app** — The upload failed before the `G` step, or you used
-   `--ram` (volatile). Re-run without `--ram` and watch for "programmed to flash".
-6. **Nothing at all (no LED)** — FPGA didn't configure: flash image invalid → redo §2.
-   JTAG always works for recovery (`tools/jtag_run.py <elf> --bit release/top.bit`).
-7. **Garbage on the terminal** — Baud must be **115200** (both bootloader and template), not 9600.
-8. **Want a factory-blank board** — Hardware Manager > right-click memory device > **Erase**:
-   the FPGA then waits for JTAG at power-on.
+1. **Garbage on the terminal** — Baud must be **115200**; the app sets it via
+   `mcu_init()`. The stock Hello World template does *not* set it — add
+   `XUartNs550_SetBaud(XPAR_UART_USB_BASEADDR, 100000000, 115200);` or use the
+   course template.
+2. **Deployed, but silent after power-on** — The ELF was probably not linked
+   with the course template's `lscript.ld`: the bootloader honors the SREC
+   record addresses, and a default all-BRAM layout collides with the
+   bootloader itself. Rebuild with the template and redeploy.
+3. **No memory tour / garbage addresses** — `mcu_init()` is not the first
+   line of `main()`, or it was removed: nothing tagged `ITCM_FUNC`/`DTCM_DATA`
+   works before it runs.
+4. **Board boots an old app** — the flash write did not complete (check the
+   programming step's verify result), or you power-cycled before it finished.
+   Redeploy.
+5. **Nothing at all (no LED, no output)** — the FPGA didn't configure: flash
+   image invalid → redo §2. JTAG always works for recovery.
+6. **Want a factory-blank board** — Hardware Manager > right-click memory
+   device > **Erase**: the FPGA then waits for JTAG at power-on.

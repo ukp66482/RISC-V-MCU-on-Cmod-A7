@@ -18,7 +18,8 @@ rebuild with `python3 tools/gen_spec_pdfs.py`).
 | Document | Description |
 |----------|-------------|
 | [JTAG Debug Mode](guides/JTAG-Debug-Mode/JTAG-Debug-Mode.md) | Develop and debug over JTAG in Vitis (code runs from RAM) |
-| [Standalone Boot Mode](guides/Standalone-Boot-Mode/Standalone-Boot-Mode.md) | Deploy to flash with `upload.py`; the boot flow explained |
+| [Standalone Boot Mode](guides/Standalone-Boot-Mode/Standalone-Boot-Mode.md) | Deploy applications to flash; boots at every power-on (AMD/Xilinx SREC bootloader) |
+| [Boot Image Pipeline](guides/Boot-Image-Pipeline/Boot-Image-Pipeline.md) | From block design to power-on: bitstream, BRAM init, `updatemem`, flash layout |
 | [Vitis quick reference](guides/README.md) | Platform and application concepts, XSDB commands |
 
 ## Diagrams

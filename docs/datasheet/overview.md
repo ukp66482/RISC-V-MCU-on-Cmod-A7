@@ -9,10 +9,9 @@ spec/guide markdown. -->
 The Cmod A7-35T RISC-V MCU is a soft microcontroller implemented on the
 Artix-7 FPGA of the Digilent Cmod A7-35T module. To the programmer it behaves
 like a commercial flash-based MCU: firmware is stored in the on-board QSPI
-flash, boots automatically in under a second at power-on, and is programmed
-over a single USB cable with `tools/upload.py` — no FPGA toolchain required.
-The full AMD Vitis/JTAG development flow remains available on the same board,
-with no jumpers or mode switching.
+flash and boots automatically in under a second at power-on, and the full AMD
+Vitis/JTAG development flow is available on the same board over a single USB
+cable, with no jumpers or mode switching.
 
 The system is built around a MicroBlaze-V (RISC-V) processor with a
 three-level memory hierarchy — tightly-coupled BRAM (ITCM/DTCM), cached
@@ -36,9 +35,8 @@ address map designed to be read at a glance.
 - **Analog** — 2 external ADC inputs (12-bit XADC, 0–3.3 V range) plus on-die
   temperature and supply monitors
 - **I/O** — 48-pin DIP form factor, 3.3 V LVCMOS (not 5 V tolerant)
-- **Boot** — standalone boot from flash (< 1 s) with UART bootloader
-  self-programming, or JTAG load/debug from Vitis; both coexist without
-  reconfiguration
+- **Boot** — standalone boot from flash (< 1 s) via the on-chip bootloader,
+  or JTAG load/debug from Vitis; both coexist without reconfiguration
 - **Debug** — JTAG breakpoints, single-step, register and memory inspection
 
 ## System Block Diagram

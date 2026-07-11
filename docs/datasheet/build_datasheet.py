@@ -89,9 +89,8 @@ RECIPE = [
     ("intro", "sa"),
     ("sec", "sa", "Working with JTAG Debug Mode", 2, "Boot Modes: JTAG vs Standalone"),
     ("sec", "sa", "How Standalone Boot Works", 2, None),
-    ("sec", "sa", "Prerequisites", 2, "Prerequisites for Standalone Upload"),
     ("sec", "sa", "Build Your Application", 2, None),
-    ("sec", "sa", "Upload", 2, None),
+    ("sec", "sa", "Deploy to Flash", 2, None),
     ("sec", "sa", "Boot and Verify", 2, None),
     ("sec", "sa", "One-Time Board Setup (Instructor)", 2, None),
     ("sec", "sa", "How the Deployment Image Is Made (Instructor Reference)", 2, None),
@@ -463,6 +462,7 @@ def main():
             (r"^(== One-Time Board Setup[^\n]*)", "sec-setup"),
             (r"^(== Build Your Application[^\n]*)", "sec-build"),
             (r"^(== How Standalone Boot Works[^\n]*)", "sec-works"),
+            (r"^(== How the Deployment Image Is Made[^\n]*)", "sec-image"),
             (r"^(=== Analog Input Circuit[^\n]*)", "sec-analog"),
         ]
         for pat, label in LABELS:
@@ -473,13 +473,8 @@ def main():
         # repair references that were correct in the standalone files but
         # dangle after integration (stale intra-file § numbers, old doc names)
         REFS = [
-            ("*one-time setup* (§2)", "*one-time setup* (@sec-setup)"),
-            ("`app_template` (§3)", "`app_template` (@sec-build)"),
             ("redo §2.", "redo @sec-setup."),
-            ("power-cycle in §2)", "power-cycle in @sec-setup)"),
-            ("still needs §2 (requires Vivado", "still needs @sec-setup (requires Vivado"),
-            ("or do §2 yourself", "or do @sec-setup yourself"),
-            ("in _building_ the program (§3)", "in _building_ the program (@sec-build)"),
+            ("configuration constant (§7)", "configuration constant (@sec-image)"),
             ("(see the Standalone Boot Mode guide)", "(see @sec-works)"),
             ("as in the JTAG guide",
              "as in the separate JTAG Debug Mode guide"),
@@ -492,7 +487,7 @@ def main():
              "Interrupt routing is listed in @sec-intc."),
             ("(on-board divider scales to the XADC's 0–1 V)",
              "(on-board divider scales to the XADC's 0–1 V; see @sec-analog)"),
-            ("This guide shows how", "This chapter shows how"),
+            ("This guide explains how", "This chapter explains how"),
         ]
         for old, new in REFS:
             if old not in body:

@@ -85,7 +85,7 @@ def main():
     print(f"BUILD OK: {rel}")
     print("run it (JTAG, volatile):   python3 tools/jtag_run.py " + rel)
     print("ship it (flash, boots at power-on):")
-    print("                           python3 tools/upload.py   " + rel)
+    print("                           python3 tools/flash_app.py " + rel)
     print("edit + debug in the GUI:   vitis -> Open Workspace -> workspace-example")
     print("=" * 64)
 

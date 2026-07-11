@@ -29,7 +29,7 @@
 | Access | 1 cycle, dual-port — instruction and data sides read simultaneously |
 | Layout | 32 KB bootloader + 32 KB ITCM + 64 KB DTCM |
 
-**Description:** Instruction and data local memory implemented with FPGA Block RAM — functionally this MCU's tightly-coupled memory (TCM): the ILMB/DLMB ports play the same role as ITCM/DTCM on other MCU cores (e.g. Cortex-M7), giving 1-cycle access outside the cache path. Layout: `0x0000`–`0x7FFF` (32 KB) holds the UART bootloader (restored from flash at every configuration); `0x8000`–`0xFFFF` (32 KB) is the application's ITCM for interrupt handlers and timing-critical code (`ITCM_FUNC`, copied out of the SRAM image by `mcu_init()` at startup); `0x10000`–`0x1FFFF` (64 KB) is the DTCM, holding the stack (top-down from `0x20000`) and `DTCM_DATA` fast data.
+**Description:** Instruction and data local memory implemented with FPGA Block RAM — functionally this MCU's tightly-coupled memory (TCM): the ILMB/DLMB ports play the same role as ITCM/DTCM on other MCU cores (e.g. Cortex-M7), giving 1-cycle access outside the cache path. Layout: `0x0000`–`0x7FFF` (32 KB) holds the bootloader (restored from flash at every configuration); `0x8000`–`0xFFFF` (32 KB) is the application's ITCM for interrupt handlers and timing-critical code (`ITCM_FUNC`, copied out of the SRAM image by `mcu_init()` at startup); `0x10000`–`0x1FFFF` (64 KB) is the DTCM, holding the stack (top-down from `0x20000`) and `DTCM_DATA` fast data.
 
 ### 1.3 AXI SmartConnect (`microblaze_riscv_0_axi_periph`)
 
@@ -166,13 +166,13 @@ Six 32-bit AXI timer instances (Vitis driver: `XTmrCtr`) — three as general-pu
 | Mode | CPU-programmable register mode — flash contents are **not** memory-mapped |
 | FIFO | 256 B TX/RX — one full flash page (256 B) per transfer |
 
-**Description:** Controls the on-board Quad-SPI NOR Flash. The full register set (control, status, TX/RX FIFO, slave select) is exposed at `0x4050_0000`, so the CPU can issue any SPI command — read (`0x0B`), Write Enable (`0x06`), Sector/Block Erase (`0x20`/`0xD8`), Page Program (`0x02`), status poll (`0x05`). This is what allows the UART bootloader to program application images into flash at runtime (`workspace-example/bootloader/src/bootloader.c` is a complete worked example, and the Vitis `XSpi` driver wraps the register protocol).
+**Description:** Controls the on-board Quad-SPI NOR Flash. The full register set (control, status, TX/RX FIFO, slave select) is exposed at `0x4050_0000`, so the CPU can issue any SPI command — read (`0x0B`), Write Enable (`0x06`), Sector/Block Erase (`0x20`/`0xD8`), Page Program (`0x02`), status poll (`0x05`). This keeps the flash fully CPU-programmable at runtime (the Vitis `XSpi` driver wraps the register protocol).
 
 Flash contents are **not memory-mapped**: there is no XIP window, and code cannot execute from flash directly. The standalone-boot design instead copies the application from flash into SRAM at power-on (see the Standalone Boot Mode guide).
 
 > **Design note:** a read-only memory-mapped XIP window and CPU-programmable register mode are
-> mutually exclusive in this controller. This project chooses register mode: self-programming
-> (Arduino-style `upload.py` workflow) was judged more valuable for the course than
+> mutually exclusive in this controller. This project chooses register mode: keeping the
+> flash CPU-programmable at runtime was judged more valuable for the course than
 > execute-in-place, and the 512 KB SRAM + I-cache serves execution instead.
 
 ### 5.2 SRAM / Cellular RAM (`axi_emc_0`)

@@ -7,8 +7,8 @@
  *                      or  python3 tools/jtag_run.py build/<app>.elf
  *                      -> loads into RAM, gone at power-off, debugger works
  *
- *   Standalone (ship): python3 tools/upload.py build/<app>.elf
- *                      -> written to flash, runs by itself at every power-on
+ *   Standalone (ship): write the app into flash (Standalone Boot Mode guide)
+ *                      -> runs by itself at every power-on
  *
  * Memory map (details in lscript.ld):
  *
