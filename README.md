@@ -29,23 +29,10 @@ and work purely at the firmware level.
 
 ## Boot modes
 
-Create and build an application in one command (Vitis project from the course
-template, ready for both modes):
-
-```
-python3 tools/vitis_new_app.py myapp
-```
-
 ### JTAG mode
 
-For development: run over JTAG — code goes to RAM, the debugger works, and a
-power-cycle restores whatever is in flash.
-
-```
-python3 tools/jtag_run.py workspace-example/myapp/build/myapp.elf
-```
-
-or click **Run/Debug** in Vitis — see the
+For development: run over JTAG from Vitis (**Run/Debug**) — code goes to RAM,
+the debugger works, and a power-cycle restores whatever is in flash. See the
 [JTAG Debug Mode guide](docs/guides/JTAG-Debug-Mode/JTAG-Debug-Mode.md).
 
 ### Standalone boot
@@ -69,7 +56,7 @@ docs/                     specs (pin / power / IP), guides (JTAG / standalone bo
 workspace-example/
   showcase/               full-feature demo: SPI+I2C to an ESP32, servo, ADC, interrupts (preloaded on the board)
   app_template/           template for new applications
-tools/                    vitis_new_app.py, vitis_build.py, jtag_run.py, flash_app.py, doc build/check helpers
+tools/                    maintainer helper scripts (app scaffolding, JTAG run, flash deploy, doc builds)
 ```
 
 ## Rebuilding the hardware

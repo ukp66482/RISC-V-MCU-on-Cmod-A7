@@ -10,46 +10,12 @@ This guide walks through loading and debugging a MicroBlaze RISC-V application o
   `source /opt/Xilinx/2025.2/Vitis/settings64.sh` (adjust to your install)
 - Cmod A7-35T board connected via its micro-USB cable (it carries power, UART,
   and JTAG all at once)
-- For the CLI helpers below: run them from the repository root, and install
-  `pyserial` if you want the UART tail (see the Standalone guide's prerequisites)
-
----
-
-## 0. The Fast Path (no GUI)
-
-Two commands take you from a fresh checkout to a running program:
-
-```bash
-python3 tools/vitis_new_app.py myapp        # create + build (first run also builds the platform)
-python3 tools/jtag_run.py workspace-example/myapp/build/myapp.elf
-```
-
-`vitis_new_app.py` performs sections 1–7 of this guide for you (workspace,
-platform with `uart_USB` stdin/stdout, application from the course template,
-build). `jtag_run.py` is section 8's **Run** button as a command, and tails the
-UART so you immediately see:
-
-```
-RISC-V MCU on Cmod A7 - memory tour
-  main()       @ 0x600009D0   (SRAM,  cached)
-  blink_step() @ 0x00008000   (ITCM,  1-cycle)
-  ...
-```
-
-The result is a normal Vitis project — open the workspace in the GUI any time
-for breakpoints and stepping.
-
-**First time here?** Do the GUI walkthrough (sections 1–8) once so you know
-what the script does on your behalf; afterwards use the two commands for every
-new app. If you already ran the fast path, open `workspace-example` in the GUI
-and jump straight to section 8 — do **not** re-create the `platform` component
-the script already made.
 
 ---
 
 ## 1. Open Vitis Workspace
 
-Launch the Vitis Unified IDE. On the Welcome page, click **Open Workspace** to select or create a working directory — use the repo's `workspace-example/` folder, which is what the fast-path scripts, the template paths, and this guide all assume (any empty folder also works if you adjust the paths yourself).
+Launch the Vitis Unified IDE. On the Welcome page, click **Open Workspace** to select or create a working directory — use the repo's `workspace-example/` folder, which is what the template paths and this guide assume (any empty folder also works if you adjust the paths yourself).
 
 ![Open Workspace](images/image_0.png)
 
@@ -238,8 +204,7 @@ Open the platform's **Configuration for Os: standalone** settings page and verif
 
 - **stdin** and **stdout**: set both to **`uart_USB`**. The default may be
   `uart_1` (the DIP-pin UART) — with that setting `xil_printf` output never
-  reaches your USB terminal. (Platforms created by `tools/vitis_new_app.py`
-  already have this preset.)
+  reaches your USB terminal.
 - Adjust other BSP settings as needed
 
 The project-wide serial convention is **115200 8N1**. The course template
@@ -292,12 +257,11 @@ Vitis will automatically:
 **✔ Checkpoint** — open a 115200-baud terminal **before** clicking Run. The
 board shows up as two serial ports; the UART is usually the higher-numbered
 (e.g. `/dev/ttyUSB1`) — `python3 -m serial.tools.miniterm /dev/ttyUSB1 115200`
-works anywhere pyserial is installed (Ctrl-] quits). Or skip the terminal and
-use `python3 tools/jtag_run.py <elf>`, which loads, runs, and tails the UART in
-one go. The template prints its memory tour **once at boot** — missed it? just
-click Run again. The two board LEDs blinking is an independent sign the program
-is alive. If the tour's addresses show SRAM/ITCM/DTCM as in §0, everything —
-linker script, BSP, UART — is wired correctly.
+works anywhere pyserial is installed (Ctrl-] quits). The template prints its
+memory tour **once at boot** — missed it? just click Run again. The two board
+LEDs blinking is an independent sign the program is alive. If the tour's
+addresses show SRAM/ITCM/DTCM, everything — linker script, BSP, UART — is
+wired correctly.
 
 ![Run Application](images/image_19.png)
 
