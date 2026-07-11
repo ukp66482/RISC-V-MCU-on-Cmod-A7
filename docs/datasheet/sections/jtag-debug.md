@@ -20,19 +20,19 @@ into RAM and provides full debug control. Nothing is written to flash.
 
 Launch the Vitis Unified IDE and click **Set Workspace** on the Welcome page.
 
-![Set Workspace](images/image0.png)
+![Set Workspace](images/jtag0.png)
 
 Select the repo's `workspace-example/` folder — the template paths and this
 guide assume it (any empty folder also works if you adjust the paths
 yourself).
 
-![Open Folder](images/image1.png)
+![Open Folder](images/jtag1.png)
 
 The first time a Vitis installation opens this workspace it may show an
 **Update Workspace** dialog. Click **Update** — it refreshes only the
 workspace metadata and does not modify any component.
 
-![Update Workspace](images/image2.png)
+![Update Workspace](images/jtag2.png)
 
 ---
 
@@ -46,25 +46,25 @@ workspace already contains a `platform` component, skip to section 3.**
 
 From the menu bar, select **File > New Component > Platform**.
 
-![File > New Component > Platform](images/image3.png)
+![File > New Component > Platform](images/jtag3.png)
 
 ### 2.2 Platform Name and Location
 
 Enter `platform` as the component name and keep the workspace directory as
 the location. Click **Next**.
 
-![Platform Name and Location](images/image4.png)
+![Platform Name and Location](images/jtag4.png)
 
 ### 2.3 Select the Hardware Design (XSA)
 
 On the **Flow** page, select **Hardware Design** and click **Browse** next to
 the *Hardware Design (XSA) For Implementation* field.
 
-![Select Platform Creation Flow](images/image5.png)
+![Select Platform Creation Flow](images/jtag5.png)
 
 Pick the prebuilt `release/top_wrapper.xsa` from the repository.
 
-![Select top_wrapper.xsa](images/image6.png)
+![Select top_wrapper.xsa](images/jtag6.png)
 
 ### 2.4 Select Operating System and Processor
 
@@ -73,19 +73,19 @@ Pick the prebuilt `release/top_wrapper.xsa` from the repository.
 
 Click **Next**.
 
-![OS and Processor](images/image7.png)
+![OS and Processor](images/jtag7.png)
 
 ### 2.5 Platform Summary
 
 Review the settings and click **Finish**.
 
-![Platform Summary](images/image8.png)
+![Platform Summary](images/jtag8.png)
 
 Vitis generates the platform component. When it finishes, the Explorer shows
 the `platform` component with its `Sources` and `Output` trees, and the
 notification *"Created platform: platform"* appears.
 
-![Platform Created](images/image9.png)
+![Platform Created](images/jtag9.png)
 
 ---
 
@@ -97,38 +97,38 @@ Open the **Examples** view from the left activity bar. Under *Embedded
 Software Examples*, select **Hello World** and click the **+** (Create
 Application Component from Template) button.
 
-![Hello World Template](images/image10.png)
+![Hello World Template](images/jtag10.png)
 
 ### 3.2 Application Name and Location
 
 Enter your application name (this guide uses `test`). Click **Next**.
 
-![Application Name](images/image11.png)
+![Application Name](images/jtag11.png)
 
 ### 3.3 Select the Platform
 
 Select the `platform` component created in section 2 (Board: `cmod_a7-35t`).
 Click **Next**.
 
-![Select Platform](images/image12.png)
+![Select Platform](images/jtag12.png)
 
 ### 3.4 Select the Domain
 
 Select `standalone_microblaze_riscv_0`. Click **Next**.
 
-![Select Domain](images/image13.png)
+![Select Domain](images/jtag13.png)
 
 ### 3.5 Application Summary
 
 Review the settings and click **Finish**.
 
-![Application Summary](images/image14.png)
+![Application Summary](images/jtag14.png)
 
 The new component appears in the Explorer. Its `src/` folder holds the
 template's generated files: `helloworld.c`, `lscript.ld`, `platform.c`, and
 `platform.h`.
 
-![Application Created](images/image15.png)
+![Application Created](images/jtag15.png)
 
 ---
 
@@ -145,18 +145,18 @@ In the Explorer, select all four files under `src/` (`helloworld.c`,
 `lscript.ld`, `platform.c`, `platform.h`), right-click, and choose
 **Delete**.
 
-![Delete Generated Sources](images/image16.png)
+![Delete Generated Sources](images/jtag16.png)
 
 ### 4.2 Import the Template Files
 
 Right-click the `src/` folder and choose **Import > Files...**
 
-![Import Files](images/image17.png)
+![Import Files](images/jtag17.png)
 
 Navigate to `workspace-example/app_template/src/` and select both `main.c`
 and `lscript.ld`. Click **Open**.
 
-![Select Template Files](images/image18.png)
+![Select Template Files](images/jtag18.png)
 
 Afterwards `src/` contains exactly `main.c` and `lscript.ld`. Files inside
 `src/` are compiled automatically; no build configuration is needed.
@@ -190,12 +190,12 @@ Open the platform's **Settings > vitis-comp.json**, navigate to
 The configuration table shows `standalone_stdin` and `standalone_stdout` set
 to `uart_1`:
 
-![BSP Defaults to uart_1](images/image19.png)
+![BSP Defaults to uart_1](images/jtag19.png)
 
 Change both to **`uart_USB`**. The output log reports the domain being
 reconfigured.
 
-![stdin/stdout Set to uart_USB](images/image20.png)
+![stdin/stdout Set to uart_USB](images/jtag20.png)
 
 > **Note:** If the platform BSP is ever regenerated (for example after
 > changing another BSP option), re-check this page — regeneration can reset
@@ -212,20 +212,20 @@ reconfigured.
 In the **FLOW** panel, select the `platform` component and click **Build**.
 Wait for *"Platform Build Finished successfully"*.
 
-![Build Platform](images/image23.png)
+![Build Platform](images/jtag23.png)
 
 ### 6.2 Build the Application
 
 Switch the FLOW component to your application and click **Build**.
 
-![Build Application](images/image24.png)
+![Build Application](images/jtag24.png)
 
 The first application build asks how platform builds should be handled.
 Select **Always build platform with application** and click **Save in
 Workspace Preference** — BSP changes (such as section 5) then propagate
 automatically on every build.
 
-![Platform Build Dependency](images/image25.png)
+![Platform Build Dependency](images/jtag25.png)
 
 The build produces `<workspace>/test/build/test.elf`.
 
@@ -243,14 +243,14 @@ The build produces `<workspace>/test/build/test.elf`.
 In the **FLOW** panel, click **Debug**. Vitis programs the FPGA over JTAG,
 loads the ELF into memory, and pauses execution at `main()`.
 
-![Debug Launched](images/image26.png)
+![Debug Launched](images/jtag26.png)
 
 The Debug view shows the target (*RISC-V at USER2*, *Hart #0 — PAUSED ON
 BREAKPOINT*), the call stack, local variables, and breakpoints. Note the call
 stack address: `main()` sits at `0x600009EC` — in SRAM, exactly where the
 linker script placed it.
 
-![Paused at main()](images/image27.png)
+![Paused at main()](images/jtag27.png)
 
 ### 7.2 Open a Serial Terminal, Then Continue
 
@@ -258,13 +258,13 @@ Open a serial terminal **before** resuming execution. The board shows up as
 two serial ports; the UART is usually the higher-numbered one. Settings:
 **115200 8N1**.
 
-![GTKTerm on the Board UART](images/image32.png)
+![GTKTerm on the Board UART](images/jtag32.png)
 
 Click **Continue (F5)**. The application starts: the memory tour prints once,
 followed by a status line about once a second, and the on-board RGB LED
 cycles through its colors.
 
-![Memory Tour and Status Output](images/image33.png)
+![Memory Tour and Status Output](images/jtag33.png)
 
 **✔ Checkpoint** — the memory tour is the proof that everything is wired
 correctly:
@@ -297,14 +297,14 @@ instead — same loading, no pause at `main()`.
 
 While a debug session is active, the **View** menu provides three inspectors:
 
-![View Menu](images/image28.png)
+![View Menu](images/jtag28.png)
 
 ### 8.1 Memory Inspector
 
 Enter an address to inspect memory directly — for example `0x60000000` (the
 application image in SRAM), `0x8000` (ITCM), or `0x10000` (DTCM).
 
-![Memory Inspector](images/image29.png)
+![Memory Inspector](images/jtag29.png)
 
 ### 8.2 Register Inspector
 
@@ -312,7 +312,7 @@ Shows all processor registers with live values. With the target paused at
 `main()`, `sp` reads `0x00020000` — the top of the DTCM, matching the
 linker script's stack placement.
 
-![Register Inspector](images/image30.png)
+![Register Inspector](images/jtag30.png)
 
 ### 8.3 Disassembly View
 
@@ -320,7 +320,7 @@ Shows the machine code actually executing, with source interleaving. The
 instruction addresses around `main()` all fall in `0x6000_xxxx` — the
 program runs from SRAM.
 
-![Disassembly](images/image31.png)
+![Disassembly](images/jtag31.png)
 
 ---
 
@@ -341,7 +341,7 @@ program runs from SRAM.
 
    The offending line, as the IDE shows it:
 
-   ![clk_wiz Driver Bug](images/image21.png)
+   ![clk_wiz Driver Bug](images/jtag21.png)
 
    **Fix the source** (works with either compiler): change line 839 from
 
@@ -355,7 +355,7 @@ program runs from SRAM.
    strcmp(InstancePtr->Config.Name, "xlnx,clkx5-wiz-1.0") >= 0
    ```
 
-   ![After the Fix](images/image22.png)
+   ![After the Fix](images/jtag22.png)
 
    Then rebuild the platform. Apply the same one-line fix to the Vitis
    installation copy at
