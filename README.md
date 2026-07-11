@@ -73,7 +73,7 @@ board/                    Cmod A7 hardware: constraints, board files, KiCad symb
 docs/                     specs (pin / power / IP), guides (JTAG / standalone boot), diagrams
 workspace-example/
   showcase/               full-feature demo: SPI+I2C to an ESP32, servo, ADC, interrupts (preloaded on the board)
-  SRAM_app_template/      template for new applications
+  app_template/      template for new applications
   bootloader/             UART flash bootloader source
 tools/                    vitis_new_app.py, vitis_build.py, jtag_run.py, upload.py, make_boot_mcs.sh, doc build/check helpers
 ```

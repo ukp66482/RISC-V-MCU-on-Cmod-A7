@@ -27,7 +27,7 @@ press the reset button when asked, and watch your program print. That's it.
   *externally-managed-environment*, use the apt package.
 - If the port gives `PermissionError: /dev/ttyUSB…`, add yourself to its group
   once: `sudo usermod -aG dialout $USER`, then log out and back in.
-- An application ELF built from the `SRAM_app_template` (§3)
+- An application ELF built from the `app_template` (§3)
 
 ---
 
@@ -84,7 +84,7 @@ python3 tools/vitis_new_app.py myapp
 ```
 
 **Manual path:** copy `main.c` and `lscript.ld` from
-`workspace-example/SRAM_app_template/src/` into a Vitis application as in the JTAG
+`workspace-example/app_template/src/` into a Vitis application as in the JTAG
 guide (its sections 1–5; substitute the template files at its step 4.1). Either way
 you end up with a normal Vitis project you can open in the GUI.
 

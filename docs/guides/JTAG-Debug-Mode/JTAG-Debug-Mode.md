@@ -163,7 +163,7 @@ the workspace, here `workspace-example/`):
 
 ```bash
 cd workspace-example
-cp SRAM_app_template/src/main.c SRAM_app_template/src/lscript.ld GPIO_test/src/
+cp app_template/src/main.c app_template/src/lscript.ld GPIO_test/src/
 rm GPIO_test/src/helloworld.c
 ```
 
@@ -222,7 +222,7 @@ Verify the section-to-region mapping: everything (`.text`, `.data`, `.bss`, `.he
 > **Note:** the Vitis-generated default linker script places everything in the
 > 128 KB BRAM — fine for a quick Hello World over JTAG, but small, and the
 > layout collides with the bootloader flow. The course template's
-> [`lscript.ld`](../../../workspace-example/SRAM_app_template/src/lscript.ld)
+> [`lscript.ld`](../../../workspace-example/app_template/src/lscript.ld)
 > (already copied in §4.1) fixes this: code/data in 512 KB SRAM, stack in DTCM,
 > `ITCM_FUNC`/`DTCM_DATA` support — and the same ELF then also works with
 > `upload.py`. See the

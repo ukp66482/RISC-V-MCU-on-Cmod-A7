@@ -8,7 +8,7 @@ does everything the GUI walkthrough does:
   1. opens the workspace-example/ Vitis workspace,
   2. creates the platform from release/top_wrapper.xsa if it is missing
      (stdin/stdout preset to uart_USB, the way this project needs it),
-  3. creates an application component <name> from the SRAM_app_template
+  3. creates an application component <name> from the app_template
      sources (main.c + lscript.ld),
   4. builds it and prints where the .elf is and how to run it.
 
@@ -68,7 +68,7 @@ def main():
         print(f">> component {name} already exists — rebuilding it")
         app = client.get_component(name=name)
     src = os.path.join(ws, name, "src")
-    tpl = os.path.join(REPO, "workspace-example", "SRAM_app_template", "src")
+    tpl = os.path.join(REPO, "workspace-example", "app_template", "src")
     for f in ("main.c", "lscript.ld"):
         shutil.copy(os.path.join(tpl, f), os.path.join(src, f))
     # the template replaces the generated hello-world sources

@@ -474,7 +474,7 @@ def main():
         # dangle after integration (stale intra-file § numbers, old doc names)
         REFS = [
             ("*one-time setup* (§2)", "*one-time setup* (@sec-setup)"),
-            ("`SRAM_app_template` (§3)", "`SRAM_app_template` (@sec-build)"),
+            ("`app_template` (§3)", "`app_template` (@sec-build)"),
             ("redo §2.", "redo @sec-setup."),
             ("power-cycle in §2)", "power-cycle in @sec-setup)"),
             ("still needs §2 (requires Vivado", "still needs @sec-setup (requires Vivado"),

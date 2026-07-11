@@ -84,4 +84,5 @@ Vivado                          Vitis
 ## Guides in This Directory
 
 - [JTAG Debug Mode](JTAG-Debug-Mode/JTAG-Debug-Mode.md) — Load and debug applications over JTAG
-- [Standalone Boot Mode](Standalone-Boot-Mode/Standalone-Boot-Mode.md) — Program flash for standalone boot
+- [Standalone Boot Mode](Standalone-Boot-Mode/Standalone-Boot-Mode.md) — Program flash for standalone boot (custom UART bootloader; supports serial firmware update)
+- [Official SREC Bootloader](Official-SREC-Bootloader/Official-SREC-Bootloader.md) — AMD/Xilinx's vendor-supported standalone-boot flow (`srec_spi_bootloader`), board-verified
