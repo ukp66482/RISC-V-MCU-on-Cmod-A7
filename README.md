@@ -42,18 +42,17 @@ JTAG Debug Mode chapter of the
 
 To retain a program on the board, deploy it into the QSPI flash. The program
 then starts automatically at every power-on. The bootloader is AMD/Xilinx's
-standard SREC bootloader, embedded in the hardware image. The Standalone Boot
-chapter of the datasheet is in preparation; until it is available, the draft
-procedure is provided in
-[docs/datasheet/sections/standalone-boot.md](docs/datasheet/sections/standalone-boot.md).
+standard SREC bootloader, embedded in the hardware image. The complete
+walkthrough is the Standalone Boot chapter of the datasheet
+([docs/datasheet/sections/standalone-boot.md](docs/datasheet/sections/standalone-boot.md)),
+including the one-time step that prepares a new board.
 
-The same ELF file runs in both modes. A new board requires
-`release/official_boot.mcs` to be programmed once with Vivado Hardware Manager.
+The same ELF file runs in both modes.
 
 ## Repository layout
 
 ```
-release/                  prebuilt outputs: official_boot.mcs, boot_srec.bit, top.bit, top_wrapper.xsa
+release/                  prebuilt outputs: boot_srec.bit, top.bit, top_wrapper.xsa, top_wrapper.mmi
 RISC-V-MCU/               Vivado project (recreate_project.tcl)
 board/                    Cmod A7 hardware: constraints, board files, KiCad symbol
 docs/                     specs (pin / power / IP), guides (JTAG / standalone boot), diagrams

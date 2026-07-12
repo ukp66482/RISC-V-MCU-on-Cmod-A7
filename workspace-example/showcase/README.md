@@ -82,7 +82,7 @@ python3 tools/jtag_run.py workspace-example/showcase/build/showcase.elf  # volat
 ```
 
 To make the application permanent, deploy the ELF to flash; see the
-[standalone-boot draft](../../docs/datasheet/sections/standalone-boot.md).
+[Standalone Boot chapter](../../docs/datasheet/sections/standalone-boot.md).
 
 Build and upload the receiver sketch once with arduino-cli:
 

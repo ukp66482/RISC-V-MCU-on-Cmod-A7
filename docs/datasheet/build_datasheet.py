@@ -25,6 +25,7 @@ SOURCES = {
     "pwr":  os.path.join(HERE, "sections/power.md"),
     "mem":  os.path.join(HERE, "sections/memory.md"),
     "jtag": os.path.join(HERE, "sections/jtag-debug.md"),
+    "boot": os.path.join(HERE, "sections/standalone-boot.md"),
 }
 
 # Datasheet outline. Entry types:
@@ -107,11 +108,19 @@ RECIPE = [
     ("sec", "jtag", "Troubleshooting", 2, None),
 
     ("h1", "Standalone Boot"),
-    ("text", "At every power-on the MCU loads the application stored in the "
-             "QSPI flash into SRAM and starts it — no PC attached. The full "
-             "walkthrough for deploying an application to flash is in "
-             "preparation and will be added in a future revision of this "
-             "datasheet."),
+    ("intro", "boot"),
+    ("sec", "boot", "How Standalone Boot Works", 2, None),
+    ("sec", "boot", "Prerequisites", 2, None),
+    ("sec", "boot", "Create the Bootloader Component", 2, None),
+    ("sec", "boot", "Configure the Bootloader", 2, None),
+    ("sec", "boot", "Build the Bootloader", 2, None),
+    ("sec", "boot", "Merge the Bootloader into the Hardware Image", 2, None),
+    ("sec", "boot", "Prepare the Application Image", 2, None),
+    ("sec", "boot", "Program the Flash", 2, None),
+    ("sec", "boot", "Boot and Verify", 2, None),
+    ("sec", "boot", "Updating the Application", 2, None),
+    ("sec", "boot", "Working with JTAG Debug Mode", 2, None),
+    ("sec", "boot", "Troubleshooting", 2, None),
 ]
 
 # Sections deliberately left out, with the reason (coverage check enforces this)
@@ -478,6 +487,8 @@ def main():
             (r"^(= Peripherals[^\n]*)", "ch-periph"),
             (r"^(== QSPI Flash[^\n]*)", "sec-flash"),
             (r"^(= Standalone Boot[^\n]*)", "ch-standalone"),
+            (r"^(= JTAG Debug Mode[^\n]*)", "ch-jtag"),
+            (r"^(== Prepare the Application Image[^\n]*)", "sec-appimage"),
             (r"^(== Create a Platform[^\n]*)", "sec-platform"),
             (r"^(== Create an Application[^\n]*)", "sec-createapp"),
             (r"^(== Set the Console UART[^\n]*)", "sec-uart"),
@@ -493,6 +504,11 @@ def main():
         # dangle after integration (stale intra-file § numbers, old doc names)
         REFS = [
             ("(see the Standalone Boot Mode guide)", "(see @ch-standalone)"),
+            ("as described in the JTAG Debug Mode chapter",
+             "as described in @ch-jtag"),
+            ("built in the JTAG Debug Mode chapter", "built in @ch-jtag"),
+            ("skip directly to the application image step.",
+             "skip directly to @sec-appimage."),
             ("skip to section 3.", "skip to @sec-createapp."),
             ("created in section 2", "created in @sec-platform"),
             ("(such as section 5)", "(such as @sec-uart)"),

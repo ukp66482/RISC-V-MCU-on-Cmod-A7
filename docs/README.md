@@ -19,7 +19,7 @@ of truth; the PDF is a build artifact.
 | [sections/peripherals.md](datasheet/sections/peripherals.md) | Peripheral capabilities, register base addresses, interrupt mapping |
 | [sections/power.md](datasheet/sections/power.md) | Power rails, input options, VU pin behavior |
 | [sections/jtag-debug.md](datasheet/sections/jtag-debug.md) | JTAG debug walkthrough (Vitis Unified IDE) |
-| [sections/standalone-boot.md](datasheet/sections/standalone-boot.md) | Standalone boot — draft; datasheet chapter in preparation |
+| [sections/standalone-boot.md](datasheet/sections/standalone-boot.md) | Standalone boot walkthrough (Vitis Unified IDE) |
 
 ## Guides
 
