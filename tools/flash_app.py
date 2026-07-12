@@ -23,13 +23,12 @@ import sys
 import tempfile
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BOOT_BIT = os.path.join(REPO, "release", "boot_srec.bit")
 APP_SLOT = 0x00220000
 FLASH_END = 0x00400000          # 4 MB part
 SRAM_LO, SRAM_HI = 0x60000000, 0x60080000
 
 TCL = """\
-write_cfgmem -force -format mcs -size 4 -interface SPIx4 \
+write_cfgmem -force -format mcs -size 4 -interface SPIx1 \
     -loaddata "up 0x{slot:08X} {srec}" -file {mcs}
 open_hw_manager
 connect_hw_server
@@ -52,14 +51,7 @@ program_hw_devices $dev
 refresh_hw_device $dev
 program_hw_cfgmem -hw_cfgmem $cfg
 puts "FLASH-APP-OK"
-# boot_hw_device (JPROGRAM -> config from flash) is occasionally flaky over
-# JTAG; falling back to loading the same design directly is equivalent for
-# the user (a real power-on always boots from flash).
-if {{[catch {{boot_hw_device $dev}}]}} {{
-    puts "boot-from-flash unresponsive - loading design over JTAG instead"
-    set_property PROGRAM.FILE {{{boot_bit}}} $dev
-    program_hw_devices $dev
-}}
+boot_hw_device $dev
 puts "BOOTED-FROM-FLASH"
 close_hw_target
 disconnect_hw_server
@@ -155,7 +147,7 @@ def main():
 
     script = os.path.join(tmp, "flash.tcl")
     with open(script, "w") as f:
-        f.write(TCL.format(slot=APP_SLOT, srec=srec, boot_bit=BOOT_BIT,
+        f.write(TCL.format(slot=APP_SLOT, srec=srec,
                            mcs=os.path.join(tmp, "app.mcs")))
     print("writing flash over JTAG (takes about a minute)…")
     r = subprocess.run([vivado, "-mode", "batch", "-nolog", "-nojournal",

@@ -90,7 +90,7 @@ The FPGA's configuration engine expects the bitstream to reside at flash offset
 place additional raw data at other offsets in the same file:
 
 ```tcl
-write_cfgmem -force -format mcs -size 4 -interface SPIx4 \
+write_cfgmem -force -format mcs -size 4 -interface SPIx1 \
     -loadbit  "up 0x0        boot_srec.bit"  \
     -loaddata "up 0x00220000 showcase.srec"  \
     -file official_boot.mcs
@@ -160,10 +160,11 @@ frozen even the ELF-into-bitstream step requires nothing from Vivado. Vivado rem
 necessary for the one-time hardware build and for the flash-image and
 programming steps.
 
-> Vitis also ships a standalone `program_flash` CLI that can write an image to
-> a given flash offset through the FPGA. It has not been validated on this
-> board; the flows in this repository use the Vivado Hardware Manager path above,
-> which is board-verified.
+> Vitis also ships a standalone `program_flash` CLI that can write an image
+> to a given flash offset through the FPGA — board-verified 2026-07-12 for
+> application-slot updates, which makes a Vitis-only deployment possible.
+> Give it the SREC file with a `.bin` extension so its bytes are written
+> verbatim rather than parsed as an image format.
 
 ## The prebuilt artifacts in `release/`
 

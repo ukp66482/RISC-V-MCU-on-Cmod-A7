@@ -78,9 +78,13 @@ set_property -dict { PACKAGE_PIN V8    IOSTANDARD LVCMOS33 } [get_ports { gpio_C
 #set_property -dict { PACKAGE_PIN J19   IOSTANDARD LVCMOS33 } [get_ports { ja[6] }]
 #set_property -dict { PACKAGE_PIN K18   IOSTANDARD LVCMOS33 } [get_ports { ja[7] }]
 
-## ── Configuration / QSPI fast boot (verified on Macronix MX25L3273F) ────
-## Quad-width x4 read at 33 MHz + compression -> power-on config in well
-## under a second. write_cfgmem interface must match (SPIx4).
-set_property BITSTREAM.CONFIG.SPI_BUSWIDTH 4 [current_design]
+## ── Configuration / QSPI boot (verified on Macronix MX25L3273F) ─────────
+## Single-width x1 read at 33 MHz + compression: power-on config still well
+## under a second (~0.4 s for the ~1.6 MB compressed image), and — decisive,
+## board-tested 2026-07-12 — x1 configuration works with the flash QE bit
+## CLEARED. The flash-programming tools clear the non-volatile QE bit on
+## every app-slot write; an x4 bitstream then cannot boot until QE is
+## restored, an x1 bitstream does not care. x4 was used until 2026-07-12.
+set_property BITSTREAM.CONFIG.SPI_BUSWIDTH 1 [current_design]
 set_property BITSTREAM.CONFIG.CONFIGRATE 33 [current_design]
 set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]

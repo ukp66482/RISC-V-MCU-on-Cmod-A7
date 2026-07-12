@@ -43,5 +43,8 @@ To modify the hardware, rebuild the Vivado project from source with
 > **Status (2026-07-11):** verified on hardware (Macronix MX25L3273F). The
 > full cycle was confirmed: flash programming (range-scoped and verified),
 > boot from flash, application copy to SRAM by the SREC bootloader, and
-> application execution. The bitstream uses quad-SPI x4 at 33 MHz with
-> compression (`BITSTREAM.CONFIG` set in `board/Cmod-A7-Master.xdc`).
+> application execution. The bitstream uses single-width SPI (x1) at 33 MHz
+> with compression (`BITSTREAM.CONFIG` in `board/Cmod-A7-Master.xdc`); x1
+> was chosen on 2026-07-12 because it boots regardless of the flash
+> Quad-Enable bit, which the flash-programming tools clear on every
+> app-slot write (an x4 bitstream cannot boot until QE is restored).
