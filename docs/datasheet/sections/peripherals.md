@@ -105,7 +105,7 @@ All GPIO groups are memory-mapped ports with per-bit direction control: the TRI 
 |----------|-------------|-------|-----------|------------|-------------|
 | `board_led_2bits` | `0x4000_0000` | 2 | Output | A17, C16 | On-board LEDs × 2 |
 | `board_button` | `0x4001_0000` | 1 | Input | B18 | On-board user button (BTN1) |
-| `board_rgb` | `0x4002_0000` | 3 | Output | B17, B16, C17 | On-board RGB LED (R/G/B) |
+| `board_rgb` | `0x4002_0000` | 3 | Output | B17, B16, C17 | On-board RGB LED (bit 0 = Blue, bit 1 = Green, bit 2 = Red) |
 
 ### 3.2 DIP Connector GPIO (4 Groups × 7-bit)
 
@@ -163,7 +163,7 @@ The device provides six 32-bit AXI timer instances (Vitis driver: `XTmrCtr`): th
 |------|-------|
 | Base Address | `0x4050_0000` |
 | Flash Device | On-board 4 MB QSPI NOR flash (Macronix; Micron on older boards) |
-| Mode | CPU-programmable register mode — flash contents are **not** memory-mapped |
+| Mode | CPU-programmable register mode — flash contents are not memory-mapped |
 | FIFO | 256 B TX/RX — one full flash page (256 B) per transfer |
 
 **Description:** This controller manages the on-board Quad-SPI NOR Flash. The full register set (control, status, TX/RX FIFO, slave select) is exposed at `0x4050_0000`, so the CPU can issue any SPI command: read (`0x0B`), Write Enable (`0x06`), Sector/Block Erase (`0x20`/`0xD8`), Page Program (`0x02`), and status poll (`0x05`). The flash therefore remains fully CPU-programmable at runtime (the Vitis `XSpi` driver wraps the register protocol).
@@ -225,7 +225,7 @@ Flash contents are not memory-mapped: there is no XIP window, and code cannot ex
 | SCL Frequency | 100 kHz (standard mode) |
 | Input Glitch Filter | 50 ns on SCL and SDA — per the I2C tSP spike-suppression spec |
 | SCL / SDA Pins | DIP Pin 13 (L1) / Pin 14 (L2) |
-| Pull-ups | Weak FPGA internal pull-ups enabled; **external 4.7 kΩ to 3.3 V recommended** for real devices |
+| Pull-ups | Weak FPGA internal pull-ups enabled; external 4.7 kΩ to 3.3 V recommended for real devices |
 | Interrupt | INTC In6 |
 
 **Description:** An AXI IIC master controls external I2C devices (sensors, EEPROMs, OLED displays). The bus uses open-drain signaling: any device may only pull the line low, and the pull-up resistor returns it high. Devices are addressed by their 7-bit I2C address. Use the Vitis `XIic` driver.
@@ -235,7 +235,7 @@ Flash contents are not memory-mapped: there is no XIP window, and code cannot ex
 | Item | Value |
 |------|-------|
 | Base Address | `0x4080_0000` |
-| SCLK | Software-programmable, ≈1.6 – 25 MHz (**6.25 MHz at reset**) |
+| SCLK | Software-programmable, ≈1.6 – 25 MHz (6.25 MHz at reset) |
 | Clock Control | `0x4090_0000` — runtime clock setting; see `showcase/src/spi0.c` for the `spi0_set_clock()` helper |
 | Slave Selects | 2 — two devices can share the bus |
 | Pins | DIP 35 SCLK (V3) · 36 MOSI (W5) · 37 MISO (V4) · 38 SS0 (U4) · 39 SS1 (V5) |

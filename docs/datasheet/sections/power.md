@@ -55,8 +55,8 @@ The PWRGD (Power Good) output drives the Power On LED (LD5).
 
 | Condition | VU Pin Function |
 |-----------|----------------|
-| USB connected | VU is an **output** — driven by USB 5V through a Schottky diode (expect ~5 V with small drop) |
-| USB not connected | VU is an **input** — accepts external power supply (3.32–5.5 V) |
+| USB connected | Output. Driven from USB 5 V through a Schottky diode; approximately 5 V after the diode drop |
+| USB not connected | Input. Accepts an external supply of 3.32–5.5 V |
 
 ---
 

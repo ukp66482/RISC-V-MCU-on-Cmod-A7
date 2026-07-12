@@ -150,7 +150,7 @@ The XADC expects an input range of 0–1 V. The board includes a resistive volta
 | Divider ratio | 1 kΩ / (2.32 kΩ + 1 kΩ) ≈ 0.301 |
 | Resistor tolerance | 1% |
 
-> **Note:** Pins 15 and 16 are routed through on-board voltage dividers. If used as analog inputs, they must not be assigned as digital I/O in the constraints file. Do not exceed 3.3 V on these pins.
+> **Note:** Pins 15 and 16 are routed through on-board voltage dividers and are dedicated analog inputs; they are not available as digital I/O. Do not exceed 3.3 V on these pins.
 
 ---
 

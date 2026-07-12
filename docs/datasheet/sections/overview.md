@@ -48,7 +48,7 @@ external SRAM, and QSPI flash storage.
 - Digilent *Cmod A7 Reference Manual*: board schematics, connectors, and the
   power tree
 - AMD/Xilinx *DS181, Artix-7 FPGAs Data Sheet*: absolute maximum ratings and
-  DC/AC characteristics underlying Chapter 5
+  DC/AC characteristics underlying the Electrical Characteristics chapter
 - AMD/Xilinx LogiCORE IP product guides (PG series): full register maps for
   the AXI peripherals (e.g. PG153 for the Quad SPI controller)
 - The per-topic markdown under `docs/` in the course repository: the single

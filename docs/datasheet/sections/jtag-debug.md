@@ -162,9 +162,9 @@ Afterwards `src/` contains exactly `main.c` and `lscript.ld`. Files inside
 `src/` are compiled automatically; no build configuration is needed.
 
 The `mcu_init();` call must remain the first line of `main()`. It copies
-`ITCM_FUNC` code into the ITCM, zeroes the DTCM, and sets the USB UART to
-115200. The demo loop then cycles the on-board RGB LED and prints a status
-line about once a second.
+`ITCM_FUNC` code into the ITCM, zeroes the DTCM, and sets the USB UART
+to 115200. The demo loop then cycles the on-board RGB LED and prints a
+status line about once a second.
 
 ### 4.3 About the Linker Script
 
@@ -229,10 +229,10 @@ automatically on every build.
 
 The build produces `<workspace>/test/build/test.elf`.
 
-> During the build, Vitis automatically links in `boot.S` and `crt.o` from
-> the standalone BSP: `boot.S` runs first after reset (initializes registers,
-> stack pointer, and trap vector), and `crt.o` clears `.bss` before calling
-> `main()`.
+> During the build, Vitis automatically links in the BSP's `boot.S` and the
+> toolchain C library's startup object `crt0.o`: `boot.S` runs first after
+> reset (initializes registers, stack pointer, and trap vector), and `crt0.o`
+> clears `.bss` before calling `main()`.
 
 ---
 
@@ -326,53 +326,53 @@ interleaving. The instruction addresses around `main()` all fall in
 
 ## 9. Troubleshooting
 
-1. **Platform build fails with
-   `error: passing argument 2 of 'strcmp' ... [-Wint-conversion]` in
-   `xclk_wiz.c`** (reported as *"Error in generating platform"*). Two conditions
-   combine to cause this error:
+**Platform build fails with
+`error: passing argument 2 of 'strcmp' ... [-Wint-conversion]` in
+`xclk_wiz.c`** (reported as *"Error in generating platform"*). Two conditions
+combine to cause this error:
 
-   - The clock-management driver source that ships with Vitis 2025.2
-     (`clk_wiz` v1_10) contains a misplaced parenthesis in `xclk_wiz.c`
-     line 839.
-   - If another RISC-V toolchain with GCC 14 or newer is on your PATH (for
-     example one installed at `/opt/riscv` for assembly coursework), the BSP
-     build may select it instead of the Vitis-bundled compiler. GCC 14+ treats
-     this construct as an error; the bundled compiler treats it as a warning.
+- The clock-management driver source that ships with Vitis 2025.2
+  (`clk_wiz` v1_10) contains a misplaced parenthesis in `xclk_wiz.c`
+  line 839.
+- If another RISC-V toolchain with GCC 14 or newer is on your PATH (for
+  example one installed at `/opt/riscv` for assembly coursework), the BSP
+  build may select it instead of the Vitis-bundled compiler. GCC 14+ treats
+  this construct as an error; the bundled compiler treats it as a warning.
 
-   The offending line as displayed in the IDE:
+The offending line as displayed in the IDE:
 
-   ![clk_wiz Driver Bug](images/jtag21.png)
+![clk_wiz Driver Bug](images/jtag21.png)
 
-   Fix the source (this fix works with either compiler): change line 839 from
+Fix the source (this fix works with either compiler): change line 839 from
 
-   ```c
-   strcmp(InstancePtr->Config.Name, "xlnx,clkx5-wiz-1.0" >= 0)
-   ```
+```c
+strcmp(InstancePtr->Config.Name, "xlnx,clkx5-wiz-1.0" >= 0)
+```
 
-   to
+to
 
-   ```c
-   strcmp(InstancePtr->Config.Name, "xlnx,clkx5-wiz-1.0") >= 0
-   ```
+```c
+strcmp(InstancePtr->Config.Name, "xlnx,clkx5-wiz-1.0") >= 0
+```
 
-   ![After the Fix](images/jtag22.png)
+![After the Fix](images/jtag22.png)
 
-   Then rebuild the platform. Apply the same one-line fix to the Vitis
-   installation copy at
-   `<install>/2025.2/data/embeddedsw/XilinxProcessorIPLib/drivers/clk_wiz_v1_10/src/xclk_wiz.c`,
-   where `<install>` is the Xilinx installation directory (`/opt/Xilinx` by
-   default on Linux). The platform re-imports driver sources whenever the BSP
-   is regenerated, so an unpatched installation reintroduces the error.
+Then rebuild the platform. Apply the same one-line fix to the Vitis
+installation copy at
+`<install>/2025.2/data/embeddedsw/XilinxProcessorIPLib/drivers/clk_wiz_v1_10/src/xclk_wiz.c`,
+where `<install>` is the Xilinx installation directory (`/opt/Xilinx` by
+default on Linux). The platform re-imports driver sources whenever the BSP
+is regenerated, so an unpatched installation reintroduces the error.
 
-   To check which compiler configured the BSP, read
-   `platform/.../bsp/libsrc/build_configs/gen_bsp/compile_commands.json`.
-   To force reselection, delete `platform/.../bsp/libsrc/build_configs` and
-   rebuild from a session whose PATH does not contain the other toolchain.
+To check which compiler configured the BSP, read
+`platform/.../bsp/libsrc/build_configs/gen_bsp/compile_commands.json`.
+To force reselection, delete `platform/.../bsp/libsrc/build_configs` and
+rebuild from a session whose PATH does not contain the other toolchain.
 
-2. **The application runs (RGB LED cycles) but the USB console is silent.**
-   `xil_printf` output is directed to the DIP-header UART. The BSP stdout has
-   reverted to `uart_1`: redo section 5, then rebuild both the platform and
-   the application. The compiled setting is recorded in
-   `platform/export/platform/sw/standalone_microblaze_riscv_0/include/bspconfig.h`:
-   `STDOUT_BASEADDRESS` must read `0x40300000` (uart_USB), not `0x40310000`
-   (uart_1).
+**The application runs (RGB LED cycles) but the USB console is silent.**
+`xil_printf` output is directed to the DIP-header UART. The BSP stdout has
+reverted to `uart_1`: redo section 5, then rebuild both the platform and
+the application. The compiled setting is recorded in
+`platform/export/platform/sw/standalone_microblaze_riscv_0/include/bspconfig.h`:
+`STDOUT_BASEADDRESS` must read `0x40300000` (uart_USB), not `0x40310000`
+(uart_1).
