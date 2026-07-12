@@ -141,13 +141,13 @@ Peripheral registers and base addresses are documented in the
 
 *Figure 2. On-board voltage divider circuit for XADC analog inputs*
 
-The XADC expects an input range of 0–1 V. The board includes a resistive voltage divider (2.32 KΩ / 1 KΩ, all 1% precision) that scales the DIP pin voltage down to the FPGA's acceptable range. A 140 Ω series resistor and 1 nF capacitor are placed on the differential pair for filtering. The ADx_N path has an 845 Ω series resistor.
+The XADC expects an input range of 0–1 V. The board includes a resistive voltage divider (2.32 kΩ / 1 kΩ, all 1% precision) that scales the DIP pin voltage down to the FPGA's acceptable range. A 140 Ω series resistor and 1 nF capacitor are placed on the differential pair for filtering. The ADx_N path has an 845 Ω series resistor.
 
 | Parameter | Value |
 |-----------|-------|
 | Max input voltage on DIP pin 15/16 | **3.3 V** (relative to GND on pin 25) |
 | Voltage at FPGA after divider | 0–1 V |
-| Divider ratio | 1 KΩ / (2.32 KΩ + 1 KΩ) ≈ 0.301 |
+| Divider ratio | 1 kΩ / (2.32 kΩ + 1 kΩ) ≈ 0.301 |
 | Resistor tolerance | 1% |
 
 > **Note:** Pins 15 and 16 are routed through on-board voltage dividers. If used as analog inputs, they must not be assigned as digital I/O in the constraints file. Do not exceed 3.3 V on these pins.

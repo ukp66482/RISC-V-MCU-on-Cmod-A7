@@ -77,9 +77,7 @@ After implementation, export the XSA and create a Vitis platform (standalone,
 
 ## Other documents
 
-- [Unified MCU datasheet](docs/datasheet/Cmod_A7_MCU_Datasheet.pdf): the primary reference, covering overview, architecture, memory, pinout, peripherals, power, and the JTAG debug walkthrough (chapter sources under [docs/datasheet/sections/](docs/datasheet/sections/))
-- [Boot image pipeline](docs/guides/Boot-Image-Pipeline/Boot-Image-Pipeline.md): how the boot images are built, from block design to power-on
-- [Vitis quick reference](docs/guides/README.md): platform and application concepts, XSDB commands
+- [Unified MCU datasheet](docs/datasheet/Cmod_A7_MCU_Datasheet.pdf): the primary reference, covering overview, architecture, memory, pinout, peripherals, power, and the JTAG debug and standalone boot walkthroughs (chapter sources under [docs/datasheet/sections/](docs/datasheet/sections/))
 - [Bus topology diagram](docs/images/dp_ip_topology.svg): AXI masters, caches, and interconnect wiring
 
 ## License

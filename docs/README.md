@@ -21,13 +21,6 @@ of truth; the PDF is a build artifact.
 | [sections/jtag-debug.md](datasheet/sections/jtag-debug.md) | JTAG debug walkthrough (Vitis Unified IDE) |
 | [sections/standalone-boot.md](datasheet/sections/standalone-boot.md) | Standalone boot walkthrough (Vitis Unified IDE) |
 
-## Guides
-
-| Document | Description |
-|----------|-------------|
-| [Boot Image Pipeline](guides/Boot-Image-Pipeline/Boot-Image-Pipeline.md) | From block design to power-on: bitstream, BRAM init, `updatemem`, flash layout |
-| [Vitis quick reference](guides/README.md) | Platform and application concepts, XSDB commands |
-
 ## Diagrams
 
 | File | Description |
