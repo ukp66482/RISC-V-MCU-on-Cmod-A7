@@ -59,7 +59,8 @@ board/                    Cmod A7 hardware: constraints, board files, KiCad symb
 docs/                     specs (pin / power / IP), guides (JTAG / standalone boot), diagrams
 workspace-example/
   showcase/               full-feature demo: SPI+I2C to an ESP32, servo, ADC, interrupts (preloaded on the board)
-  app_template/           template for new applications
+  app_template/           template for new applications (C)
+  asm_template/           template for RISC-V assembly applications (.S)
   mem_bench/              measures the memory-hierarchy latencies in the datasheet
 tools/                    maintainer helper scripts (app scaffolding, JTAG run, flash deploy, doc builds)
 ```
