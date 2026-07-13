@@ -434,30 +434,30 @@ directly from the address: class 0 = GPIO, 1 = Timer, 2 = PWM, 3 = UART, 4 = INT
 
 | Base Address | Range | Peripheral | Category |
 |-----------------|-------|------------|----------|
-| `0x0000_0000` | 128K / 128K | Local Memory (BRAM) | Memory |
-| `0x4000_0000` | 64K | board_led_2bits | GPIO |
-| `0x4001_0000` | 64K | board_button | GPIO |
-| `0x4002_0000` | 64K | board_rgb | GPIO |
-| `0x4003_0000` | 64K | gpio_A_0_6 | GPIO |
-| `0x4004_0000` | 64K | gpio_B_0_6 | GPIO |
-| `0x4005_0000` | 64K | gpio_C_0_6 | GPIO |
-| `0x4006_0000` | 64K | gpio_D_0_6 | GPIO |
-| `0x4007_0000` | 64K | INT_0_3 | Interrupt |
-| `0x4010_0000` | 64K | timer_0 | Timer |
-| `0x4011_0000` | 64K | timer_1 | Timer |
-| `0x4012_0000` | 64K | timer_2 | Timer |
-| `0x4020_0000` | 64K | PWM_0 | PWM |
-| `0x4021_0000` | 64K | PWM_1 | PWM |
-| `0x4022_0000` | 64K | PWM_2 | PWM |
-| `0x4030_0000` | 64K | uart_USB | Communication |
-| `0x4031_0000` | 64K | uart_1 | Communication |
-| `0x4040_0000` | 64K | axi_intc | System |
-| `0x4050_0000` | 64K | axi_quad_spi_0 (QSPI flash controller) | Memory |
-| `0x4060_0000` | 64K | xadc_wiz_0 | ADC |
-| `0x4070_0000` | 64K | i2c_0 (DIP 13/14) | Communication |
-| `0x4080_0000` | 64K | spi_0 (external master, DIP 35–39) | Communication |
-| `0x4090_0000` | 64K | spi_0_clk (SPI clock control) | Communication |
-| `0x6000_0000` | 512K | axi_emc_0 (exact physical fit, I/D-cached) | Memory |
+| `0x0000_0000` | 128K | Local memory (bootloader, ITCM, DTCM) | Memory |
+| `0x4000_0000` | 64K | On-board LEDs | GPIO |
+| `0x4001_0000` | 64K | User button (BTN1) | GPIO |
+| `0x4002_0000` | 64K | RGB LED | GPIO |
+| `0x4003_0000` | 64K | GPIO group A | GPIO |
+| `0x4004_0000` | 64K | GPIO group B | GPIO |
+| `0x4005_0000` | 64K | GPIO group C | GPIO |
+| `0x4006_0000` | 64K | GPIO group D | GPIO |
+| `0x4007_0000` | 64K | External interrupt inputs | Interrupt |
+| `0x4010_0000` | 64K | Timer 0 | Timer |
+| `0x4011_0000` | 64K | Timer 1 | Timer |
+| `0x4012_0000` | 64K | Timer 2 | Timer |
+| `0x4020_0000` | 64K | PWM 0 | PWM |
+| `0x4021_0000` | 64K | PWM 1 | PWM |
+| `0x4022_0000` | 64K | PWM 2 | PWM |
+| `0x4030_0000` | 64K | USB UART | Communication |
+| `0x4031_0000` | 64K | External UART (DIP 11/12) | Communication |
+| `0x4040_0000` | 64K | Interrupt controller | System |
+| `0x4050_0000` | 64K | QSPI flash controller | Memory |
+| `0x4060_0000` | 64K | ADC (XADC) | ADC |
+| `0x4070_0000` | 64K | I2C controller (DIP 13/14) | Communication |
+| `0x4080_0000` | 64K | SPI master (DIP 35–39) | Communication |
+| `0x4090_0000` | 64K | SPI clock control | Communication |
+| `0x6000_0000` | 512K | External SRAM (cached) | Memory |
 
 ---
 

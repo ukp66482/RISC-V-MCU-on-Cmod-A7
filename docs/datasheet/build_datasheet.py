@@ -60,10 +60,11 @@ RECIPE = [
 
     ("h1", "System Architecture"),
     ("sec", "ip", "MicroBlaze RISC-V (`microblaze_riscv_0`)", 2, "MicroBlaze RISC-V Core"),
-    ("sec", "ip", "AXI Interrupt Controller (`microblaze_riscv_0_axi_intc`)", 2, "Interrupt Controller"),
-    ("sec", "ip", "Clocking Wizard (`clk_wiz_1`)", 2, "Clocking"),
+    ("sec", "ip", "Clocking Wizard (`clk_wiz_1`)", 2, "Clock"),
     ("sec", "ip", "Processor System Reset (`rst_clk_wiz_1_100M`)", 2, "Reset"),
+    ("sec", "ip", "AXI Interrupt Controller (`microblaze_riscv_0_axi_intc`)", 2, "Interrupt Controller"),
     ("sec", "ip", "Debug Module (`mdm_1`)", 2, "Debug Module"),
+    ("typst", "#pagebreak(weak: true)"),
     ("sec", "ip", "Complete Address Map", 2, None),
 
     ("h1", "Memory Hierarchy"),
