@@ -48,6 +48,16 @@ RECIPE = [
     ("sec", "pin", "Pin Map — Right Side (Pin 25–48)", 2, None),
     ("sec", "pin", "On-Board I/O (No DIP Pin Exposure)", 2, None),
 
+    ("h1", "Electrical Characteristics and Power"),
+    ("h2", "Electrical Characteristics"),
+    ("body", "pin", "Electrical Characteristics"),
+    ("body", "pwr", "Warnings"),
+    ("sec", "pwr", "Overview", 2, "Power Architecture"),
+    ("sec", "pwr", "Power Input Options", 2, None),
+    ("sec", "pwr", "Output Power Rails", 2, None),
+    ("sec", "pwr", "VU Pin Behavior", 2, None),
+    ("sec", "pwr", "Dual Power Source (USB + External)", 2, None),
+
     ("h1", "System Architecture"),
     ("sec", "ip", "MicroBlaze RISC-V (`microblaze_riscv_0`)", 2, "MicroBlaze RISC-V Core"),
     ("sec", "ip", "AXI Interrupt Controller (`microblaze_riscv_0_axi_intc`)", 2, "Interrupt Controller"),
@@ -81,17 +91,6 @@ RECIPE = [
     ("sec", "ip", "External SPI Master (`spi_0`)", 2, "SPI Master"),
     ("sec", "ip", "XADC Wizard (`xadc_wiz_0`)", 2, "Analog-to-Digital Converter (XADC)"),
     ("sec", "pin", "Analog Input Circuit", 3, None),
-
-    ("h1", "Electrical Characteristics and Power"),
-    ("h2", "Electrical Characteristics"),
-    ("body", "pin", "Electrical Characteristics"),
-    ("body", "pwr", "Warnings"),
-    ("sec", "pwr", "Overview", 2, "Power Architecture"),
-    ("sec", "pwr", "Power Input Options", 2, None),
-    ("sec", "pwr", "Output Power Rails", 2, None),
-    ("sec", "pwr", "VU Pin Behavior", 2, None),
-    ("sec", "pwr", "Dual Power Source (USB + External)", 2, None),
-    ("sec", "pwr", "Quick Reference for External Power Design", 2, None),
 
     ("h1", "JTAG Debug Mode"),
     ("intro", "jtag"),
@@ -493,6 +492,7 @@ def main():
             (r"^(== Set the Console UART[^\n]*)", "sec-uart"),
             (r"^(== Troubleshooting[^\n]*)", "sec-jtag-ts"),
             (r"^(=== Analog Input Circuit[^\n]*)", "sec-analog"),
+            (r"^(== Power Input Options[^\n]*)", "sec-pwr-in"),
         ]
         for pat, label in LABELS:
             body, n = re.subn(pat, r"\1 <%s>" % label, body,
@@ -520,9 +520,9 @@ def main():
             ("Devices are addressed by their 7-bit I2C address.",
              "Devices are addressed by their 7-bit I2C address. "
              "Interrupt routing is listed in @sec-intc."),
-            ("(on-board divider scales to the XADC's 0–1 V)",
-             "(on-board divider scales to the XADC's 0–1 V; see @sec-analog)"),
             ("This guide describes how", "This chapter describes how"),
+            ("(see the note in Power Input Options)",
+             "(see the note in @sec-pwr-in)"),
         ]
         for old, new in REFS:
             if old not in body:

@@ -161,10 +161,12 @@ and `lscript.ld`. Click **Open**.
 Afterwards `src/` contains exactly `main.c` and `lscript.ld`. Files inside
 `src/` are compiled automatically; no build configuration is needed.
 
-The `mcu_init();` call must remain the first line of `main()`. It copies
-`ITCM_FUNC` code into the ITCM, zeroes the DTCM, and sets the USB UART
-to 115200. The demo loop then cycles the on-board RGB LED and prints a
-status line about once a second.
+> **Note:** The `mcu_init();` call must remain the first line of `main()`.
+> It copies `ITCM_FUNC` code into the ITCM, zeroes the DTCM, and sets the
+> USB UART to 115200.
+
+The demo loop cycles the on-board RGB LED and prints a status line about
+once a second.
 
 ### 4.3 About the Linker Script
 

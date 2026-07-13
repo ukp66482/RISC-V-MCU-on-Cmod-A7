@@ -2,23 +2,11 @@
 
 ## 1. DIP Connector Overview
 
-The Cmod A7-35T has a 48-pin DIP connector (J1). All digital I/O pins operate at LVCMOS33 (3.3 V logic level) with no series resistors.
+The Cmod A7-35T has a 48-pin DIP connector. All digital I/O pins operate at LVCMOS33 (3.3 V logic level) with no series resistors.
 
 ![Cmod A7-35T DIP Pinout](./images/pinout_diagram.svg)
 
 *Figure 1. Cmod A7-35T DIP pinout (top view)*
-
-| Category | Count |
-|----------|-------|
-| GPIO (4 groups × 7-bit) | 28 |
-| External Interrupts | 4 |
-| PWM Outputs | 3 |
-| UART 1 (TX + RX) | 2 |
-| I2C (SCL + SDA) | 2 |
-| SPI (SCLK/MOSI/MISO/SS×2) | 5 |
-| Analog Inputs (XADC) | 2 |
-| Power (VU + GND) | 2 |
-| **Total** | **48** |
 
 Peripheral registers and base addresses are documented in the
 [IP peripheral reference](peripherals.md).
@@ -43,8 +31,8 @@ Peripheral registers and base addresses are documented in the
 | 12 | UART_RX | K2 | Input | UART 1 receive |
 | 13 | I2C_SCL | L1 | I/O (open-drain) | I2C clock (external 4.7 kΩ pull-up recommended) |
 | 14 | I2C_SDA | L2 | I/O (open-drain) | I2C data (external 4.7 kΩ pull-up recommended) |
-| 15 | ADC_0 | G3 / G2 | Analog | XADC VAUX4 (ain_p[15] / ain_n[15]) |
-| 16 | ADC_1 | H2 / J2 | Analog | XADC VAUX12 (ain_p[16] / ain_n[16]) |
+| 15 | ADC_0 | G3 / G2 | Analog | Analog input 0 (XADC VAUX4) |
+| 16 | ADC_1 | H2 / J2 | Analog | Analog input 1 (XADC VAUX12) |
 | 17 | GPIO_B0 | M1 | I/O | General purpose GPIO, Group B bit 0 |
 | 18 | GPIO_B1 | N3 | I/O | General purpose GPIO, Group B bit 1 |
 | 19 | GPIO_B2 | P3 | I/O | General purpose GPIO, Group B bit 2 |
@@ -173,21 +161,37 @@ The XADC expects an input range of 0–1 V. The board includes a resistive volta
 
 ## 10. On-Board I/O (No DIP Pin Exposure)
 
-| Function | FPGA Pins |
-|----------|-----------|
-| LEDs (2) | A17, C16 |
-| User button (BTN1) | B18 |
-| Reset button (BTN0) | A18 |
-| RGB LED | B17, B16, C17 |
+These devices are mounted on the module and use no DIP pins; the names
+match the board silkscreen. The LEDs and the user button are GPIO ports;
+the reset button is wired to the system reset.
+
+| Device | Function |
+|--------|----------|
+| LD0 | RGB LED (three GPIO outputs) |
+| LD1, LD2 | Status LEDs (GPIO outputs) |
+| BTN1 | User button (GPIO input) |
+| BTN0 | Reset button (not readable by software) |
 
 ---
 
 ## 11. Electrical Characteristics
 
+**Recommended Operating Conditions**
+
 | Parameter | Value |
 |-----------|-------|
-| I/O Standard | LVCMOS33 (3.3 V) |
-| Series Resistance on DIP Pins | None |
-| Max Input Voltage (digital I/O) | abs. max –0.4 V to VCCO + 0.55 V = **3.85 V** (DS181); not 5 V tolerant |
-| Analog Input Range (Pin 15, 16) | 0–3.3 V (on-board divider scales to the XADC's 0–1 V) |
-| Clock Source | 12 MHz oscillator (FPGA pin L17), PLL → 100 MHz |
+| I/O logic level | LVCMOS33 (3.3 V) |
+| Digital input voltage | 0 V to 3.3 V |
+| Analog input voltage (pins 15, 16) | 0 V to 3.3 V |
+
+**Absolute Maximum Ratings**
+
+Stresses beyond these ratings may cause permanent damage to the device.
+
+| Parameter | Min | Max |
+|-----------|-----|-----|
+| Digital I/O pin voltage | –0.4 V | 3.85 V |
+
+> **Not 5 V tolerant:** The DIP pins connect to the device with no series
+> resistors. Drive them only with 3.3 V logic; use a level shifter or
+> resistive divider for any 5 V signal.

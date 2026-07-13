@@ -111,9 +111,9 @@ All GPIO groups are memory-mapped ports with per-bit direction control: the TRI 
 
 | Instance | Base Address | Width | Direction | Connection | Description |
 |----------|-------------|-------|-----------|------------|-------------|
-| `board_led_2bits` | `0x4000_0000` | 2 | Output | A17, C16 | On-board LEDs × 2 |
-| `board_button` | `0x4001_0000` | 1 | Input | B18 | On-board user button (BTN1) |
-| `board_rgb` | `0x4002_0000` | 3 | Output | B17, B16, C17 | On-board RGB LED (bit 0 = Blue, bit 1 = Green, bit 2 = Red) |
+| `board_led_2bits` | `0x4000_0000` | 2 | Output | LD1, LD2 | On-board LEDs × 2 |
+| `board_button` | `0x4001_0000` | 1 | Input | BTN1 | On-board user button |
+| `board_rgb` | `0x4002_0000` | 3 | Output | LD0 | On-board RGB LED (bit 0 = Blue, bit 1 = Green, bit 2 = Red) |
 
 ### 3.2 DIP Connector GPIO (4 Groups × 7-bit)
 

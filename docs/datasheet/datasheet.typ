@@ -73,7 +73,6 @@
   columns: (auto, 1fr), stroke: none, inset: (y: 4pt), fill: none,
   [*Platform*], [#meta-platform],
   [*Processor*], [#meta-processor],
-  [*System Clock*], [#meta-system],
   [*Toolchain*], [#meta-toolchain],
 )
 #v(0.6cm)

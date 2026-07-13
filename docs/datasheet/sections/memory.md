@@ -109,7 +109,8 @@ latency equals the best-case latency.
 At power-on the bootloader copies the application image from flash into SRAM
 (see the Standalone Boot Mode guide); the template's `mcu_init()` then copies
 `ITCM_FUNC` code out of the SRAM image into the ITCM and zeroes the DTCM.
-For this reason the template requires `mcu_init();` to remain the first line
-of `main()`: contents placed in the tightly-coupled memories are not valid
-before it runs. The memory tour printed at boot lists each region's run-time
-addresses and serves as a check that the layout is in effect.
+The memory tour printed at boot lists each region's run-time addresses and
+serves as a check that the layout is in effect.
+
+> **Note:** `mcu_init();` must remain the first line of `main()`: contents
+> placed in the tightly-coupled memories are not valid before it runs.
