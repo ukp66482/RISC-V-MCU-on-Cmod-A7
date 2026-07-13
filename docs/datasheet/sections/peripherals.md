@@ -19,17 +19,17 @@
 | Cached region | External SRAM only |
 | Debug | JTAG: breakpoints, register and memory access |
 
-**Description:** The processor executes firmware from SRAM. All memory and peripherals are memory-mapped into one address space. The external SRAM is cached; on-chip RAM and peripheral registers are not, so peripheral reads and writes always take effect immediately.
+**Description:** The processor executes firmware from SRAM. All memory and peripherals are memory-mapped into one address space. The external SRAM is cached; the tightly-coupled memory and peripheral registers are not, so peripheral reads and writes always take effect immediately.
 
 ### 1.2 Local Memory
 
 | Item | Value |
 |------|-------|
 | Address | `0x0000_0000` – `0x0001_FFFF` (128 KB) |
-| Access | 1 cycle, dual-port — instruction and data sides read simultaneously |
+| Access | 1 cycle — instruction and data sides read simultaneously |
 | Layout | 32 KB bootloader + 32 KB ITCM + 64 KB DTCM |
 
-**Description:** Instruction and data local memory is implemented with FPGA Block RAM and functions as this MCU's tightly-coupled memory (TCM): the separate instruction and data local-memory ports serve the same role as ITCM/DTCM on other MCU cores (e.g. Cortex-M7), giving 1-cycle access outside the cache path. The layout is as follows: `0x0000`–`0x7FFF` (32 KB) holds the bootloader (restored from flash at every configuration); `0x8000`–`0xFFFF` (32 KB) is the application's ITCM for interrupt handlers and timing-critical code (`ITCM_FUNC`, copied out of the SRAM image by `mcu_init()` at startup); `0x10000`–`0x1FFFF` (64 KB) is the DTCM, holding the stack (top-down from `0x20000`) and `DTCM_DATA` fast data.
+**Description:** The tightly-coupled memory (TCM) is the on-chip RAM: its separate instruction and data ports serve the same role as ITCM/DTCM on other MCU cores (e.g. Cortex-M7), giving 1-cycle access outside the cache path. The layout is as follows: `0x0000`–`0x7FFF` (32 KB) holds the bootloader (restored at every power-on); `0x8000`–`0xFFFF` (32 KB) is the application's ITCM for interrupt handlers and timing-critical code (`ITCM_FUNC`, copied out of the SRAM image by `mcu_init()` at startup); `0x10000`–`0x1FFFF` (64 KB) is the DTCM, holding the stack (top-down from `0x20000`) and `DTCM_DATA` fast data.
 
 ### 1.4 AXI Interrupt Controller (`microblaze_riscv_0_axi_intc`)
 
@@ -355,11 +355,11 @@ Flash contents are not memory-mapped: there is no XIP window, and code cannot ex
 | Item | Value |
 |------|-------|
 | Base Address | `0x6000_0000` |
-| Size | 512 KB — `0x6000_0000` – `0x6007_FFFF`, an exact physical fit |
-| Memory | On-board asynchronous SRAM (Cellular RAM) |
-| Cache | Fully covered by the I-Cache and D-Cache |
+| Size | 512 KB — `0x6000_0000` – `0x6007_FFFF` |
+| Memory | On-board asynchronous SRAM |
+| Cache | Covered by the I-Cache and D-Cache |
 
-**Description:** This external memory controller interfaces to the on-board 512 KB SRAM, the main application memory: standalone boot copies the program here and executes it. Raw access latency is higher than Block RAM, but with both caches covering this range, frequently accessed code and data run at close to BRAM speed.
+**Description:** This memory controller interfaces to the on-board 512 KB SRAM, the main application memory: standalone boot copies the program here and executes it. Its access latency is higher than the tightly-coupled memory's, but with both caches covering this range, frequently accessed code and data run at cache speed.
 
 ---
 
@@ -434,7 +434,7 @@ directly from the address: class 0 = GPIO, 1 = Timer, 2 = PWM, 3 = UART, 4 = INT
 
 | Base Address | Range | Peripheral | Category |
 |-----------------|-------|------------|----------|
-| `0x0000_0000` | 128K | Local memory (bootloader, ITCM, DTCM) | Memory |
+| `0x0000_0000` | 128K | Tightly-coupled memory (bootloader, ITCM, DTCM) | Memory |
 | `0x4000_0000` | 64K | On-board LEDs | GPIO |
 | `0x4001_0000` | 64K | User button (BTN1) | GPIO |
 | `0x4002_0000` | 64K | RGB LED | GPIO |
@@ -485,7 +485,7 @@ Reserved bits read as undefined values and must be written as 0. Reading a
 register with a read side effect purely for inspection (for example from a
 debugger memory view) consumes data or clears status.
 
-Reset values apply after power-on or reconfiguration of the device.
+Reset values apply after power-on or reset.
 
 > **Note:** Loading a new program over JTAG does not reset the peripherals:
 > registers keep whatever state the previous program left, including armed

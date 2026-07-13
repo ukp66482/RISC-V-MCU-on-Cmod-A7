@@ -3,10 +3,10 @@
 **Platform:** Cmod A7-35T RISC-V MCU  
 **Scope:** memory hierarchy, address map, caches, measured access latencies, placement guidance  
 
-The MCU provides three types of memory: single-cycle tightly-coupled RAM,
+The MCU provides three types of memory: single-cycle tightly-coupled memory,
 cached external SRAM, and QSPI flash storage. Ordinary code and data reside
-in the large SRAM; latency-critical code and data can be placed in memories
-with fixed single-cycle timing.
+in the SRAM; latency-critical code and data may be placed in the
+tightly-coupled memory, which has fixed single-cycle timing.
 
 ---
 
@@ -14,20 +14,12 @@ with fixed single-cycle timing.
 
 ![Memory Hierarchy](./images/memory_hierarchy.svg)
 
-| Level | Memory | Size | Access | Role |
-|---|---|---|---|---|
-| 1 | ITCM + DTCM (tightly-coupled RAM) | 32 KB + 64 KB | 1 cycle, fixed | interrupt handlers, stack, hot data |
-| 2 | I-Cache + D-Cache | 16 KB + 16 KB | adds ≈0 cycles on hit | transparent acceleration of SRAM |
-| 3 | External SRAM | 512 KB | ≈26 cycles/word on miss | application code, data, heap |
-| — | QSPI flash | 4 MB | not directly addressable | firmware storage, read at boot |
-
-The tightly-coupled memories reside on a dedicated dual-port memory bus with
-guaranteed single-cycle access; they are never cached because they are
-already as fast as a cache hit. The external SRAM is the application's main
-memory; it is reached through the caches, so frequently accessed code and
-data run at tightly-coupled speed while the total space is 512 KB. The QSPI flash has no
-CPU address window: firmware is stored in flash and executed from SRAM, and
-the bootloader performs the copy at every power-on.
+| Level | Memory | Size | Role |
+|---|---|---|---|
+| 1 | ITCM + DTCM (tightly-coupled memory) | 32 KB + 64 KB | Interrupt handlers, stack, frequently accessed data |
+| 2 | I-Cache + D-Cache | 16 KB + 16 KB | Transparent acceleration of SRAM |
+| 3 | External SRAM | 512 KB | Application code, data, heap |
+| — | QSPI flash | 4 MB | Application + hardware image (non-volatile) |
 
 ## 2. Memory Map
 

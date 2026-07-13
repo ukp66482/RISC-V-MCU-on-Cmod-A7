@@ -39,7 +39,7 @@
   <text class="t" x="324" y="157" text-anchor="middle">16 KB I-Cache</text>
   <rect class="box" x="395" y="140" width="125" height="28"/>
   <text class="t" x="457" y="157" text-anchor="middle">16 KB D-Cache</text>
-  <text class="ts" x="300" y="200" text-anchor="middle">Local Memory</text>
+  <text class="ts" x="300" y="200" text-anchor="middle">TCM</text>
   <text class="ts" x="430" y="200" text-anchor="middle">Cache</text>
   <text class="ts" x="505" y="200" text-anchor="middle">Peripherals</text>
 
@@ -71,9 +71,9 @@
 
   <!-- ============ local memory ============ -->
   <rect class="box" x="210" y="255" width="180" height="80"/>
-  <text class="tb" x="300" y="282" text-anchor="middle">Block RAM 128 KB</text>
-  <text class="t"  x="300" y="298" text-anchor="middle">32 K bootloader</text>
-  <text class="t"  x="300" y="311" text-anchor="middle">32 K ITCM &#183; 64 K DTCM</text>
+  <text class="tb" x="300" y="282" text-anchor="middle">Tightly-Coupled Memory</text>
+  <text class="t"  x="300" y="298" text-anchor="middle">128 KB on-chip RAM:</text>
+  <text class="ts" x="300" y="311" text-anchor="middle">32 K bootloader &#183; 32 K ITCM &#183; 64 K DTCM</text>
 
   <!-- ============ memory interconnect -> SRAM ============ -->
   <rect class="box" x="405" y="255" width="110" height="30"/>

@@ -29,12 +29,12 @@
 
   <rect class="box" x="170" y="108" width="230" height="48"/>
   <text class="t"  x="285" y="128" text-anchor="middle">ITCM &#8212; 32 KB</text>
-  <text class="ts" x="285" y="142" text-anchor="middle">ITCM_FUNC code &#183; 1 cycle</text>
+  <text class="ts" x="285" y="142" text-anchor="middle">ITCM_FUNC code</text>
   <text class="addr" x="162" y="114" text-anchor="end">0x0000 8000</text>
 
   <rect class="box" x="170" y="156" width="230" height="66"/>
   <text class="t"  x="285" y="176" text-anchor="middle">DTCM &#8212; 64 KB</text>
-  <text class="ts" x="285" y="190" text-anchor="middle">DTCM_DATA &#183; stack &#183; 1 cycle</text>
+  <text class="ts" x="285" y="190" text-anchor="middle">DTCM_DATA &#183; stack</text>
   <text class="addr" x="162" y="162" text-anchor="end">0x0001 0000</text>
   <line class="wire" x1="330" y1="214" x2="330" y2="198"/>
   <text class="ts" x="338" y="208" text-anchor="start">stack</text>
@@ -48,7 +48,7 @@
   <!-- peripherals -->
   <rect class="box" x="170" y="268" width="230" height="52"/>
   <text class="t"  x="285" y="288" text-anchor="middle">Peripheral registers</text>
-  <text class="ts" x="285" y="302" text-anchor="middle">uncached &#183; class-based address map</text>
+  <text class="ts" x="285" y="302" text-anchor="middle">uncached</text>
   <text class="addr" x="162" y="274" text-anchor="end">0x4000 0000</text>
 
   <!-- unmapped gap -->
@@ -69,14 +69,14 @@
   <text class="ti" x="660" y="52" text-anchor="middle">storage only &#8212; own offsets, no CPU address window</text>
 
   <rect class="box" x="560" y="80" width="200" height="90"/>
-  <text class="t"  x="660" y="106" text-anchor="middle">Configuration image</text>
-  <text class="ts" x="660" y="120" text-anchor="middle">hardware + bootloader</text>
+  <text class="t"  x="660" y="106" text-anchor="middle">Hardware image</text>
+  <text class="ts" x="660" y="120" text-anchor="middle">includes the bootloader</text>
   <text class="ts" x="660" y="134" text-anchor="middle">loaded by the chip itself at power-on</text>
   <text class="addr" x="552" y="86" text-anchor="end">0x00 0000</text>
 
   <rect class="box" x="560" y="170" width="200" height="80"/>
   <text class="t"  x="660" y="196" text-anchor="middle">Application slot</text>
-  <text class="ts" x="660" y="210" text-anchor="middle">SREC image, written by deployment</text>
+  <text class="ts" x="660" y="210" text-anchor="middle">application, as an SREC image</text>
   <text class="ts" x="660" y="224" text-anchor="middle">1.875 MB &#8212; holds a full-SRAM app</text>
   <text class="addr" x="552" y="176" text-anchor="end">0x22 0000</text>
 
