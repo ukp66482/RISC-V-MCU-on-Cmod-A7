@@ -114,3 +114,30 @@ serves as a check that the layout is in effect.
 
 > **Note:** `mcu_init();` must remain the first line of `main()`: contents
 > placed in the tightly-coupled memories are not valid before it runs.
+
+### Run and Load Addresses (VMA and LMA)
+
+The linker records two addresses for every output section. The run
+address (VMA) is where the section executes: calls, jumps, and pointers
+resolve to it. The load address (LMA) is where the section's bytes are
+placed in the program image: loaders write to it. For most sections the
+two addresses are equal; they differ only when a section must be moved
+into place at startup.
+
+In this device the one section with different addresses is `.itcm.text`,
+the `ITCM_FUNC` code: it runs in the ITCM at `0x8000` (VMA) but is stored
+inside the SRAM image (LMA). The template's linker script declares this
+as `> itcm AT> sram`. Every loader writes load addresses — the bootloader
+copies each SREC record to the address it names, and a JTAG download does
+the same — so the complete image lands in SRAM regardless of how it is
+loaded, and the same ELF serves both paths. `mcu_init()` then performs
+the one move the image needs: it copies `.itcm.text` from its SRAM load
+address into the ITCM and executes `fence.i` so the processor fetches the
+new code. The DTCM sections occupy no space in the image (NOLOAD); they
+are cleared at startup instead.
+
+```
+program image     section bytes at their load addresses (all in SRAM)
+bootloader / JTAG write the image to SRAM
+mcu_init()        copy .itcm.text SRAM -> ITCM, zero DTCM, fence.i
+```

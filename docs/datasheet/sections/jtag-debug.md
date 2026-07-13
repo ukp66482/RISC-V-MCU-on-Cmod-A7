@@ -23,7 +23,7 @@ Launch the Vitis Unified IDE and click **Set Workspace** on the Welcome page.
 ![Set Workspace](images/jtag0.png)
 
 Select the `workspace-example/` folder in the repository. The template paths
-in this guide assume this location; any empty folder can also be used if the
+in this chapter assume this location; any empty folder can also be used if the
 paths are adjusted accordingly.
 
 ![Open Folder](images/jtag1.png)
@@ -101,7 +101,7 @@ Application Component from Template) button.
 
 ### 3.2 Application Name and Location
 
-Enter your application name (this guide uses `test`). Click **Next**.
+Enter your application name (this chapter uses `test`). Click **Next**.
 
 ![Application Name](images/jtag11.png)
 

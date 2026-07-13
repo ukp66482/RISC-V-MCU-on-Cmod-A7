@@ -36,6 +36,9 @@ SOURCES = {
 #   ("intro", alias)                       file preamble (text before first ##)
 #   ("text", markdown)                     glue text, converted like markdown
 #   ("typst", code)                        raw typst (for glue with @refs)
+#   ("figbreak", bool)                     True: page-break after every figure
+#                                          (one operation per page in the
+#                                          screenshot walkthroughs)
 RECIPE = [
     ("h1", "Device Overview"),
     ("sec", "ov", "Introduction", 2, None),
@@ -94,6 +97,7 @@ RECIPE = [
     ("sec", "pin", "Analog Input Circuit", 3, None),
 
     ("h1", "JTAG Debug Mode"),
+    ("figbreak", True),
     ("intro", "jtag"),
     ("sec", "jtag", "Prerequisites", 2, None),
     ("sec", "jtag", "Open the Workspace", 2, None),
@@ -121,6 +125,36 @@ RECIPE = [
     ("sec", "boot", "Working with JTAG Debug Mode", 2, None),
     ("sec", "boot", "Troubleshooting", 2, None),
 ]
+
+# Figures that do NOT get the figbreak page break after them: each one is a
+# small step merged onto one page with the figure that follows it (wizard
+# dialog pairs, before/after edits, action+result). Typst pushes the pair
+# apart automatically if it does not fit, so entries here are always safe.
+NO_BREAK = {
+    "jtag0.png",   # Set Workspace + Open Folder
+    "jtag3.png",   # platform wizard: menu + name
+    "jtag5.png",   # platform wizard: flow + XSA
+    "jtag7.png",   # platform wizard: OS/processor + summary
+    "jtag10.png",  # app wizard: template + name
+    "jtag12.png",  # app wizard: platform + domain
+    "jtag14.png",  # app wizard: summary + created
+    "jtag17.png",  # import files + select template files
+    "jtag19.png",  # BSP stdout: before + after
+    "jtag23.png",  # build platform + build application
+    "jtag26.png",  # debug launched + paused at main()
+    "jtag32.png",  # GTKTerm + memory tour output
+    "jtag28.png",  # view menu + memory inspector
+    "jtag30.png",  # register inspector + disassembly
+    "jtag21.png",  # clk_wiz bug + after the fix
+    "boot0.png",   # bootloader wizard: template + name
+    "boot2.png",   # bootloader wizard: platform + summary
+    "boot4.png",   # blconfig.h: before + after
+    "boot6.png",   # VERBOSE: before + after
+    "boot8.png",   # build + ELF built
+    "boot11.png",  # objcopy + rename to .bin
+    "boot14.png",  # program hardware image: dialog + done
+    "boot16.png",  # program application slot: dialog + done
+}
 
 # Sections deliberately left out, with the reason (coverage check enforces this)
 DROPPED = {
@@ -230,6 +264,8 @@ class Converter:
         self.code = []
         self.out = []
         self.img_seq = 0
+        self.fig_break = False
+        self.pending_break = False  # figbreak deferred past a trailing note
 
     def line(self, s=""):
         self.out.append(s)
@@ -288,8 +324,12 @@ class Converter:
         self.line("]")
         self.line()
         quote.clear()
+        if self.pending_break:
+            self.pending_break = False
+            self.line("#pagebreak(weak: true)")
+            self.line()
 
-    def flush_figure(self, fig, caption=None):
+    def flush_figure(self, fig, caption=None, defer_break=False):
         if fig is None:
             return None
         path, alt = fig
@@ -298,6 +338,13 @@ class Converter:
                   % (path, width, caption if caption is not None
                      else self.inline(alt)))
         self.line()
+        base = path.split("_", 1)[1] if "_" in path else path
+        if self.fig_break and base not in NO_BREAK:
+            if defer_break:          # a note follows: keep it on this page
+                self.pending_break = True
+            else:
+                self.line("#pagebreak(weak: true)")
+                self.line()
         return None
 
     def convert(self, lines, src_dir):
@@ -332,7 +379,8 @@ class Converter:
                 continue
             self.flush_table(table)
             if ln.startswith(">"):
-                flush_li(); self.flush_para(para); fig = self.flush_figure(fig)
+                flush_li(); self.flush_para(para)
+                fig = self.flush_figure(fig, defer_break=True)
                 quote.append(ln.lstrip("> ").rstrip())
                 continue
             self.flush_quote(quote)
@@ -427,6 +475,8 @@ def main():
             elif kind == "typst":
                 conv.line(entry[1])
                 conv.line()
+            elif kind == "figbreak":
+                conv.fig_break = entry[1]
             elif kind == "intro":
                 alias = entry[1]
                 used_intros.add(alias)

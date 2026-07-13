@@ -179,8 +179,6 @@ updatemem -force \
   -out     release/boot_srec.bit
 ```
 
-![updatemem in the Integrated Terminal](images/boot10.png)
-
 The inputs and what they mean:
 
 | Argument | File | Purpose |
@@ -196,6 +194,8 @@ The inputs and what they mean:
 > one of the paths is wrong and no output is produced; check the output
 > file's timestamp before using it. The MMI file must come from the same
 > hardware build as the bitstream.
+
+![updatemem in the Integrated Terminal](images/boot10.png)
 
 ## 7. Prepare the Application Image
 
