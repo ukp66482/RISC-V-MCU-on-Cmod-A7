@@ -7,49 +7,30 @@ spec/guide markdown. -->
 ## Introduction
 
 The Cmod A7-35T RISC-V MCU is a soft microcontroller implemented on the
-Artix-7 FPGA of the Digilent Cmod A7-35T module. To the programmer it behaves
-like a commercial flash-based MCU: firmware is stored in the on-board QSPI
-flash and boots automatically in under a second at power-on, and the full AMD
-Vitis/JTAG development flow is available on the same board over a single USB
-cable, with no jumpers or mode switching.
-
-The system is built around a MicroBlaze-V (RISC-V) processor with a
-three-level memory hierarchy and a class-based AXI peripheral address map.
-The memory hierarchy consists of tightly-coupled BRAM (ITCM/DTCM), cached
-external SRAM, and QSPI flash storage.
+Digilent Cmod A7-35T module. It combines a MicroBlaze-V (RISC-V) processor
+with tightly-coupled BRAM, cached external SRAM, and QSPI flash, and
+provides memory-mapped peripherals: GPIO, timers and PWM, UART, I2C, SPI,
+and an ADC.
 
 ## Features
 
-- **CPU**: 32-bit RISC-V (RV32IM + bit-manipulation) at 100 MHz; 16 KB
-  I-cache + 16 KB D-cache (write-through, 32-byte lines)
-- **Memory**: 128 KB block RAM (32 KB bootloader + 32 KB ITCM + 64 KB DTCM,
-  single-cycle); 512 KB SRAM for application code and data (cached);
-  4 MB QSPI flash (bitstream + application storage)
-- **GPIO**: 28 bidirectional pins in four 7-bit groups, plus 4 dedicated
-  external interrupt inputs
-- **Timers**: 3 × 32-bit general-purpose timers with interrupts; 3 dedicated
-  PWM output channels
-- **Communication**: 2 × 16550 UART (USB + DIP header); I2C master
-  (100 kHz, 50 ns glitch filter); SPI master (software-settable clock
-  ≈1.6 – 25 MHz, 2 slave selects)
-- **Analog**: 2 external ADC inputs (12-bit XADC, 0–3.3 V range) plus on-die
-  temperature and supply monitors
-- **I/O**: 48-pin DIP form factor, 3.3 V LVCMOS (not 5 V tolerant)
-- **Boot**: standalone boot from flash (< 1 s) via the on-chip bootloader,
-  or JTAG load/debug from Vitis; both coexist without reconfiguration
-- **Debug**: JTAG breakpoints, single-step, register and memory inspection
+| Feature | Description |
+|---------|-------------|
+| Core | 32-bit RISC-V (RV32IMB), 100 MHz |
+| Cache | 16 KB instruction, 16 KB data |
+| On-chip RAM | 128 KB: 32 KB bootloader, 32 KB ITCM, 64 KB DTCM |
+| External RAM | 512 KB SRAM, cached |
+| Flash | 4 MB QSPI |
+| GPIO | 28 pins, 4 external interrupts |
+| Timers / PWM | 3 × 32-bit timers with interrupts, 3 PWM channels |
+| UART | 2 × 16550 UART |
+| I2C | Master, 100 kHz |
+| SPI | Master, ≈1.6 – 25 MHz, 2 slave selects |
+| ADC | 12-bit, 2 external inputs |
+| I/O | 48-pin DIP, 3.3 V |
+| Boot | Standalone from flash, or JTAG from Vitis |
+| Debug | JTAG (IEEE 1149.1)|
 
 ## System Block Diagram
 
 ![System Architecture](../../images/system_architecture.svg)
-
-## Reference Documents
-
-- Digilent *Cmod A7 Reference Manual*: board schematics, connectors, and the
-  power tree
-- AMD/Xilinx *DS181, Artix-7 FPGAs Data Sheet*: absolute maximum ratings and
-  DC/AC characteristics underlying the Electrical Characteristics chapter
-- AMD/Xilinx LogiCORE IP product guides (PG series): full register maps for
-  the AXI peripherals (e.g. PG153 for the Quad SPI controller)
-- The per-topic markdown under `docs/` in the course repository: the single
-  source from which this datasheet is built

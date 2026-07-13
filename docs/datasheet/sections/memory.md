@@ -36,8 +36,8 @@ the bootloader performs the copy at every power-on.
 | Address range | Size | Region | Access |
 |---|---|---|---|
 | `0x0000_0000` – `0x0000_7FFF` | 32 KB | Bootloader (reserved) | 1 cycle |
-| `0x0000_8000` – `0x0000_FFFF` | 32 KB | ITCM — application fast code | 1 cycle |
-| `0x0001_0000` – `0x0001_FFFF` | 64 KB | DTCM — fast data; stack grows down from `0x0002_0000` | 1 cycle |
+| `0x0000_8000` – `0x0000_FFFF` | 32 KB | ITCM — application code (`ITCM_FUNC`) | 1 cycle |
+| `0x0001_0000` – `0x0001_FFFF` | 64 KB | DTCM — data; stack grows down from `0x0002_0000` | 1 cycle |
 | `0x4000_0000` – `0x40FF_FFFF` | — | Peripheral registers | uncached |
 | `0x6000_0000` – `0x6007_FFFF` | 512 KB | External SRAM — application code / data / heap | cached |
 

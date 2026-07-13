@@ -41,11 +41,15 @@ RECIPE = [
     ("sec", "ov", "Introduction", 2, None),
     ("sec", "ov", "Features", 2, None),
     ("sec", "ov", "System Block Diagram", 2, None),
-    ("sec", "ov", "Reference Documents", 2, None),
+
+    ("h1", "Pinout"),
+    ("sec", "pin", "DIP Connector Overview", 2, None),
+    ("sec", "pin", "Pin Map — Left Side (Pin 1–24)", 2, None),
+    ("sec", "pin", "Pin Map — Right Side (Pin 25–48)", 2, None),
+    ("sec", "pin", "On-Board I/O (No DIP Pin Exposure)", 2, None),
 
     ("h1", "System Architecture"),
     ("sec", "ip", "MicroBlaze RISC-V (`microblaze_riscv_0`)", 2, "MicroBlaze RISC-V Core"),
-    ("sec", "ip", "AXI SmartConnect (`microblaze_riscv_0_axi_periph`)", 2, "Bus Architecture"),
     ("sec", "ip", "AXI Interrupt Controller (`microblaze_riscv_0_axi_intc`)", 2, "Interrupt Controller"),
     ("sec", "ip", "Clocking Wizard (`clk_wiz_1`)", 2, "Clocking"),
     ("sec", "ip", "Processor System Reset (`rst_clk_wiz_1_100M`)", 2, "Reset"),
@@ -62,19 +66,14 @@ RECIPE = [
     ("sec", "mem", "Measured Access Latencies", 2, None),
     ("sec", "mem", "Memory Placement Guidance", 2, None),
 
-    ("h1", "Pinout"),
-    ("sec", "pin", "DIP Connector Overview", 2, None),
-    ("sec", "pin", "Pin Map — Left Side (Pin 1–24)", 2, None),
-    ("sec", "pin", "Pin Map — Right Side (Pin 25–48)", 2, None),
-    ("sec", "pin", "On-Board I/O (No DIP Pin Exposure)", 2, None),
-
     ("h1", "Peripherals"),
-    ("typst", "All peripheral registers are memory-mapped and reached "
-              "through the AXI data port; base addresses follow the "
-              "class-based scheme summarised in @sec-map. Pin locations "
+    ("typst", "All peripheral registers are memory-mapped; "
+              "base addresses are listed "
+              "in @sec-map. Pin locations "
               "for every signal are listed in the pin maps of @ch-pinout. "
               "The QSPI flash controller is described with the memory "
               "system in @sec-flash."),
+    ("sec", "ip", "Register Access Conventions", 2, None),
     ("sec", "ip", "GPIO (General Purpose I/O)", 2, "GPIO"),
     ("sec", "ip", "Timers & PWM", 2, "Timers and PWM"),
     ("sec", "ip", "UART Communication", 2, "UART"),
@@ -488,7 +487,6 @@ def main():
             (r"^(== QSPI Flash[^\n]*)", "sec-flash"),
             (r"^(= Standalone Boot[^\n]*)", "ch-standalone"),
             (r"^(= JTAG Debug Mode[^\n]*)", "ch-jtag"),
-            (r"^(= Electrical Characteristics and Power[^\n]*)", "ch-electrical"),
             (r"^(== Prepare the Application Image[^\n]*)", "sec-appimage"),
             (r"^(== Create a Platform[^\n]*)", "sec-platform"),
             (r"^(== Create an Application[^\n]*)", "sec-createapp"),
@@ -507,8 +505,6 @@ def main():
             ("(see the Standalone Boot Mode guide)", "(see @ch-standalone)"),
             ("as described in the JTAG Debug Mode chapter",
              "as described in @ch-jtag"),
-            ("underlying the Electrical Characteristics chapter",
-             "underlying @ch-electrical"),
             ("built in the JTAG Debug Mode chapter", "built in @ch-jtag"),
             ("skip directly to the application image step.",
              "skip directly to @sec-appimage."),

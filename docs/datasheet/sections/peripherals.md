@@ -13,13 +13,13 @@
 
 | Item | Value |
 |------|-------|
-| Architecture | 32-bit RISC-V — RV32IM + bit-manipulation (hardware multiply/divide) |
+| Architecture | 32-bit RISC-V, RV32IMB (hardware multiply/divide, bit-manipulation) |
 | Clock | 100 MHz |
-| Buses | LMB to local BRAM (1-cycle) · AXI to peripherals and external memory |
-| Cache | 16 KB I-Cache + 16 KB D-Cache, write-through, 32 B lines — covers exactly the 512 KB SRAM (`0x6000_0000`–`0x6007_FFFF`) |
-| Debug | JTAG: breakpoints, register inspection, memory read/write |
+| Cache | 16 KB instruction + 16 KB data, write-through, 32-byte lines |
+| Cached region | External SRAM only |
+| Debug | JTAG: breakpoints, register and memory access |
 
-**Description:** The main processor core executes user firmware and reaches every peripheral through the AXI interconnect. Only the SRAM range is cached: BRAM access is already single-cycle, and peripheral registers must never be cached.
+**Description:** The processor executes firmware from SRAM. All memory and peripherals are memory-mapped into one address space. The external SRAM is cached; on-chip RAM and peripheral registers are not, so peripheral reads and writes always take effect immediately.
 
 ### 1.2 Local Memory
 
@@ -29,20 +29,15 @@
 | Access | 1 cycle, dual-port — instruction and data sides read simultaneously |
 | Layout | 32 KB bootloader + 32 KB ITCM + 64 KB DTCM |
 
-**Description:** Instruction and data local memory is implemented with FPGA Block RAM and functions as this MCU's tightly-coupled memory (TCM): the ILMB/DLMB ports serve the same role as ITCM/DTCM on other MCU cores (e.g. Cortex-M7), giving 1-cycle access outside the cache path. The layout is as follows: `0x0000`–`0x7FFF` (32 KB) holds the bootloader (restored from flash at every configuration); `0x8000`–`0xFFFF` (32 KB) is the application's ITCM for interrupt handlers and timing-critical code (`ITCM_FUNC`, copied out of the SRAM image by `mcu_init()` at startup); `0x10000`–`0x1FFFF` (64 KB) is the DTCM, holding the stack (top-down from `0x20000`) and `DTCM_DATA` fast data.
-
-### 1.3 AXI SmartConnect (`microblaze_riscv_0_axi_periph`)
-
-![Bus & Cache Topology](../../images/dp_ip_topology.svg)
-
-**Description:** An AXI crossbar fans the processor's data port out to all peripheral endpoints. Routing is determined entirely by address decoding. The diagram above shows the path taken by each address range; a second, smaller interconnect merges the cache and debug masters in front of the SRAM controller.
+**Description:** Instruction and data local memory is implemented with FPGA Block RAM and functions as this MCU's tightly-coupled memory (TCM): the separate instruction and data local-memory ports serve the same role as ITCM/DTCM on other MCU cores (e.g. Cortex-M7), giving 1-cycle access outside the cache path. The layout is as follows: `0x0000`–`0x7FFF` (32 KB) holds the bootloader (restored from flash at every configuration); `0x8000`–`0xFFFF` (32 KB) is the application's ITCM for interrupt handlers and timing-critical code (`ITCM_FUNC`, copied out of the SRAM image by `mcu_init()` at startup); `0x10000`–`0x1FFFF` (64 KB) is the DTCM, holding the stack (top-down from `0x20000`) and `DTCM_DATA` fast data.
 
 ### 1.4 AXI Interrupt Controller (`microblaze_riscv_0_axi_intc`)
 
-| Item | Value |
-|------|-------|
-| Base Address | `0x4040_0000` |
-| Interrupt Sources | 8 |
+The interrupt controller combines the peripheral interrupt sources into a single
+request line to the processor. When an interrupt is taken, the processor reads
+the controller to determine which source is active.
+
+![The interrupt controller collects eight sources into one request to the core](./images/interrupt_controller.svg)
 
 **Interrupt Mapping:**
 
@@ -59,15 +54,28 @@
 
 ### 1.5 Debug Module (`mdm_1`)
 
-**Description:** The MicroBlaze Debug Module provides JTAG debug access for breakpoints, register inspection, and memory read/write. It can also trigger a system reset from the debugger (used by `xsdb` / Vitis debug sessions).
+**Description:** The debug module connects a host debugger to the processor
+over the JTAG port. Vitis and `xsdb` sessions use it to halt and single-step
+the core, set breakpoints, read and write the processor registers, memory, and
+peripheral registers, and reset the system. Because every peripheral is
+memory-mapped, the debugger can operate a device directly — for example
+writing a GPIO register to drive an output — with no firmware running.
+
+![The debug module gives the host debugger access to the core, memory, peripheral registers, and system reset over JTAG](./images/debug_module.svg)
 
 ### 1.6 Clocking Wizard (`clk_wiz_1`)
 
-**Description:** This block multiplies the 12 MHz on-board oscillator up to the 100 MHz system clock with an MMCM/PLL. Its `locked` signal indicates clock stability and gates the release of system reset.
+**Description:** The system clock is 100 MHz, generated from the 12 MHz
+on-board oscillator by an on-chip PLL. The processor and all peripherals
+run at this frequency.
 
 ### 1.7 Processor System Reset (`rst_clk_wiz_1_100M`)
 
-**Description:** This block generates synchronized reset signals for the CPU, bus fabric and peripherals, releasing them only after the clock is stable. The external reset source is the on-board button BTN0 (A18, active-high).
+**Description:** A reset restarts the processor from the bootloader, which
+reloads the application from flash (see the Standalone Boot Mode guide),
+and returns peripheral registers to their reset values. There are three
+reset sources: power-on, the on-board reset button BTN0, and a system
+reset issued by the debugger.
 
 ---
 
@@ -129,11 +137,88 @@ All GPIO groups are memory-mapped ports with per-bit direction control: the TRI 
 
 **Description:** Four external interrupt inputs are grouped into a single GPIO instance with interrupt generation enabled. A change on any of the four pins can raise INTC In5.
 
+### 3.4 GPIO Register Map
+
+All eight GPIO ports share the same register layout. Offsets are relative to
+the port base address listed in the tables above. Only the low WIDTH bits of
+each register are implemented (7 for groups A–D, 4 for `INT_0_3`, 3 for the
+RGB port, 2 for the LED port, 1 for the button port); unimplemented bits read
+as 0. Offsets `0x08`/`0x0C` (second-channel data and direction) are not
+implemented in this device, and the interrupt registers (`0x11C`–`0x128`) are
+implemented on the `INT_0_3` port only.
+
+| Offset | Name | Access | Reset | Description |
+|--------|------|--------|-------|-------------|
+| `0x000` | `DATA` | RW | `0x0` | Port data |
+| `0x004` | `TRI` | RW | all 1 | Per-pin direction (1 = input, 0 = output) |
+| `0x11C` | `GIER` | RW | `0x0` | Global interrupt enable (`INT_0_3` only) |
+| `0x120` | `ISR` | R/TOW | `0x0` | Interrupt status (`INT_0_3` only) |
+| `0x128` | `IER` | RW | `0x0` | Interrupt enable (`INT_0_3` only) |
+
+#### DATA — Port Data Register (Offset 0x000)
+
+| Bits | Name | Access | Description |
+|------|------|--------|-------------|
+| 31:W | — | — | Reserved (W = port width). Read as 0. |
+| W-1:0 | `DATA` | RW | One bit per pin. A read returns the pin level for input pins and the last written value for output pins. A write drives pins configured as outputs; writes to input pins have no effect. |
+
+#### TRI — Port Direction Register (Offset 0x004)
+
+| Bits | Name | Access | Description |
+|------|------|--------|-------------|
+| 31:W | — | — | Reserved. Read as 0. |
+| W-1:0 | `TRI` | RW | Per-pin direction: 1 = input, 0 = output. All pins are inputs after reset; software must clear the relevant bits before driving a pin. On the fixed-direction ports (LEDs, RGB, button, `INT_0_3`) the direction is set in hardware and this register has no effect. |
+
+#### GIER — Global Interrupt Enable Register (Offset 0x11C)
+
+| Bits | Name | Access | Description |
+|------|------|--------|-------------|
+| 31 | `GIE` | RW | Master gate for the port's interrupt output. Write `0x8000_0000` to enable. |
+| 30:0 | — | — | Reserved. |
+
+#### ISR — Interrupt Status Register (Offset 0x120)
+
+| Bits | Name | Access | Description |
+|------|------|--------|-------------|
+| 31:1 | — | — | Reserved. |
+| 0 | `CH1` | R/TOW | Set by hardware when any input pin of the port changes state (either edge). Toggle-on-write: to clear, read the register and write the read value back. |
+
+#### IER — Interrupt Enable Register (Offset 0x128)
+
+| Bits | Name | Access | Description |
+|------|------|--------|-------------|
+| 31:1 | — | — | Reserved. |
+| 0 | `CH1` | RW | Enables the port interrupt. The enable is per port, not per pin: any of the four `INT_0_3` inputs raises the same interrupt, and the handler reads `DATA` to determine which line changed. |
+
+**Driver support (`XGpio`).** The functions below cover the course use of the
+driver; the last column names the registers each one accesses.
+
+| Function | Purpose | Registers touched |
+|----------|---------|-------------------|
+| `XGpio_Initialize(&inst, base)` | Bind the instance to a port | none |
+| `XGpio_SetDataDirection(&inst, 1, m)` | Set pin directions | `TRI` |
+| `XGpio_DiscreteRead(&inst, 1)` | Read pin states | `DATA` |
+| `XGpio_DiscreteWrite(&inst, 1, v)` | Write the whole port | `DATA` |
+| `XGpio_DiscreteSet/Clear(&inst, 1, m)` | Set or clear only masked bits | `DATA` (read-modify-write) |
+| `XGpio_InterruptEnable(&inst, 1)` | Enable the port interrupt | `IER` |
+| `XGpio_InterruptGlobalEnable(&inst)` | Open the interrupt gate | `GIER` |
+| `XGpio_InterruptGetStatus(&inst)` | Read pending status | `ISR` |
+| `XGpio_InterruptClear(&inst, 1)` | Acknowledge the interrupt | `ISR` (toggle-safe) |
+
+> **Note:** Three behaviors are board-verified sources of bugs. `ISR` toggles
+> on write: writing a hard-coded 1 while the bit is clear sets a phantom
+> pending interrupt, so always write back exactly the value just read (or use
+> `XGpio_InterruptClear`). `XGpio_DiscreteSet`/`Clear` are read-modify-write
+> sequences, not atomic: if an interrupt handler writes the same port, keep
+> all writes to that port in one context. Finally, `XGpio_Initialize` in this
+> toolchain takes the port base address (`XPAR_..._BASEADDR`); older examples
+> that pass a device ID do not compile here.
+
 ---
 
 ## 4. Timers & PWM
 
-The device provides six 32-bit AXI timer instances (Vitis driver: `XTmrCtr`): three serve as general-purpose timers with interrupts, and three have their outputs routed to pins as PWM channels.
+The device provides six 32-bit timer instances (Vitis driver: `XTmrCtr`): three serve as general-purpose timers with interrupts, and three have their outputs routed to pins as PWM channels.
 
 ### 4.1 System Timers
 
@@ -152,6 +237,96 @@ The device provides six 32-bit AXI timer instances (Vitis driver: `XTmrCtr`): th
 | `PWM_2` | `0x4022_0000` | W4 | Pin 40 | PWM Channel 2 |
 
 **Description:** These timer instances are configured in PWM mode to generate square-wave outputs, suitable for applications such as LED dimming, motor speed control, and buzzer tone generation. Frequency and duty cycle are configured through the Timer Load Registers and the PWM enable bit.
+
+### 4.3 Timer/PWM Register Map
+
+Each of the six instances (`timer_0`–`timer_2`, `PWM_0`–`PWM_2`) is one dual
+32-bit counter block: counter 0 occupies offsets `0x00`–`0x08` and counter 1
+the same layout at `+0x10`. The general-purpose timers normally use counter 0
+alone; PWM mode uses both counters together (period and high time). All
+counters run at the 100 MHz bus clock, so one count equals 10 ns.
+
+| Offset | Name | Access | Reset | Description |
+|--------|------|--------|-------|-------------|
+| `0x00` | `TCSR0` | RW | `0x0` | Counter 0 control and status |
+| `0x04` | `TLR0` | RW | `0x0` | Counter 0 load value |
+| `0x08` | `TCR0` | RO | `0x0` | Counter 0 current count |
+| `0x10` | `TCSR1` | RW | `0x0` | Counter 1 control and status |
+| `0x14` | `TLR1` | RW | `0x0` | Counter 1 load value |
+| `0x18` | `TCR1` | RO | `0x0` | Counter 1 current count |
+
+#### TCSR — Control and Status Register (Offsets 0x00 and 0x10)
+
+| Bits | Name | Access | Description |
+|------|------|--------|-------------|
+| 31:12 | — | — | Reserved. Write 0. |
+| 11 | `CASC` | RW | Cascade both counters into one 64-bit counter. |
+| 10 | `ENALL` | RW | Writing 1 enables both counters simultaneously. |
+| 9 | `PWMA` | RW | PWM mode (set in both TCSRs, together with `GENT`). |
+| 8 | `TINT` | R/W1C | Interrupt status: reads 1 after the counter reaches its terminal value. Write the register back with this bit set to clear it. |
+| 7 | `ENT` | RW | Enable the counter (starts counting). |
+| 6 | `ENIT` | RW | Enable the interrupt output (general-purpose timers only). |
+| 5 | `LOAD` | RW | While 1, forces `TCR` = `TLR`. Write a pulse (set, then clear) to load; the counter does not run while set. |
+| 4 | `ARHT` | RW | Auto-reload: reload `TLR` and continue at the terminal value (1) or stop and hold (0). |
+| 3 | `CAPT` | RW | External capture mode. Not wired in this device; write 0. |
+| 2 | `GENT` | RW | Enable the generate output (required for PWM). |
+| 1 | `UDT` | RW | Count direction: 0 = up, 1 = down. |
+| 0 | `MDT` | RW | Mode: 0 = generate, 1 = capture. Write 0. |
+
+#### TLR — Load Register (Offsets 0x04 and 0x14)
+
+The 32-bit value loaded into the counter by `LOAD` or by auto-reload. In PWM
+mode `TLR0` sets the period and `TLR1` the high time; the hardware adds a
+fixed two-cycle overhead to each interval.
+
+#### TCR — Counter Register (Offsets 0x08 and 0x18)
+
+The live 32-bit count, readable at any time without disturbing the counter.
+
+**Configuration recipes** (board-verified, from the course examples):
+
+Free-running cycle counter — count up from zero and read elapsed 10 ns
+cycles:
+
+```c
+Xil_Out32(TIMER + 0x00, 0x0);          /* TCSR0: stop, clear mode  */
+Xil_Out32(TIMER + 0x04, 0x0);          /* TLR0: start value 0      */
+Xil_Out32(TIMER + 0x00, 0x20);         /* LOAD pulse: TCR0 <- TLR0 */
+Xil_Out32(TIMER + 0x00, 0x80);         /* ENT: run                 */
+u32 cycles = Xil_In32(TIMER + 0x08);   /* TCR0: elapsed cycles     */
+```
+
+PWM output — `TLR0` = period, `TLR1` = high time, both counters in
+PWM-generate mode (`0x296` = `PWMA|T-run|ARHT|GENT|UDT`):
+
+```c
+Xil_Out32(PWM + 0x04, PERIOD_CYC);     /* TLR0: period             */
+Xil_Out32(PWM + 0x00, 0x20);           /* LOAD counter 0           */
+Xil_Out32(PWM + 0x14, HIGH_CYC);       /* TLR1: high time          */
+Xil_Out32(PWM + 0x10, 0x20);           /* LOAD counter 1           */
+Xil_Out32(PWM + 0x00, 0x296);          /* TCSR0: PWMA|ENT|ARHT|GENT|UDT */
+Xil_Out32(PWM + 0x10, 0x296);          /* TCSR1: same              */
+```
+
+**Driver support (`XTmrCtr`).**
+
+| Function | Purpose | Registers touched |
+|----------|---------|-------------------|
+| `XTmrCtr_Initialize(&inst, base)` | Bind the instance and stop both counters | `TCSR0/1` |
+| `XTmrCtr_SetOptions(&inst, n, opt)` | Set mode bits (down-count, auto-reload, interrupt) | `TCSR` |
+| `XTmrCtr_SetResetValue(&inst, n, v)` | Set the load value | `TLR` |
+| `XTmrCtr_Start(&inst, n)` | Load and start counter *n* | `TCSR` (`LOAD`, then `ENT`) |
+| `XTmrCtr_Stop(&inst, n)` | Stop counter *n* | `TCSR` |
+| `XTmrCtr_GetValue(&inst, n)` | Read the live count | `TCR` |
+
+> **Note:** The PWM instances are ordinary timer blocks whose outputs are
+> routed to pins — there are no separate PWM registers. In interrupt use,
+> the handler must clear `TINT` by writing `TCSR` back with bit 8 set;
+> an unacknowledged timer interrupt re-enters the handler forever. A program
+> loaded over JTAG on top of a running program can inherit an already-armed
+> timer interrupt, so interrupt-driven programs should disable and
+> acknowledge the timers during initialization before enabling their own
+> handlers.
 
 ---
 
@@ -228,7 +403,7 @@ Flash contents are not memory-mapped: there is no XIP window, and code cannot ex
 | Pull-ups | Weak FPGA internal pull-ups enabled; external 4.7 kΩ to 3.3 V recommended for real devices |
 | Interrupt | INTC In6 |
 
-**Description:** An AXI IIC master controls external I2C devices (sensors, EEPROMs, OLED displays). The bus uses open-drain signaling: any device may only pull the line low, and the pull-up resistor returns it high. Devices are addressed by their 7-bit I2C address. Use the Vitis `XIic` driver.
+**Description:** An I2C master controls external I2C devices (sensors, EEPROMs, OLED displays). The bus uses open-drain signaling: any device may only pull the line low, and the pull-up resistor returns it high. Devices are addressed by their 7-bit I2C address. Use the Vitis `XIic` driver.
 
 ### 7.2 External SPI Master (`spi_0`)
 
@@ -257,31 +432,80 @@ peripheral class (1 MB per class, 64 KB per instance). The device type is identi
 directly from the address: class 0 = GPIO, 1 = Timer, 2 = PWM, 3 = UART, 4 = INTC,
 5 = QSPI control, 6 = XADC, 7 = I2C, 8 = SPI, 9 = SPI clock control.
 
-| Base Address | Range | Peripheral | Type | Category |
-|-----------------|-------|------------|---------|----------|
-| `0x0000_0000` | 128K / 128K | Local Memory (BRAM) | BRAM | Memory |
-| `0x4000_0000` | 64K | board_led_2bits | axi_gpio | GPIO |
-| `0x4001_0000` | 64K | board_button | axi_gpio | GPIO |
-| `0x4002_0000` | 64K | board_rgb | axi_gpio | GPIO |
-| `0x4003_0000` | 64K | gpio_A_0_6 | axi_gpio | GPIO |
-| `0x4004_0000` | 64K | gpio_B_0_6 | axi_gpio | GPIO |
-| `0x4005_0000` | 64K | gpio_C_0_6 | axi_gpio | GPIO |
-| `0x4006_0000` | 64K | gpio_D_0_6 | axi_gpio | GPIO |
-| `0x4007_0000` | 64K | INT_0_3 | axi_gpio | Interrupt |
-| `0x4010_0000` | 64K | timer_0 | axi_timer | Timer |
-| `0x4011_0000` | 64K | timer_1 | axi_timer | Timer |
-| `0x4012_0000` | 64K | timer_2 | axi_timer | Timer |
-| `0x4020_0000` | 64K | PWM_0 | axi_timer | PWM |
-| `0x4021_0000` | 64K | PWM_1 | axi_timer | PWM |
-| `0x4022_0000` | 64K | PWM_2 | axi_timer | PWM |
-| `0x4030_0000` | 64K | uart_USB | axi_uart16550 | Communication |
-| `0x4031_0000` | 64K | uart_1 | axi_uart16550 | Communication |
-| `0x4040_0000` | 64K | axi_intc | axi_intc | System |
-| `0x4050_0000` | 64K | axi_quad_spi_0 (QSPI flash controller) | axi_quad_spi | Memory |
-| `0x4060_0000` | 64K | xadc_wiz_0 | xadc_wiz | ADC |
-| `0x4070_0000` | 64K | i2c_0 (DIP 13/14) | axi_iic | Communication |
-| `0x4080_0000` | 64K | spi_0 (external master, DIP 35–39) | axi_quad_spi | Communication |
-| `0x4090_0000` | 64K | spi_0_clk (SPI clock control) | clock control | Communication |
-| `0x6000_0000` | 512K | axi_emc_0 (exact physical fit, I/D-cached) | axi_emc | Memory |
+| Base Address | Range | Peripheral | Category |
+|-----------------|-------|------------|----------|
+| `0x0000_0000` | 128K / 128K | Local Memory (BRAM) | Memory |
+| `0x4000_0000` | 64K | board_led_2bits | GPIO |
+| `0x4001_0000` | 64K | board_button | GPIO |
+| `0x4002_0000` | 64K | board_rgb | GPIO |
+| `0x4003_0000` | 64K | gpio_A_0_6 | GPIO |
+| `0x4004_0000` | 64K | gpio_B_0_6 | GPIO |
+| `0x4005_0000` | 64K | gpio_C_0_6 | GPIO |
+| `0x4006_0000` | 64K | gpio_D_0_6 | GPIO |
+| `0x4007_0000` | 64K | INT_0_3 | Interrupt |
+| `0x4010_0000` | 64K | timer_0 | Timer |
+| `0x4011_0000` | 64K | timer_1 | Timer |
+| `0x4012_0000` | 64K | timer_2 | Timer |
+| `0x4020_0000` | 64K | PWM_0 | PWM |
+| `0x4021_0000` | 64K | PWM_1 | PWM |
+| `0x4022_0000` | 64K | PWM_2 | PWM |
+| `0x4030_0000` | 64K | uart_USB | Communication |
+| `0x4031_0000` | 64K | uart_1 | Communication |
+| `0x4040_0000` | 64K | axi_intc | System |
+| `0x4050_0000` | 64K | axi_quad_spi_0 (QSPI flash controller) | Memory |
+| `0x4060_0000` | 64K | xadc_wiz_0 | ADC |
+| `0x4070_0000` | 64K | i2c_0 (DIP 13/14) | Communication |
+| `0x4080_0000` | 64K | spi_0 (external master, DIP 35–39) | Communication |
+| `0x4090_0000` | 64K | spi_0_clk (SPI clock control) | Communication |
+| `0x6000_0000` | 512K | axi_emc_0 (exact physical fit, I/D-cached) | Memory |
+
+---
+
+## 9. Register Access Conventions
+
+Every peripheral register in this device is a 32-bit word at a word-aligned
+offset from its instance base address (the Complete Address Map lists all
+base addresses). Registers must be accessed with full-word reads and writes:
+in C through `Xil_In32`/`Xil_Out32` or a `volatile` pointer, in assembly with
+`lw`/`sw`. Byte and halfword accesses are not supported by the peripheral
+bus.
+
+The register tables in this chapter use the following access codes:
+
+| Code | Meaning |
+|------|---------|
+| RW | Read/write |
+| RO | Read-only; writes are ignored |
+| WO | Write-only; reads return undefined data |
+| R/W1C | Readable; writing 1 to a set bit clears it |
+| R/TOW | Readable; writing 1 toggles the bit (see the GPIO `ISR`) |
+| RSE | Read side effect: the read itself changes state (for example, a UART receive-buffer read pops the FIFO) |
+
+Reserved bits read as undefined values and must be written as 0. Reading a
+register with a read side effect purely for inspection (for example from a
+debugger memory view) consumes data or clears status.
+
+Reset values apply after power-on or reconfiguration of the device.
+
+> **Note:** Loading a new program over JTAG does not reset the peripherals:
+> registers keep whatever state the previous program left, including armed
+> interrupts and half-finished bus transactions. Programs must not assume
+> reset values at entry; initialize every peripheral before use.
+
+The following two fragments are equivalent and drive the RGB LED port
+directly — the C form is the course template's idiom, the assembly form is
+the `asm_template` idiom:
+
+```c
+Xil_Out32(0x40020000 + 0x4, 0x0);   /* TRI: all pins outputs */
+Xil_Out32(0x40020000, 0x2);         /* DATA: green (bit 1)   */
+```
+
+```asm
+li   t0, 0x40020000        # RGB LED port base
+sw   zero, 4(t0)           # TRI: all pins outputs
+li   t1, 0x2               # bit 1 = green
+sw   t1, 0(t0)             # DATA: drive the pins
+```
 
 ---

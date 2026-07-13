@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 340" font-family="Liberation Sans, Helvetica, Arial, sans-serif" fill="black">
+  <rect x="0" y="0" width="600" height="340" fill="white"/>
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z"/>
+    </marker>
+    <marker id="arrb" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto">
+      <path d="M0,0 L5,2.5 L0,5 z"/>
+    </marker>
+  </defs>
+  <style>
+    .box { fill:white; stroke:black; stroke-width:1.3; }
+    .wire{ stroke:black; stroke-width:1; fill:none; marker-end:url(#arr); }
+    .bus { stroke:black; stroke-width:3.5; fill:none; marker-end:url(#arrb); }
+    .t   { font-size:9px; }
+    .tb  { font-size:11px; font-weight:bold; }
+    .ts  { font-size:8px; }
+    .ti  { font-size:8px; font-style:italic; }
+  </style>
+
+  <!-- ============ interrupt sources ============ -->
+  <rect class="box" x="24" y="16"  width="120" height="26"/>
+  <text class="t" x="84" y="33"  text-anchor="middle">Timer 0</text>
+  <rect class="box" x="24" y="54"  width="120" height="26"/>
+  <text class="t" x="84" y="71"  text-anchor="middle">Timer 1</text>
+  <rect class="box" x="24" y="92"  width="120" height="26"/>
+  <text class="t" x="84" y="109" text-anchor="middle">Timer 2</text>
+  <rect class="box" x="24" y="130" width="120" height="26"/>
+  <text class="t" x="84" y="147" text-anchor="middle">UART (DIP)</text>
+  <rect class="box" x="24" y="168" width="120" height="26"/>
+  <text class="t" x="84" y="185" text-anchor="middle">UART (USB)</text>
+  <rect class="box" x="24" y="206" width="120" height="26"/>
+  <text class="t" x="84" y="223" text-anchor="middle">External inputs &#215;4</text>
+  <rect class="box" x="24" y="244" width="120" height="26"/>
+  <text class="t" x="84" y="261" text-anchor="middle">I2C</text>
+  <rect class="box" x="24" y="282" width="120" height="26"/>
+  <text class="t" x="84" y="299" text-anchor="middle">SPI</text>
+
+  <!-- ============ source -> controller wires + input numbers ============ -->
+  <line class="wire" x1="144" y1="29"  x2="250" y2="29"/>
+  <text class="ts" x="197" y="25"  text-anchor="middle">In0</text>
+  <line class="wire" x1="144" y1="67"  x2="250" y2="67"/>
+  <text class="ts" x="197" y="63"  text-anchor="middle">In1</text>
+  <line class="wire" x1="144" y1="105" x2="250" y2="105"/>
+  <text class="ts" x="197" y="101" text-anchor="middle">In2</text>
+  <line class="wire" x1="144" y1="143" x2="250" y2="143"/>
+  <text class="ts" x="197" y="139" text-anchor="middle">In3</text>
+  <line class="wire" x1="144" y1="181" x2="250" y2="181"/>
+  <text class="ts" x="197" y="177" text-anchor="middle">In4</text>
+  <line class="wire" x1="144" y1="219" x2="250" y2="219"/>
+  <text class="ts" x="197" y="215" text-anchor="middle">In5</text>
+  <line class="wire" x1="144" y1="257" x2="250" y2="257"/>
+  <text class="ts" x="197" y="253" text-anchor="middle">In6</text>
+  <line class="wire" x1="144" y1="295" x2="250" y2="295"/>
+  <text class="ts" x="197" y="291" text-anchor="middle">In7</text>
+
+  <!-- ============ interrupt controller ============ -->
+  <rect class="box" x="250" y="16" width="120" height="292"/>
+  <text class="tb" x="310" y="156" text-anchor="middle">Interrupt</text>
+  <text class="tb" x="310" y="170" text-anchor="middle">Controller</text>
+  <text class="ts" x="310" y="186" text-anchor="middle">8 sources &#8594; 1 request</text>
+
+  <!-- ============ controller -> CPU ============ -->
+  <line class="bus" x1="370" y1="162" x2="470" y2="162"/>
+  <text class="ts" x="420" y="156" text-anchor="middle">IRQ</text>
+
+  <!-- ============ CPU ============ -->
+  <rect class="box" x="470" y="138" width="106" height="48"/>
+  <text class="tb" x="523" y="160" text-anchor="middle">RISC-V</text>
+  <text class="tb" x="523" y="174" text-anchor="middle">Core</text>
+
+  <!-- ============ enable-chain caption ============ -->
+  <text class="ti" x="24" y="330">A source reaches the core only when the source, the controller, and the core all enable interrupts.</text>
+</svg>

@@ -137,7 +137,7 @@ template's generated files: `helloworld.c`, `lscript.ld`, `platform.c`, and
 The generated Hello World sources are replaced entirely by the course
 template. The template `main.c` starts with `mcu_init()`, and its
 `lscript.ld` places code in the 512 KB SRAM, places the stack in DTCM, and
-provides the `ITCM_FUNC`/`DTCM_DATA` fast-memory attributes.
+provides the `ITCM_FUNC`/`DTCM_DATA` placement attributes.
 
 ### 4.1 Delete the Generated Files
 
