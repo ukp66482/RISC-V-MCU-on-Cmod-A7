@@ -57,21 +57,19 @@ The write-through policy has two practical consequences:
 
 ## 4. Measured Access Latencies
 
-Latencies were measured on the board at 100 MHz with an optimization-enabled
-word-copy loop. Values are cycles per 32-bit word and include the loop's own
-≈7-cycle overhead; the difference between rows is the memory's contribution.
+The figures below were measured on the board at 100 MHz with an optimized
+(`-O2`) word-copy loop and a hardware cycle counter; the cache-miss figure was
+taken immediately after invalidating the data cache. Each value is the latency
+of a single access.
 
-| Access | Cycles/word | Notes |
+| Access | Cycles | Notes |
 |---|---|---|
-| TCM read | ≈7.2 | equals the bare loop; the memory adds no cycles |
-| SRAM read, cache **hit** | ≈7.2 | a hit is as fast as the TCM |
-| SRAM read, cache **miss** | ≈26 | ≈151 cycles to fill one 32-byte line |
-| SRAM write (write-through) | ≈23.6 | every store pays the SRAM latency |
+| TCM read | 1 | single-cycle; identical every time |
+| SRAM read, cache **hit** | 1 | a hit matches the TCM |
+| SRAM read, cache **miss** | ≈151 | fetches one 32-byte line (≈19 cycles per word) |
+| SRAM write (write-through) | ≈16 | per store; the store waits for SRAM |
 
-> **Note:** Measure with compiler optimization enabled. An unoptimized build
-> inflates the loop overhead to the point where cached and uncached accesses
-> appear almost identical; the memory effects are hidden by the extra
-> instructions.
+![Memory hierarchy: faster and smaller toward the top, larger and slower toward flash](./images/memory_pyramid.svg)
 
 ## 5. Memory Placement Guidance
 
@@ -84,8 +82,11 @@ word-copy loop. Values are cycles per 32-bit word and include the loop's own
 | Firmware image | QSPI flash |
 
 As a general rule, place code and data in SRAM by default and move them to
-the TCMs when predictable timing is required. A function
-in SRAM usually runs at cache speed, but its worst case (a cold cache line)
-takes three to four times longer; for an interrupt handler this spread appears
-directly as latency jitter. In the tightly-coupled memories the worst-case
-latency equals the best-case latency.
+the TCMs when predictable timing is required.
+
+A function in SRAM usually runs at cache speed, but its worst case (a cold
+cache line) takes three to four times longer; for an interrupt handler this
+spread appears directly as latency jitter.
+
+In the tightly-coupled memories the worst-case latency equals the best-case
+latency.
