@@ -41,13 +41,13 @@
   block(above: 0.4em, below: 1.1em, text(size: 16pt, it))
 }
 #show heading.where(level: 2): it => {
-  block(above: 1.5em, below: 0.7em, text(size: 12pt, it))
+  block(above: 1.5em, below: 0.7em, sticky: true, text(size: 12pt, it))
 }
 #show heading.where(level: 3): it => {
-  block(above: 1.2em, below: 0.6em, text(size: 10.5pt, it))
+  block(above: 1.2em, below: 0.6em, sticky: true, text(size: 10.5pt, it))
 }
 #show heading.where(level: 4): it => {
-  block(above: 1.0em, below: 0.5em, text(size: 9.5pt, it))
+  block(above: 1.0em, below: 0.5em, sticky: true, text(size: 9.5pt, it))
 }
 
 #set table(stroke: 0.4pt + luma(140), inset: 4.5pt,

@@ -259,8 +259,8 @@ Click **Program** and wait for *Program flash finished.*
 
 ![Hardware Image Programmed](images/boot15.png)
 
-> **Note:** The flash type entry covers the board's Macronix MX25L3233F
-> device. Older boards carry a Micron part instead; if the IC3 marking
+> **Note:** The flash type entry covers the board's Macronix MX25L3273F
+> device. Older boards carry a Micron N25Q032A instead; if the IC3 marking
 > says N25Q032, select `n25q32-3.3v-spi-x1_x2_x4`.
 
 ### 8.2 Program the Application

@@ -26,10 +26,21 @@
 | Item | Value |
 |------|-------|
 | Address | `0x0000_0000` – `0x0001_FFFF` (128 KB) |
-| Access | 1 cycle — instruction and data sides read simultaneously |
+| Ports | Dual-port: simultaneous instruction and data access |
 | Layout | 32 KB bootloader + 32 KB ITCM + 64 KB DTCM |
 
-**Description:** The tightly-coupled memory (TCM) is the on-chip RAM: its separate instruction and data ports serve the same role as ITCM/DTCM on other MCU cores (e.g. Cortex-M7), giving 1-cycle access outside the cache path. The layout is as follows: `0x0000`–`0x7FFF` (32 KB) holds the bootloader (restored at every power-on); `0x8000`–`0xFFFF` (32 KB) is the application's ITCM for interrupt handlers and timing-critical code (`ITCM_FUNC`, copied out of the SRAM image by `mcu_init()` at startup); `0x10000`–`0x1FFFF` (64 KB) is the DTCM, holding the stack (top-down from `0x20000`) and `DTCM_DATA` fast data.
+**Description:** The tightly-coupled memory (TCM) is the on-chip RAM, accessed
+outside the cache path. It is a dual-port memory, so an instruction fetch and a
+data access can proceed at the same time. It serves the same role as ITCM/DTCM
+on other MCU cores (e.g. Cortex-M7), and is divided into the bootloader region,
+the ITCM for interrupt handlers and timing-critical code, and the DTCM for the
+stack and fast data.
+
+> **Note:** The bootloader region has no software load path. Its contents are
+> carried inside the hardware image and restored from flash at every power-on,
+> before the processor starts. Like a mask ROM, the bootloader survives
+> application updates and cannot be corrupted by software
+> (see the Standalone Boot Mode guide).
 
 ### 1.4 AXI Interrupt Controller (`microblaze_riscv_0_axi_intc`)
 
@@ -337,18 +348,18 @@ Xil_Out32(PWM + 0x10, 0x296);          /* TCSR1: same              */
 | Item | Value |
 |------|-------|
 | Base Address | `0x4050_0000` |
-| Flash Device | On-board 4 MB QSPI NOR flash (Macronix; Micron on older boards) |
+| Flash Device | 4 MB QSPI NOR flash: Macronix MX25L3273F, or Micron N25Q032A on older boards |
 | Mode | CPU-programmable register mode — flash contents are not memory-mapped |
 | FIFO | 256 B TX/RX — one full flash page (256 B) per transfer |
 
-**Description:** This controller manages the on-board Quad-SPI NOR Flash. The full register set (control, status, TX/RX FIFO, slave select) is exposed at `0x4050_0000`, so the CPU can issue any SPI command: read (`0x0B`), Write Enable (`0x06`), Sector/Block Erase (`0x20`/`0xD8`), Page Program (`0x02`), and status poll (`0x05`). The flash therefore remains fully CPU-programmable at runtime (the Vitis `XSpi` driver wraps the register protocol).
+**Description:** This controller manages the on-board Quad-SPI NOR Flash. The CPU drives the flash through the controller, so firmware can read, erase, and program it at runtime.
 
 Flash contents are not memory-mapped: there is no XIP window, and code cannot execute from flash directly. The standalone-boot design instead copies the application from flash into SRAM at power-on (see the Standalone Boot Mode guide).
 
 > **Design note:** A read-only memory-mapped XIP window and CPU-programmable register mode are
-> mutually exclusive in this controller. This project uses register mode: keeping the
-> flash CPU-programmable at runtime was judged more valuable for the course than
-> execute-in-place, and execution is served by the 512 KB SRAM and the I-cache instead.
+> mutually exclusive in this controller. This MCU uses register mode: keeping the
+> flash CPU-programmable at runtime is preferred over execute-in-place, and
+> execution is served by the 512 KB SRAM and the I-cache instead.
 
 ### 5.2 SRAM / Cellular RAM (`axi_emc_0`)
 
@@ -359,7 +370,7 @@ Flash contents are not memory-mapped: there is no XIP window, and code cannot ex
 | Memory | On-board asynchronous SRAM |
 | Cache | Covered by the I-Cache and D-Cache |
 
-**Description:** This memory controller interfaces to the on-board 512 KB SRAM, the main application memory: standalone boot copies the program here and executes it. Its access latency is higher than the tightly-coupled memory's, but with both caches covering this range, frequently accessed code and data run at cache speed.
+**Description:** This memory controller interfaces to the on-board 512 KB SRAM, the main application memory: standalone boot copies the program here and executes it.
 
 ---
 

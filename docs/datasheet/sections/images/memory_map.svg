@@ -29,12 +29,12 @@
 
   <rect class="box" x="170" y="108" width="230" height="48"/>
   <text class="t"  x="285" y="128" text-anchor="middle">ITCM &#8212; 32 KB</text>
-  <text class="ts" x="285" y="142" text-anchor="middle">ITCM_FUNC code</text>
+  <text class="ts" x="285" y="142" text-anchor="middle">fast code</text>
   <text class="addr" x="162" y="114" text-anchor="end">0x0000 8000</text>
 
   <rect class="box" x="170" y="156" width="230" height="66"/>
   <text class="t"  x="285" y="176" text-anchor="middle">DTCM &#8212; 64 KB</text>
-  <text class="ts" x="285" y="190" text-anchor="middle">DTCM_DATA &#183; stack</text>
+  <text class="ts" x="285" y="190" text-anchor="middle">data &#183; stack</text>
   <text class="addr" x="162" y="162" text-anchor="end">0x0001 0000</text>
   <line class="wire" x1="330" y1="214" x2="330" y2="198"/>
   <text class="ts" x="338" y="208" text-anchor="start">stack</text>
@@ -84,6 +84,10 @@
   <line class="dash" x1="760" y1="250" x2="760" y2="300"/>
   <text class="ti" x="660" y="279" text-anchor="middle">(rest of the slot)</text>
   <text class="addr" x="552" y="306" text-anchor="end">0x40 0000</text>
+
+  <!-- restore arrow: hardware image -> bootloader region -->
+  <path class="dasha" d="M 560 94 L 404 94"/>
+  <text class="ti" x="482" y="106" text-anchor="middle">restored at power-on</text>
 
   <!-- boot copy arrow: app image -> SRAM -->
   <path class="dasha" d="M 560 205 L 480 205 L 480 426 L 404 426"/>

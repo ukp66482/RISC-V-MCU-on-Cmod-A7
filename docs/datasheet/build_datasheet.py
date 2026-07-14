@@ -43,6 +43,7 @@ RECIPE = [
     ("h1", "Device Overview"),
     ("sec", "ov", "Introduction", 2, None),
     ("sec", "ov", "Features", 2, None),
+    ("sec", "ov", "On-Board Components", 2, None),
     ("sec", "ov", "System Block Diagram", 2, None),
 
     ("h1", "Pinout"),
@@ -293,6 +294,9 @@ class Converter:
             widest = avg.index(max(avg))
         cols = ", ".join("1fr" if i == widest else "auto"
                          for i in range(ncol))
+        small = len(body) <= 10  # short spec tables stay whole across pages
+        if small:
+            self.line("#block(breakable: false, width: 100%)[")
         self.line("#table(")
         self.line("  columns: (%s)," % cols)
         self.line("  table.header(%s)," %
@@ -303,6 +307,8 @@ class Converter:
             self.line("  " + ", ".join("[%s]" % self.inline(c)
                                        for c in r) + ",")
         self.line(")")
+        if small:
+            self.line("]")
         self.line()
         rows.clear()
 
