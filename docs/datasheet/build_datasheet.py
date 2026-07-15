@@ -97,6 +97,7 @@ RECIPE = [
     ("sec", "ip", "External SPI Master (`spi_0`)", 2, "SPI Master"),
     ("sec", "ip", "XADC Wizard (`xadc_wiz_0`)", 2, "Analog-to-Digital Converter (XADC)"),
     ("sec", "pin", "Analog Input Circuit", 3, None),
+    ("sec", "ip", "Interrupt Controller (`microblaze_riscv_0_axi_intc`)", 2, "Interrupt Controller"),
 
     ("h1", "JTAG Debug Mode"),
     ("figbreak", True),
@@ -268,6 +269,7 @@ class Converter:
         self.img_seq = 0
         self.fig_break = False
         self.pending_break = False  # figbreak deferred past a trailing note
+        self.pending_fig = None     # figure held to group with the table below
 
     def line(self, s=""):
         self.out.append(s)
@@ -275,14 +277,21 @@ class Converter:
     def inline(self, t):
         return inline(t, self.code)
 
-    def flush_para(self, para):
+    def flush_para(self, para, sticky=False):
         if para:
-            self.line(self.inline(" ".join(para)))
+            text = self.inline(" ".join(para))
+            # A lead-in paragraph (a register-map intro or a "Driver support"
+            # line) is made sticky so it stays with the table that follows;
+            # combined with sticky headings this keeps heading+intro+table whole.
+            self.line("#block(sticky: true)[%s]" % text if sticky else text)
             self.line()
             para.clear()
 
-    def flush_table(self, rows):
+    def flush_table(self, rows, sticky=False):
         if not rows:
+            if self.pending_fig is not None:
+                self.flush_figure(self.pending_fig)
+                self.pending_fig = None
             return
         ncol = len(rows[0])
         body = [r for r in rows[1:]
@@ -295,9 +304,24 @@ class Converter:
             widest = avg.index(max(avg))
         cols = ", ".join("1fr" if i == widest else "auto"
                          for i in range(ncol))
-        small = len(body) <= 10  # short spec tables stay whole across pages
-        if small:
-            self.line("#block(breakable: false, width: 100%)[")
+        st = ", sticky: true" if sticky else ""  # keep with a following note
+        # A lead-in figure (a register bit-field diagram) is kept together with
+        # its short table so the pair never splits across a page. Register maps
+        # (up to 13 rows) also stay whole; only long tables (address/pin maps)
+        # break.
+        keep = self.pending_fig is not None and len(body) <= 13
+        if keep:
+            self.line("#block(breakable: false%s)[" % st)
+            self.flush_figure(self.pending_fig)
+            self.pending_fig = None
+            small = False
+        else:
+            if self.pending_fig is not None:
+                self.flush_figure(self.pending_fig)
+                self.pending_fig = None
+            small = len(body) <= 13  # short/spec tables stay whole across pages
+            if small:
+                self.line("#block(breakable: false%s, width: 100%%)[" % st)
         self.line("#table(")
         self.line("  columns: (%s)," % cols)
         self.line("  table.header(%s)," %
@@ -309,6 +333,8 @@ class Converter:
                                        for c in r) + ",")
         self.line(")")
         if small:
+            self.line("]")
+        if keep:
             self.line("]")
         self.line()
         rows.clear()
@@ -366,7 +392,7 @@ class Converter:
                 self.line(li[0] + " " + self.inline(" ".join(li[1])))
                 li = None
 
-        for ln in lines:
+        for i, ln in enumerate(lines):
             if in_fence:
                 self.line(ln)
                 if ln.startswith("```"):
@@ -380,11 +406,17 @@ class Converter:
                 in_fence = True
                 continue
             if ln.startswith("|"):
-                flush_li(); self.flush_para(para); fig = self.flush_figure(fig)
+                flush_li(); self.flush_para(para, sticky=True)
+                if not table and fig is not None and not self.fig_break:
+                    self.pending_fig = fig      # group with the table below
+                    fig = None
+                else:
+                    fig = self.flush_figure(fig)
                 table.append([c.strip()
                               for c in ln.strip().strip("|").split("|")])
                 continue
-            self.flush_table(table)
+            nxt = next((l for l in lines[i:] if l.strip()), "")
+            self.flush_table(table, sticky=nxt.lstrip().startswith(">"))
             if ln.startswith(">"):
                 flush_li(); self.flush_para(para)
                 fig = self.flush_figure(fig, defer_break=True)
@@ -416,7 +448,12 @@ class Converter:
                 continue
             if not ln.strip():
                 flush_li()
-                self.flush_para(para)
+                # keep a paragraph that leads directly into a table or a code
+                # block (a register-map intro, a "Driver support" line, a recipe
+                # lead) with the block that follows it
+                nxt = next((l for l in lines[i + 1:] if l.strip()), "").lstrip()
+                self.flush_para(para,
+                                sticky=nxt.startswith("|") or nxt.startswith("```"))
                 continue
             fig = self.flush_figure(fig)
             m = re.match(r"^-\s+(.*)$", ln)

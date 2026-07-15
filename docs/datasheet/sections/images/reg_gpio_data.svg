@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 730 96" font-family="Liberation Sans, Helvetica, Arial, sans-serif" fill="black">
+  <rect x="0" y="0" width="730" height="96" fill="white"/>
+  <defs>
+    <pattern id="rsv" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="7" stroke="black" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+  <style>
+    .cell { fill:white; stroke:black; stroke-width:1; }
+    .bit  { font-size:8px; }
+    .fld  { font-size:8px; font-weight:bold; }
+    .rsvt { font-size:8.5px; font-style:italic; }
+  </style>
+
+  <rect class="cell" x="16" y="42" width="362" height="34"/>
+  <rect x="16" y="42" width="362" height="34" fill="url(#rsv)" stroke="none"/>
+  <rect x="167" y="52" width="60" height="14" fill="white"/>
+  <text class="rsvt" x="197" y="63" text-anchor="middle">Reserved</text>
+  <text class="bit" x="22" y="37" text-anchor="start">31</text>
+  <text class="bit" x="372" y="37" text-anchor="end">7</text>
+  <rect class="cell" x="378" y="42" width="48" height="34"/>
+  <text class="bit" x="402" y="37" text-anchor="middle">6</text>
+  <text class="fld" x="402" y="63" text-anchor="middle">D6</text>
+  <rect class="cell" x="426" y="42" width="48" height="34"/>
+  <text class="bit" x="450" y="37" text-anchor="middle">5</text>
+  <text class="fld" x="450" y="63" text-anchor="middle">D5</text>
+  <rect class="cell" x="474" y="42" width="48" height="34"/>
+  <text class="bit" x="498" y="37" text-anchor="middle">4</text>
+  <text class="fld" x="498" y="63" text-anchor="middle">D4</text>
+  <rect class="cell" x="522" y="42" width="48" height="34"/>
+  <text class="bit" x="546" y="37" text-anchor="middle">3</text>
+  <text class="fld" x="546" y="63" text-anchor="middle">D3</text>
+  <rect class="cell" x="570" y="42" width="48" height="34"/>
+  <text class="bit" x="594" y="37" text-anchor="middle">2</text>
+  <text class="fld" x="594" y="63" text-anchor="middle">D2</text>
+  <rect class="cell" x="618" y="42" width="48" height="34"/>
+  <text class="bit" x="642" y="37" text-anchor="middle">1</text>
+  <text class="fld" x="642" y="63" text-anchor="middle">D1</text>
+  <rect class="cell" x="666" y="42" width="48" height="34"/>
+  <text class="bit" x="690" y="37" text-anchor="middle">0</text>
+  <text class="fld" x="690" y="63" text-anchor="middle">D0</text>
+</svg>

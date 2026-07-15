@@ -63,54 +63,8 @@ the controller to determine which source is active.
 | In6 | `i2c_0` | I2C controller interrupt |
 | In7 | `spi_0` | External SPI master interrupt |
 
-#### Interrupt Controller Register Map
-
-Offsets are from the instance base (`0x4040_0000`). The status, enable, pending,
-and acknowledge registers all use the same layout: bit `n` corresponds to input
-`n` in the mapping above.
-
-| Offset | Name | Access | Description |
-|--------|------|--------|-------------|
-| `0x00` | `ISR` | RW | Interrupt status (raw, one bit per input) |
-| `0x04` | `IPR` | RO | Pending = status AND enable |
-| `0x08` | `IER` | RW | Interrupt enable (one bit per input) |
-| `0x0C` | `IAR` | WO | Acknowledge: write 1 to a bit to clear that handled interrupt |
-| `0x10` | `SIE` | WO | Set individual enable bits |
-| `0x14` | `CIE` | WO | Clear individual enable bits |
-| `0x18` | `IVR` | RO | Number of the lowest pending input |
-| `0x1C` | `MER` | RW | Master enable |
-
-##### IER — Interrupt Enable Register (Offset 0x08)
-
-![Interrupt enable register: bit 0 enables Timer 0 through bit 7 enabling the SPI master, matching the interrupt map](./images/reg_intc_ier.svg)
-
-Each bit enables one source; the bit position is the input number from the map
-above (bit 0 = Timer 0 … bit 7 = SPI). `ISR`, `IPR`, and `IAR` share this
-bit-per-input layout. Bits 31:8 are reserved.
-
-##### MER — Master Enable Register (Offset 0x1C)
-
-| Bits | Name | Access | Description |
-|------|------|--------|-------------|
-| 31:2 | — | — | Reserved. |
-| 1 | `HIE` | RW | Hardware interrupt enable (write-once). |
-| 0 | `ME` | RW | Master enable: gates all interrupt output to the processor. |
-
-**Driver support (`XIntc`).**
-
-| Function | Purpose | Registers touched |
-|----------|---------|-------------------|
-| `XIntc_Initialize(&inst, base)` | Bind the controller | none |
-| `XIntc_Connect(&inst, id, handler, ref)` | Install a handler for input `id` | none |
-| `XIntc_Enable(&inst, id)` | Enable one source | `IER` |
-| `XIntc_Start(&inst, mode)` | Start the controller | `MER` |
-| `XIntc_Acknowledge(&inst, id)` | Acknowledge a handled interrupt | `IAR` |
-
-> **Note:** Enabling an interrupt takes two gates: the per-source bit in `IER`
-> and the master enable `MER.ME`. When loading a new program over JTAG, clear
-> `MER` and `IER` first — an interrupt left pending by the previous program is
-> taken as soon as the master enable is set, before the new handlers are
-> installed.
+> **Note:** The controller's registers and programming interface are described
+> with the other peripheral registers in the Peripherals chapter.
 
 ### 1.5 Debug Module (`mdm_1`)
 
@@ -219,6 +173,8 @@ interrupt-enable registers.
 
 #### IER — Interrupt Enable Register (Offset 0x1004, DLAB = 0)
 
+![UART IER bit layout: four interrupt-enable bits in bits 3:0](./images/reg_uart_ier.svg)
+
 | Bits | Name | Access | Description |
 |------|------|--------|-------------|
 | 31:4 | — | — | Reserved. |
@@ -228,6 +184,8 @@ interrupt-enable registers.
 | 0 | `ERDA` | RW | Enable the received-data-available interrupt. |
 
 #### FCR — FIFO Control Register (Offset 0x1008, write-only)
+
+![UART FCR bit layout: the trigger level in bits 7:6 and the FIFO enable and reset controls in bits 2:0](./images/reg_uart_fcr.svg)
 
 | Bits | Name | Access | Description |
 |------|------|--------|-------------|
@@ -333,12 +291,16 @@ implemented on the `INT_0_3` port only.
 
 #### DATA — Port Data Register (Offset 0x000)
 
+![GPIO DATA layout: one bit per pin in the low bits; only the low W bits exist (W = 7 for groups A–D, fewer for the on-board ports)](./images/reg_gpio_data.svg)
+
 | Bits | Name | Access | Description |
 |------|------|--------|-------------|
 | 31:W | — | — | Reserved (W = port width). Read as 0. |
 | W-1:0 | `DATA` | RW | One bit per pin. A read returns the pin level for input pins and the last written value for output pins. A write drives pins configured as outputs; writes to input pins have no effect. |
 
 #### TRI — Port Direction Register (Offset 0x004)
+
+![GPIO TRI layout: one direction bit per pin (1 = input, 0 = output), same low-bit layout as DATA](./images/reg_gpio_tri.svg)
 
 | Bits | Name | Access | Description |
 |------|------|--------|-------------|
@@ -582,6 +544,21 @@ registers. Offsets are from the instance base (`0x4060_0000`).
 | `0x250` | `VAUX4` | RO | External analog input 0 (DIP pin 15) |
 | `0x270` | `VAUX12` | RO | External analog input 1 (DIP pin 16) |
 
+##### SR — Status Register (Offset 0x004)
+
+![XADC SR bit layout: conversion status in bits 8:6 and the current channel number in bits 5:0](./images/reg_xadc_sr.svg)
+
+| Bits | Name | Access | Description |
+|------|------|--------|-------------|
+| 31:12 | — | — | Reserved. |
+| 11 | `JTBSY` | RO | Configuration-port access busy. |
+| 10 | `JTMOD` | RO | A configuration-port write has occurred. |
+| 9 | `JTLCK` | RO | Configuration-port access is locked. |
+| 8 | `BUSY` | RO | A conversion is in progress. |
+| 7 | `EOS` | RO | End of sequence: the sequencer finished one pass over the channels. |
+| 6 | `EOC` | RO | End of conversion: a new sample is ready. |
+| 5:0 | `CHANNEL` | RO | Number of the channel just converted. |
+
 ##### Conversion Data Format
 
 ![XADC result format: the 12-bit sample is left-justified in bits 15:4; bits 3:0 read 0](./images/reg_xadc_data.svg)
@@ -661,6 +638,8 @@ runs before a transfer. Offsets are from the instance base (`0x4070_0000`).
 | 0 | `EN` | RW | Enable the controller. |
 
 ##### SR — Status Register (Offset 0x104)
+
+![I2C SR bit layout: FIFO, bus-busy, and addressing status flags in bits 7:0](./images/reg_i2c_sr.svg)
 
 | Bits | Name | Access | Description |
 |------|------|--------|-------------|
@@ -807,7 +786,64 @@ while (!(Xil_In32(SPICLK + 0x004) & 1)) ;  /* wait for lock                   */
 
 ---
 
-## 8. Complete Address Map
+## 8. Interrupt Controller (`microblaze_riscv_0_axi_intc`)
+
+The interrupt controller and its source-to-input map are introduced in the
+System Architecture chapter, with the block diagram. This section documents its
+registers. Offsets are from the instance base (`0x4040_0000`). The status,
+enable, pending, and acknowledge registers all use the same layout: bit `n`
+corresponds to interrupt input `n`.
+
+### Interrupt Controller Register Map
+
+| Offset | Name | Access | Description |
+|--------|------|--------|-------------|
+| `0x00` | `ISR` | RW | Interrupt status (raw, one bit per input) |
+| `0x04` | `IPR` | RO | Pending = status AND enable |
+| `0x08` | `IER` | RW | Interrupt enable (one bit per input) |
+| `0x0C` | `IAR` | WO | Acknowledge: write 1 to a bit to clear that handled interrupt |
+| `0x10` | `SIE` | WO | Set individual enable bits |
+| `0x14` | `CIE` | WO | Clear individual enable bits |
+| `0x18` | `IVR` | RO | Number of the lowest pending input |
+| `0x1C` | `MER` | RW | Master enable |
+
+#### IER — Interrupt Enable Register (Offset 0x08)
+
+![Interrupt enable register: bit 0 enables Timer 0 through bit 7 enabling the SPI master, matching the interrupt map](./images/reg_intc_ier.svg)
+
+Each bit enables one source; the bit position is the input number (bit 0 =
+Timer 0 … bit 7 = SPI). `ISR`, `IPR`, and `IAR` share this bit-per-input
+layout. Bits 31:8 are reserved.
+
+#### MER — Master Enable Register (Offset 0x1C)
+
+![Master enable register: the master enable and hardware-interrupt-enable bits in bits 1:0](./images/reg_intc_mer.svg)
+
+| Bits | Name | Access | Description |
+|------|------|--------|-------------|
+| 31:2 | — | — | Reserved. |
+| 1 | `HIE` | RW | Hardware interrupt enable (write-once). |
+| 0 | `ME` | RW | Master enable: gates all interrupt output to the processor. |
+
+**Driver support (`XIntc`).**
+
+| Function | Purpose | Registers touched |
+|----------|---------|-------------------|
+| `XIntc_Initialize(&inst, base)` | Bind the controller | none |
+| `XIntc_Connect(&inst, id, handler, ref)` | Install a handler for input `id` | none |
+| `XIntc_Enable(&inst, id)` | Enable one source | `IER` |
+| `XIntc_Start(&inst, mode)` | Start the controller | `MER` |
+| `XIntc_Acknowledge(&inst, id)` | Acknowledge a handled interrupt | `IAR` |
+
+> **Note:** Enabling an interrupt takes two gates: the per-source bit in `IER`
+> and the master enable `MER.ME`. When loading a new program over JTAG, clear
+> `MER` and `IER` first — an interrupt left pending by the previous program is
+> taken as soon as the master enable is set, before the new handlers are
+> installed.
+
+---
+
+## 9. Complete Address Map
 
 Peripheral addresses follow a class-based convention: `0x40[C]x_xxxx`, where `C` is the
 peripheral class (1 MB per class, 64 KB per instance). The device type is identifiable

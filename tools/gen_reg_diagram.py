@@ -65,13 +65,17 @@ def gen(fields):
     p.append('  <text class="bit" x="%d" y="37" text-anchor="end">%d</text>'
              % (L + reserved_w - 6, nunits))
 
-    # named cells, MSB-first
+    # named cells, MSB-first. An empty label marks a reserved gap between
+    # named fields (hatched like the main reserved cell, no field text).
     x = L + reserved_w
     bit = nunits - 1
     for label, n in fields:
         w = n * CELL
         p.append('  <rect class="cell" x="%d" y="%d" width="%d" height="%d"/>'
                  % (x, TOP, w, CH))
+        if not label:
+            p.append('  <rect x="%d" y="%d" width="%d" height="%d" '
+                     'fill="url(#rsv)" stroke="none"/>' % (x, TOP, w, CH))
         if n == 1:
             p.append('  <text class="bit" x="%d" y="37" text-anchor="middle">'
                      '%d</text>' % (x + w / 2, bit))
@@ -80,8 +84,9 @@ def gen(fields):
                      '%d</text>' % (x + 6, bit))
             p.append('  <text class="bit" x="%d" y="37" text-anchor="end">'
                      '%d</text>' % (x + w - 6, bit - n + 1))
-        p.append('  <text class="fld" x="%d" y="63" text-anchor="middle">'
-                 '%s</text>' % (x + w / 2, label))
+        if label:
+            p.append('  <text class="fld" x="%d" y="63" text-anchor="middle">'
+                     '%s</text>' % (x + w / 2, label))
         x += w
         bit -= n
     p.append('</svg>')
@@ -104,8 +109,20 @@ REGS = {
         ("MODF", "TX_FULL", "TX_EMPTY", "RX_FULL", "RX_EMPTY")],
     "reg_i2c_cr": [(s, 1) for s in
         ("GC", "RSTA", "TXAK", "TX", "MSMS", "TXFIFO", "EN")],
+    "reg_i2c_sr": [(s, 1) for s in
+        ("TX_EMPTY", "RX_EMPTY", "RX_FULL", "TX_FULL", "SRW", "BB", "AAS", "GC")],
     "reg_intc_ier": [(s, 1) for s in
         ("SPI", "I2C", "EXTI", "USB", "UART1", "TMR2", "TMR1", "TMR0")],
+    "reg_intc_mer": [("HIE", 1), ("ME", 1)],
+    "reg_uart_ier": [(s, 1) for s in ("EMS", "ERLS", "ETHRE", "ERDA")],
+    "reg_uart_fcr": [("RXTRIG[7:6]", 2), ("", 3), ("TXRST", 1),
+                     ("RXRST", 1), ("FEN", 1)],
+    "reg_xadc_sr": [("JTBSY", 1), ("JTMOD", 1), ("JTLCK", 1), ("BUSY", 1),
+                    ("EOS", 1), ("EOC", 1), ("CHANNEL[5:0]", 6)],
+    "reg_gpio_data": [(s, 1) for s in
+        ("D6", "D5", "D4", "D3", "D2", "D1", "D0")],
+    "reg_gpio_tri": [(s, 1) for s in
+        ("T6", "T5", "T4", "T3", "T2", "T1", "T0")],
 }
 
 
