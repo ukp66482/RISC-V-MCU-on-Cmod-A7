@@ -91,6 +91,7 @@ RECIPE = [
               "system in @sec-flash."),
     ("sec", "ip", "Register Access Conventions", 2, None),
     ("sec", "ip", "GPIO (General Purpose I/O)", 2, "GPIO"),
+    ("sec", "ip", "External Interrupt Inputs (`INT_0_3`)", 2, "External Interrupt Inputs"),
     ("sec", "ip", "Timers & PWM", 2, "Timers and PWM"),
     ("sec", "ip", "UART Communication", 2, "UART"),
     ("sec", "ip", "I2C Controller (`i2c_0`)", 2, "I2C Controller"),
@@ -255,7 +256,7 @@ def inline(t, code):
     t = re.sub(r"\\\*\\\*(.+?)\\\*\\\*", r"*\1*", t)               # **bold**
     t = re.sub(r"\\\*(.+?)\\\*", r"_\1_", t)                       # *italic*
     t = re.sub(r"\\\[(.+?)\\\]\((https?://.+?)\)",
-               r"#link(\"\2\")[\1]", t)                            # web link
+               r'#link("\2")[\1]', t)                              # web link
     t = re.sub(r"\\\[(.+?)\\\]\([^)]*\)", r"\1", t)                # file link -> text
     t = re.sub(r"__CODE(\d+)__", lambda m: "`%s`" % code[int(m.group(1))], t)
     return t
@@ -452,8 +453,8 @@ class Converter:
                 # block (a register-map intro, a "Driver support" line, a recipe
                 # lead) with the block that follows it
                 nxt = next((l for l in lines[i + 1:] if l.strip()), "").lstrip()
-                self.flush_para(para,
-                                sticky=nxt.startswith("|") or nxt.startswith("```"))
+                self.flush_para(para, sticky=nxt.startswith("|")
+                                or nxt.startswith("```") or nxt.startswith("!["))
                 continue
             fig = self.flush_figure(fig)
             m = re.match(r"^-\s+(.*)$", ln)

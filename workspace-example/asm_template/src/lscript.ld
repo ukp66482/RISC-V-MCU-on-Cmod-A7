@@ -73,41 +73,17 @@ SECTIONS
 __itcm_lma = LOADADDR(.itcm.text);   /* where the copy lives in SRAM */
 
 /* ------------------------------------------------------------------ *
- *  3. C runtime plumbing — constructors, exception tables, etc.      *
- *     libc's startup expects all of these; keep them as-is.          *
+ *  3. C runtime plumbing — the _init / _fini frames.                 *
+ *     Global constructors run from .init_array (below), which is the *
+ *     mechanism this RISC-V toolchain uses; the legacy .ctors/.dtors  *
+ *     are never emitted, so they are not placed here.                *
  * ------------------------------------------------------------------ */
-.note.gnu.build-id : {
-   KEEP (*(.note.gnu.build-id))
-} > sram
-
 .init : {
    KEEP (*(.init))
 } > sram
 
 .fini : {
    KEEP (*(.fini))
-} > sram
-
-.ctors : {
-   __CTOR_LIST__ = .;
-   ___CTORS_LIST___ = .;
-   KEEP (*crtbegin.o(.ctors))
-   KEEP (*(EXCLUDE_FILE(*crtend.o) .ctors))
-   KEEP (*(SORT(.ctors.*)))
-   KEEP (*(.ctors))
-   __CTOR_END__ = .;
-   ___CTORS_END___ = .;
-} > sram
-
-.dtors : {
-   __DTOR_LIST__ = .;
-   ___DTORS_LIST___ = .;
-   KEEP (*crtbegin.o(.dtors))
-   KEEP (*(EXCLUDE_FILE(*crtend.o) .dtors))
-   KEEP (*(SORT(.dtors.*)))
-   KEEP (*(.dtors))
-   __DTOR_END__ = .;
-   ___DTORS_END___ = .;
 } > sram
 
 /* ------------------------------------------------------------------ *
@@ -126,15 +102,8 @@ __itcm_lma = LOADADDR(.itcm.text);   /* where the copy lives in SRAM */
 .srodata : {
    __srodata_start = .;
    *(.srodata)
+   *(.srodata.*)
    __srodata_end = .;
-} > sram
-
-.sdata2 : {
-   __sdata2_start = .;
-   *(.sdata2)
-   *(.sdata2.*)
-   *(.gnu.linkonce.s2.*)
-   __sdata2_end = .;
 } > sram
 
 .data : {
@@ -145,6 +114,8 @@ __itcm_lma = LOADADDR(.itcm.text);   /* where the copy lives in SRAM */
    _edata = .;
 } > sram
 
+/* crtbegin.o / crtend.o always contribute an .eh_frame frame (even in C),
+ * so this section must exist to place them; .gcc_except_table is its pair. */
 .eh_frame : {
    *(.eh_frame)
 } > sram
@@ -194,19 +165,6 @@ __itcm_lma = LOADADDR(.itcm.text);   /* where the copy lives in SRAM */
    *(.gnu.linkonce.sb.*)
    __sbss_end = .;
 } > sram
-
-.sbss2 : {
-   __sbss2_start = .;
-   *(.sbss2)
-   *(.sbss2.*)
-   *(.gnu.linkonce.sb2.*)
-   __sbss2_end = .;
-} > sram
-
-/* centres of the small-data windows used by gp-relative addressing */
-_SDA_BASE_ = __sdata_start + ((__sbss_end - __sdata_start) / 2 );
-
-_SDA2_BASE_ = __sdata2_start + ((__sbss2_end - __sdata2_start) / 2 );
 
 /* ------------------------------------------------------------------ *
  *  6. Heap (malloc) — grows inside SRAM                              *

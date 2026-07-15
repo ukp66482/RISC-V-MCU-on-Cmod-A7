@@ -123,6 +123,16 @@ REGS = {
         ("D6", "D5", "D4", "D3", "D2", "D1", "D0")],
     "reg_gpio_tri": [(s, 1) for s in
         ("T6", "T5", "T4", "T3", "T2", "T1", "T0")],
+    "reg_exti_data": [(s, 1) for s in ("INT3", "INT2", "INT1", "INT0")],
+    "reg_exti_int": [("CH1", 1)],
+    # on-board GPIO, fixed direction: DATA carries the signal, TRI is hardwired
+    # (0 = output, 1 = input) so its cells show the fixed value.
+    "reg_led_data": [("LD2", 1), ("LD1", 1)],
+    "reg_led_tri": [("0", 1), ("0", 1)],
+    "reg_btn_data": [("BTN1", 1)],
+    "reg_btn_tri": [("1", 1)],
+    "reg_rgb_data": [("Red", 1), ("Green", 1), ("Blue", 1)],
+    "reg_rgb_tri": [("0", 1), ("0", 1), ("0", 1)],
 }
 
 

@@ -235,11 +235,18 @@ helper macros, which wrap exactly these registers.
 > applies at the 100 MHz system clock; `XUartNs550_SetBaud` recomputes it from
 > the clock frequency passed to it.
 
+> **Reference:** AMD AXI UART 16550 LogiCORE IP Product Guide ([PG143](https://docs.amd.com/r/en-US/pg143-axi-uart16550)).
+
 ---
 
 ## 3. GPIO (General Purpose I/O)
 
-All GPIO groups are memory-mapped ports with per-bit direction control: the TRI register sets each pin's direction, and the DATA register reads or writes the pin. The Vitis driver is `XGpio`.
+The general-purpose GPIO ports carry polled digital I/O. Each port is
+memory-mapped with per-pin direction control: the `TRI` register sets each
+pin's direction and the `DATA` register reads or writes the pins. The Vitis
+driver is `XGpio`. These ports have no interrupt hardware and cannot raise a
+processor interrupt; to watch a signal by interrupt, use the External Interrupt
+Inputs described in the next section.
 
 ### 3.1 On-Board GPIO
 
@@ -248,6 +255,29 @@ All GPIO groups are memory-mapped ports with per-bit direction control: the TRI 
 | `board_led_2bits` | `0x4000_0000` | 2 | Output | LD1, LD2 | On-board LEDs × 2 |
 | `board_button` | `0x4001_0000` | 1 | Input | BTN1 | On-board user button |
 | `board_rgb` | `0x4002_0000` | 3 | Output | LD0 | On-board RGB LED (bit 0 = Blue, bit 1 = Green, bit 2 = Red) |
+
+Each on-board port has a fixed direction: the LED and RGB ports are outputs and
+the button is an input, so the `TRI` register is hardwired (0 = output,
+1 = input) and software cannot change it. The `DATA` and `TRI` layout of each
+port follows.
+
+**On-board LEDs (`board_led_2bits`)** — 2-bit output.
+
+![LED DATA register: bit 0 drives LD1, bit 1 drives LD2](./images/reg_led_data.svg)
+
+![LED TRI register: both direction bits are fixed to 0 (output)](./images/reg_led_tri.svg)
+
+**User button (`board_button`)** — 1-bit input.
+
+![Button DATA register: bit 0 reads BTN1](./images/reg_btn_data.svg)
+
+![Button TRI register: the direction bit is fixed to 1 (input)](./images/reg_btn_tri.svg)
+
+**RGB LED (`board_rgb`, LD0)** — 3-bit output.
+
+![RGB DATA register: bits 2:0 drive Red, Green, Blue](./images/reg_rgb_data.svg)
+
+![RGB TRI register: all three direction bits are fixed to 0 (output)](./images/reg_rgb_tri.svg)
 
 ### 3.2 DIP Connector GPIO (4 Groups × 7-bit)
 
@@ -260,34 +290,17 @@ All GPIO groups are memory-mapped ports with per-bit direction control: the TRI 
 
 **Description:** Each group is a 7-bit bidirectional port; every bit can be an input or an output independently.
 
-### 3.3 External Interrupt Inputs (`INT_0_3`)
+### 3.3 GPIO Register Map
 
-| Item | Value |
-|------|-------|
-| Base Address | `0x4007_0000` |
-| Width | 4-bit, input-only |
-| DIP Pins | Pin 8 (INTR_0), Pin 9 (INTR_1), Pin 41 (INTR_2), Pin 33 (INTR_3) |
-| Interrupt | INTC In5 |
-
-**Description:** Four external interrupt inputs are grouped into a single GPIO instance with interrupt generation enabled. A change on any of the four pins can raise INTC In5.
-
-### 3.4 GPIO Register Map
-
-All eight GPIO ports share the same register layout. Offsets are relative to
-the port base address listed in the tables above. Only the low WIDTH bits of
-each register are implemented (7 for groups A–D, 4 for `INT_0_3`, 3 for the
-RGB port, 2 for the LED port, 1 for the button port); unimplemented bits read
-as 0. Offsets `0x08`/`0x0C` (second-channel data and direction) are not
-implemented in this device, and the interrupt registers (`0x11C`–`0x128`) are
-implemented on the `INT_0_3` port only.
+Every general-purpose port has the same two registers. Offsets are relative to
+the port base address. Only the low WIDTH bits are implemented (7 for groups
+A–D, 3 for the RGB port, 2 for the LED port, 1 for the button port);
+unimplemented bits read as 0.
 
 | Offset | Name | Access | Reset | Description |
 |--------|------|--------|-------|-------------|
 | `0x000` | `DATA` | RW | `0x0` | Port data |
 | `0x004` | `TRI` | RW | all 1 | Per-pin direction (1 = input, 0 = output) |
-| `0x11C` | `GIER` | RW | `0x0` | Global interrupt enable (`INT_0_3` only) |
-| `0x120` | `ISR` | R/TOW | `0x0` | Interrupt status (`INT_0_3` only) |
-| `0x128` | `IER` | RW | `0x0` | Interrupt enable (`INT_0_3` only) |
 
 #### DATA — Port Data Register (Offset 0x000)
 
@@ -305,28 +318,7 @@ implemented on the `INT_0_3` port only.
 | Bits | Name | Access | Description |
 |------|------|--------|-------------|
 | 31:W | — | — | Reserved. Read as 0. |
-| W-1:0 | `TRI` | RW | Per-pin direction: 1 = input, 0 = output. All pins are inputs after reset; software must clear the relevant bits before driving a pin. On the fixed-direction ports (LEDs, RGB, button, `INT_0_3`) the direction is set in hardware and this register has no effect. |
-
-#### GIER — Global Interrupt Enable Register (Offset 0x11C)
-
-| Bits | Name | Access | Description |
-|------|------|--------|-------------|
-| 31 | `GIE` | RW | Master gate for the port's interrupt output. Write `0x8000_0000` to enable. |
-| 30:0 | — | — | Reserved. |
-
-#### ISR — Interrupt Status Register (Offset 0x120)
-
-| Bits | Name | Access | Description |
-|------|------|--------|-------------|
-| 31:1 | — | — | Reserved. |
-| 0 | `CH1` | R/TOW | Set by hardware when any input pin of the port changes state (either edge). Toggle-on-write: to clear, read the register and write the read value back. |
-
-#### IER — Interrupt Enable Register (Offset 0x128)
-
-| Bits | Name | Access | Description |
-|------|------|--------|-------------|
-| 31:1 | — | — | Reserved. |
-| 0 | `CH1` | RW | Enables the port interrupt. The enable is per port, not per pin: any of the four `INT_0_3` inputs raises the same interrupt, and the handler reads `DATA` to determine which line changed. |
+| W-1:0 | `TRI` | RW | Per-pin direction: 1 = input, 0 = output. All pins are inputs after reset; software must clear the relevant bits before driving a pin. On the fixed-direction ports (LEDs, RGB, button) the direction is set in hardware and this register has no effect. |
 
 **Driver support (`XGpio`).** The functions below cover the course use of the
 driver; the last column names the registers each one accesses.
@@ -338,19 +330,94 @@ driver; the last column names the registers each one accesses.
 | `XGpio_DiscreteRead(&inst, 1)` | Read pin states | `DATA` |
 | `XGpio_DiscreteWrite(&inst, 1, v)` | Write the whole port | `DATA` |
 | `XGpio_DiscreteSet/Clear(&inst, 1, m)` | Set or clear only masked bits | `DATA` (read-modify-write) |
-| `XGpio_InterruptEnable(&inst, 1)` | Enable the port interrupt | `IER` |
+
+> **Note:** `XGpio_DiscreteSet`/`Clear` are read-modify-write sequences, not
+> atomic: if an interrupt handler writes the same port, keep all writes to that
+> port in one context. `XGpio_Initialize` in this toolchain takes the port base
+> address (`XPAR_..._BASEADDR`); older examples that pass a device ID do not
+> compile here.
+
+> **Reference:** AMD AXI GPIO LogiCORE IP Product Guide ([PG144](https://docs.amd.com/r/en-US/pg144-axi-gpio)).
+
+---
+
+## External Interrupt Inputs (`INT_0_3`)
+
+`INT_0_3` is a dedicated interrupt port: it is the only GPIO instance built with
+interrupt hardware. Its four pins are input-only, and a change on any of them
+(either edge) sets the interrupt status and raises interrupt controller input 5.
+The four pins share one interrupt line, so the handler reads `DATA` to see which
+pin changed. The pins can also be polled through `DATA` without using
+interrupts. The Vitis driver is `XGpio`, the same driver as the general-purpose
+ports.
+
+| Item | Value |
+|------|-------|
+| Base Address | `0x4007_0000` |
+| Width | 4-bit, input-only |
+| DIP Pins | Pin 8 (INTR_0), Pin 9 (INTR_1), Pin 41 (INTR_2), Pin 33 (INTR_3) |
+| Interrupt | Interrupt controller input 5 |
+
+### Interrupt Register Map
+
+Offsets are relative to the base address. `DATA` reads the four pins; the three
+interrupt registers gate and report the shared interrupt.
+
+| Offset | Name | Access | Reset | Description |
+|--------|------|--------|-------|-------------|
+| `0x000` | `DATA` | RO | `0x0` | Pin levels (bits 3:0) |
+| `0x004` | `TRI` | RO | all 1 | Direction, fixed to input |
+| `0x11C` | `GIER` | RW | `0x0` | Global interrupt enable |
+| `0x120` | `ISR` | R/TOW | `0x0` | Interrupt status |
+| `0x128` | `IER` | RW | `0x0` | Interrupt enable |
+
+#### DATA — Pin Data Register (Offset 0x000)
+
+![INT_0_3 DATA layout: the four interrupt input pins occupy bits 3:0](./images/reg_exti_data.svg)
+
+| Bits | Name | Access | Description |
+|------|------|--------|-------------|
+| 31:4 | — | — | Reserved. |
+| 3:0 | `INT3`–`INT0` | RO | Live level of the four interrupt pins. The handler reads this to see which pin changed. |
+
+#### GIER — Global Interrupt Enable Register (Offset 0x11C)
+
+![INT_0_3 GIER layout: the global interrupt enable is bit 31](./images/reg_exti_gier.svg)
+
+| Bits | Name | Access | Description |
+|------|------|--------|-------------|
+| 31 | `GIE` | RW | Master gate for the port's interrupt output. Write `0x8000_0000` to enable. |
+| 30:0 | — | — | Reserved. |
+
+#### ISR and IER — Interrupt Status and Enable (Offsets 0x120 / 0x128)
+
+![INT_0_3 ISR/IER layout: the single channel interrupt bit is bit 0](./images/reg_exti_int.svg)
+
+| Register | Bit 0 — `CH1` |
+|----------|---------------|
+| `ISR` (status, `0x120`, R/TOW) | Set by hardware when any of the four pins changes. Toggle-on-write: to clear, read the register and write the read value back. |
+| `IER` (enable, `0x128`, RW) | Enables the port interrupt. Any of the four pins raises the same interrupt; the handler reads `DATA` to determine which line changed. |
+
+The port has a single interrupt channel (`CH1`, bit 0) shared by all four pins;
+`ISR` reports it and `IER` enables it. Bits 31:1 are reserved in both.
+
+**Driver support (`XGpio`).**
+
+| Function | Purpose | Registers touched |
+|----------|---------|-------------------|
+| `XGpio_Initialize(&inst, base)` | Bind the instance to the port | none |
+| `XGpio_DiscreteRead(&inst, 1)` | Read the four pin levels | `DATA` |
 | `XGpio_InterruptGlobalEnable(&inst)` | Open the interrupt gate | `GIER` |
+| `XGpio_InterruptEnable(&inst, 1)` | Enable the port interrupt | `IER` |
 | `XGpio_InterruptGetStatus(&inst)` | Read pending status | `ISR` |
 | `XGpio_InterruptClear(&inst, 1)` | Acknowledge the interrupt | `ISR` (toggle-safe) |
 
-> **Note:** Three behaviors are board-verified sources of bugs. `ISR` toggles
-> on write: writing a hard-coded 1 while the bit is clear sets a phantom
-> pending interrupt, so always write back exactly the value just read (or use
-> `XGpio_InterruptClear`). `XGpio_DiscreteSet`/`Clear` are read-modify-write
-> sequences, not atomic: if an interrupt handler writes the same port, keep
-> all writes to that port in one context. Finally, `XGpio_Initialize` in this
-> toolchain takes the port base address (`XPAR_..._BASEADDR`); older examples
-> that pass a device ID do not compile here.
+> **Note:** `ISR` toggles on write: writing a hard-coded 1 while the bit is
+> clear sets a phantom pending interrupt, so always write back exactly the value
+> just read (or use `XGpio_InterruptClear`). The interrupt reaches the processor
+> through the interrupt controller as input 5.
+
+> **Reference:** The external interrupt inputs are the AMD AXI GPIO core in interrupt mode; see its LogiCORE IP Product Guide ([PG144](https://docs.amd.com/r/en-US/pg144-axi-gpio)).
 
 ---
 
@@ -467,6 +534,8 @@ Xil_Out32(PWM + 0x10, 0x296);          /* TCSR1: same              */
 > timer interrupt, so interrupt-driven programs should disable and
 > acknowledge the timers during initialization before enabling their own
 > handlers.
+
+> **Reference:** AMD AXI Timer LogiCORE IP Product Guide ([PG079](https://docs.amd.com/r/en-US/pg079-axi-timer)).
 
 ---
 
@@ -587,6 +656,8 @@ VAUX12 (DIP pin 16).
 > step is required. `XSysMon_GetAdcData` returns the left-justified 16-bit
 > word; shift right by 4 for the 12-bit value.
 
+> **Reference:** AMD XADC Wizard LogiCORE IP Product Guide ([PG091](https://docs.amd.com/v/u/en-US/pg091-xadc-wiz)).
+
 ---
 
 ## 7. Serial Expansion Interfaces (I2C / SPI)
@@ -668,6 +739,8 @@ runs before a transfer. Offsets are from the instance base (`0x4070_0000`).
 > course template guards against a wedged bus by writing `0x0000000A` to `SOFTR`
 > to reset the controller, then confirming `SR.BB` (bit 2) is clear before
 > starting a transfer.
+
+> **Reference:** AMD AXI IIC Bus Interface LogiCORE IP Product Guide ([PG090](https://docs.amd.com/r/en-US/pg090-axi-iic)).
 
 ### 7.2 External SPI Master (`spi_0`)
 
@@ -784,6 +857,8 @@ while (!(Xil_In32(SPICLK + 0x004) & 1)) ;  /* wait for lock                   */
 > `SR.RX_EMPTY` level, never by the occupancy counters, which lag in both
 > directions.
 
+> **Reference:** AMD AXI Quad SPI LogiCORE IP Product Guide ([PG153](https://docs.amd.com/r/en-US/pg153-axi-quad-spi)).
+
 ---
 
 ## 8. Interrupt Controller (`microblaze_riscv_0_axi_intc`)
@@ -840,6 +915,8 @@ layout. Bits 31:8 are reserved.
 > `MER` and `IER` first — an interrupt left pending by the previous program is
 > taken as soon as the master enable is set, before the new handlers are
 > installed.
+
+> **Reference:** AMD AXI Interrupt Controller LogiCORE IP Product Guide ([PG099](https://docs.amd.com/v/u/en-US/pg099-axi-intc)).
 
 ---
 
