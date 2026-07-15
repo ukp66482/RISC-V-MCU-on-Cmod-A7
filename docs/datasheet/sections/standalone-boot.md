@@ -15,13 +15,7 @@ image itself is done in the Vitis Unified IDE.
 
 ## 1. How Standalone Boot Works
 
-```
-Power-on ──► FPGA configures itself from QSPI flash (<1 s)
-        ──► Bootloader (in Block RAM, part of the hardware image) starts
-        ──► Reads the application image (SREC) from flash @ 0x220000
-        ──► Copies it to the addresses the image names (SRAM)
-        ──► Jumps to the application's entry point
-```
+![Standalone boot sequence: the FPGA restores the bootloader, which copies the application from flash into SRAM and runs it](./images/boot_flow.svg)
 
 The flash holds two independent regions, read by two different readers:
 
