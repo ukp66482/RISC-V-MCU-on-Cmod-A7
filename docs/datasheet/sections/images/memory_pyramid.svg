@@ -18,39 +18,47 @@
 
   <!-- ============ pyramid ============ -->
   <polygon class="py" points="230,32 330,32 520,360 40,360"/>
-  <line class="div" x1="193" y1="95"  x2="367" y2="95"/>
-  <line class="div" x1="147" y1="175" x2="413" y2="175"/>
-  <line class="div" x1="95"  y1="265" x2="465" y2="265"/>
+  <line class="div" x1="198" y1="88"  x2="362" y2="88"/>
+  <line class="div" x1="162" y1="150" x2="398" y2="150"/>
+  <line class="div" x1="122" y1="218" x2="438" y2="218"/>
+  <line class="div" x1="81"  y1="290" x2="479" y2="290"/>
 
   <!-- ============ band labels ============ -->
-  <text class="tb" x="280" y="66"  text-anchor="middle">Registers</text>
+  <text class="tb" x="280" y="64"  text-anchor="middle">Registers</text>
 
-  <text class="tb" x="280" y="130" text-anchor="middle">Tightly-coupled memory</text>
-  <text class="t"  x="280" y="144" text-anchor="middle">128 KB</text>
+  <text class="tb" x="280" y="117" text-anchor="middle">I-Cache + D-Cache</text>
+  <text class="t"  x="280" y="131" text-anchor="middle">16 KB + 16 KB</text>
 
-  <text class="tb" x="280" y="214" text-anchor="middle">External SRAM</text>
-  <text class="t"  x="280" y="228" text-anchor="middle">512 KB &#183; cached</text>
+  <text class="tb" x="280" y="182" text-anchor="middle">Tightly-coupled memory</text>
+  <text class="t"  x="280" y="196" text-anchor="middle">128 KB</text>
 
-  <text class="tb" x="280" y="308" text-anchor="middle">QSPI flash</text>
-  <text class="t"  x="280" y="322" text-anchor="middle">4 MB</text>
+  <text class="tb" x="280" y="250" text-anchor="middle">External SRAM</text>
+  <text class="t"  x="280" y="264" text-anchor="middle">512 KB &#183; cached</text>
+
+  <text class="tb" x="280" y="322" text-anchor="middle">QSPI flash</text>
+  <text class="t"  x="280" y="336" text-anchor="middle">4 MB</text>
 
   <!-- ============ latency annotations (right) ============ -->
-  <line class="lead" x1="348" y1="63"  x2="536" y2="63"/>
-  <text class="ti" x="540" y="66">in the core</text>
+  <line class="lead" x1="348" y1="60"  x2="536" y2="60"/>
+  <text class="ti" x="540" y="63">in the core</text>
 
-  <line class="lead" x1="390" y1="135" x2="536" y2="135"/>
-  <text class="ti" x="540" y="138">1 cycle</text>
+  <line class="lead" x1="383" y1="122" x2="536" y2="122"/>
+  <text class="ti" x="540" y="125">1 cycle on a hit</text>
 
-  <line class="lead" x1="440" y1="221" x2="536" y2="221"/>
-  <text class="ti" x="540" y="218">1-cycle hit</text>
-  <text class="ti" x="540" y="228">&#8776;151-cycle miss</text>
+  <line class="lead" x1="420" y1="187" x2="536" y2="187"/>
+  <text class="ti" x="540" y="190">1 cycle</text>
 
-  <line class="lead" x1="494" y1="315" x2="536" y2="315"/>
-  <text class="ti" x="540" y="312">storage</text>
-  <text class="ti" x="540" y="322">copied to SRAM at boot</text>
+  <line class="lead" x1="460" y1="255" x2="536" y2="255"/>
+  <text class="ti" x="540" y="252">&#8776;151-cycle line fill on a miss</text>
+  <text class="ti" x="540" y="262">&#8776;16-cycle store</text>
 
-  <!-- ============ speed axis (left, rotated to clear the base) ============ -->
-  <line class="ax" x1="24" y1="356" x2="24" y2="44"/>
-  <text class="ti" x="14" y="96"  transform="rotate(-90 14 96)"  text-anchor="middle">faster</text>
-  <text class="ti" x="14" y="312" transform="rotate(-90 14 312)" text-anchor="middle">slower</text>
+  <line class="lead" x1="502" y1="328" x2="536" y2="328"/>
+  <text class="ti" x="540" y="325">storage</text>
+  <text class="ti" x="540" y="335">copied to SRAM at boot</text>
+
+  <!-- ============ speed axis (left; explicit arrowhead, horizontal labels) ============ -->
+  <line class="lead" x1="24" y1="356" x2="24" y2="54"/>
+  <polygon points="24,44 20,55 28,55" fill="black"/>
+  <text class="ti" x="24" y="38"  text-anchor="middle">faster</text>
+  <text class="ti" x="24" y="372" text-anchor="middle">slower</text>
 </svg>

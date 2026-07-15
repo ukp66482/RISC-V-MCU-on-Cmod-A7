@@ -78,6 +78,7 @@ RECIPE = [
     ("sec", "ip", "SRAM / Cellular RAM (`axi_emc_0`)", 2, "External SRAM"),
     ("sec", "ip", "QSPI Flash (`axi_quad_spi_0`)", 2, "QSPI Flash"),
     ("sec", "mem", "Caches", 2, None),
+    ("typst", "#pagebreak(weak: true)"),
     ("sec", "mem", "Measured Access Latencies", 2, None),
     ("sec", "mem", "Memory Placement Guidance", 2, None),
 
