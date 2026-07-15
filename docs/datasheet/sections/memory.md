@@ -14,12 +14,12 @@ tightly-coupled memory.
 
 ![Memory Hierarchy](./images/memory_hierarchy.svg)
 
-| Level | Memory | Size | Role |
-|---|---|---|---|
-| 1 | ITCM + DTCM (tightly-coupled memory) | 32 KB + 64 KB | Interrupt handlers, stack, frequently accessed data |
-| 2 | I-Cache + D-Cache | 16 KB + 16 KB | Transparent acceleration of SRAM |
-| 3 | External SRAM | 512 KB | Application code, data, heap |
-| — | QSPI flash | 4 MB | Non-volatile: application + hardware image |
+| Memory | Size | Role |
+|---|---|---|
+| Tightly-coupled memory | 128 KB | Interrupt handlers, stack, frequently accessed data |
+| I-Cache + D-Cache | 16 KB + 16 KB | Transparent acceleration of SRAM |
+| External SRAM | 512 KB | Application code, data, heap |
+| QSPI flash | 4 MB | Non-volatile: application + hardware image |
 
 ## 2. Memory Map
 

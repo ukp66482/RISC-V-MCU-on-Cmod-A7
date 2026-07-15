@@ -34,7 +34,7 @@
   <!-- ============ CPU ============ -->
   <rect class="box" x="250" y="95" width="280" height="115"/>
   <text class="tb" x="390" y="112" text-anchor="middle" font-size="12">MicroBlaze-V CPU</text>
-  <text class="t"  x="390" y="127" text-anchor="middle">RV32IM &#183; bit-manip &#183; 100 MHz</text>
+  <text class="t"  x="390" y="127" text-anchor="middle">RV32IMB &#183; 100 MHz</text>
   <rect class="box" x="262" y="140" width="125" height="28"/>
   <text class="t" x="324" y="157" text-anchor="middle">16 KB I-Cache</text>
   <rect class="box" x="395" y="140" width="125" height="28"/>
