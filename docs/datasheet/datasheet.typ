@@ -29,7 +29,7 @@
     grid(
       columns: (1fr, 1fr, 1fr),
       align: (left, center, right),
-      text(size: 7.5pt)[© 2026 NCKU MPPA Course],
+      text(size: 7.5pt)[© 2027 NCKU MPPA Course],
       text(size: 8pt, style: "italic", fill: luma(110))[Preliminary],
       text(size: 7.5pt)[DS-CMOD7-0001 · page #counter(page).display() of #counter(page).final().first()],
     )
@@ -76,7 +76,7 @@
   [*Toolchain*], [#meta-toolchain],
 )
 #v(0.6cm)
-#text(size: 9pt, fill: luma(90))[Document DS-CMOD7-0001 · Revision A · July 2026]
+#text(size: 9pt, fill: luma(90))[Document DS-CMOD7-0001 · Revision A · 2027]
 #v(1.2cm)
 #outline(title: [Table of Contents], depth: 3)
 

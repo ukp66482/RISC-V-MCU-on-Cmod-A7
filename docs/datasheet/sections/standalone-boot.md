@@ -281,18 +281,8 @@ the FPGA configures itself from the flash, the bootloader loads the
 application, and the application runs, with no debugger and no IDE
 involved.
 
-Open a serial terminal at 115200 8N1 (the Vitis **Serial Monitor**,
-GTKTerm, or pyserial's miniterm; the board enumerates as two ports and
-the UART is usually the higher-numbered one). The course template prints
-its memory tour, followed by the running status output:
-
-```
-RISC-V MCU on Cmod A7 - memory tour
-  main()       @ 0x600009EC   (SRAM,  cached)
-  blink_step() @ 0x00008000   (ITCM,  1-cycle)
-  blink_count  @ 0x00010000   (DTCM,  1-cycle)
-  stack        @ 0x0001FFC0   (DTCM,  grows down)
-```
+Open a serial terminal at 115200. The application output appears as soon
+as the board finishes booting.
 
 > **Note:** The reset button (BTN0) restarts the CPU into the bootloader,
 > which re-copies the application from flash, so a reset behaves like a

@@ -617,7 +617,6 @@ def main():
             ("created in section 2", "created in @sec-platform"),
             ("(such as section 5)", "(such as @sec-uart)"),
             ("redo section 5,", "redo @sec-uart,"),
-            ("see the Troubleshooting section.", "see @sec-jtag-ts."),
             ("Peripheral registers and base addresses are documented in "
              "the IP peripheral reference.",
              "Peripheral registers and base addresses are listed in "

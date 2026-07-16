@@ -11,8 +11,7 @@ into RAM and provides full debug control. Nothing is written to flash.
 - Vitis Unified IDE 2025.2 installed
 - Cmod A7-35T board connected via its micro-USB cable (the cable carries
   power, UART, and JTAG)
-- A serial terminal program (GTKTerm, PuTTY, or pyserial's miniterm) for the
-  board's console output
+- A serial terminal program for the board's console output
 
 ---
 
@@ -256,9 +255,7 @@ the linker script placed it.
 
 ### 7.2 Open a Serial Terminal, Then Continue
 
-Open a serial terminal before resuming execution. The board enumerates as
-two serial ports; the UART is usually the higher-numbered port. Set the
-terminal to 115200 8N1.
+Open a serial terminal at 115200 before resuming execution.
 
 ![GTKTerm on the Board UART](images/jtag32.png)
 
@@ -267,20 +264,6 @@ followed by a status line about once a second, and the on-board RGB LED
 cycles through its colors.
 
 ![Memory Tour and Status Output](images/jtag33.png)
-
-The memory tour output confirms that the memory layout is correct:
-
-```
-RISC-V MCU on Cmod A7 - memory tour
-  main()       @ 0x600009EC   (SRAM,  cached)
-  blink_step() @ 0x00008000   (ITCM,  1-cycle)
-  blink_count  @ 0x00010000   (DTCM,  1-cycle)
-  stack        @ 0x0001FFC0   (DTCM,  grows down)
-```
-
-Each line matches the memory map in the datasheet: code in SRAM, fast code in
-ITCM, fast data and the stack in DTCM. If no output appears on the terminal, see the
-Troubleshooting section.
 
 ### 7.3 Breakpoints and Stepping
 
