@@ -150,7 +150,7 @@
   <rect class="box" x="712" y="394" width="146" height="52"/>
   <text class="tb" x="785" y="410" text-anchor="middle">QSPI NOR Flash</text>
   <text class="t"  x="785" y="424" text-anchor="middle">4 MB</text>
-  <text class="ts" x="785" y="437" text-anchor="middle">bitstream + application</text>
+  <text class="ts" x="785" y="437" text-anchor="middle">hardware image + application</text>
 
   <!-- ============ UART-USB route ============ -->
   <polyline class="dash" points="303,426 303,404 690,404 690,160 740,160 740,148"/>

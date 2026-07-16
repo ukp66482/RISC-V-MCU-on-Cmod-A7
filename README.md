@@ -43,9 +43,9 @@ JTAG Debug Mode chapter of the
 To retain a program on the board, deploy it into the QSPI flash. The program
 then starts automatically at every power-on. The bootloader is AMD/Xilinx's
 standard SREC bootloader, embedded in the hardware image. The complete
-walkthrough is the Standalone Boot chapter of the datasheet
-([docs/datasheet/sections/standalone-boot.md](docs/datasheet/sections/standalone-boot.md)),
-including the one-time step that prepares a new board.
+walkthrough, including the one-time step that prepares a new board, is the
+Standalone Boot chapter of the
+[datasheet](docs/datasheet/Cmod_A7_MCU_Datasheet.pdf).
 
 The same ELF file runs in both modes.
 
