@@ -90,14 +90,23 @@ RECIPE = [
               "The QSPI flash controller is described with the memory "
               "system in @sec-flash."),
     ("sec", "ip", "Register Access Conventions", 2, None),
+    # every peripheral starts on a fresh page (user's call, 2026-07-16)
+    ("typst", "#pagebreak(weak: true)"),
     ("sec", "ip", "GPIO (General Purpose I/O)", 2, "GPIO"),
+    ("typst", "#pagebreak(weak: true)"),
     ("sec", "ip", "External Interrupt Inputs (`INT_0_3`)", 2, "External Interrupt Inputs"),
+    ("typst", "#pagebreak(weak: true)"),
     ("sec", "ip", "Timers & PWM", 2, "Timers and PWM"),
+    ("typst", "#pagebreak(weak: true)"),
     ("sec", "ip", "UART Communication", 2, "UART"),
+    ("typst", "#pagebreak(weak: true)"),
     ("sec", "ip", "I2C Controller (`i2c_0`)", 2, "I2C Controller"),
+    ("typst", "#pagebreak(weak: true)"),
     ("sec", "ip", "External SPI Master (`spi_0`)", 2, "SPI Master"),
+    ("typst", "#pagebreak(weak: true)"),
     ("sec", "ip", "XADC Wizard (`xadc_wiz_0`)", 2, "Analog-to-Digital Converter (XADC)"),
     ("sec", "pin", "Analog Input Circuit", 3, None),
+    ("typst", "#pagebreak(weak: true)"),
     ("sec", "ip", "Interrupt Controller (`microblaze_riscv_0_axi_intc`)", 2, "Interrupt Controller"),
 
     ("h1", "JTAG Debug Mode"),

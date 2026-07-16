@@ -217,23 +217,11 @@ if (Xil_In32(UART + 0x1014) & 0x01)          /* DR (LSR bit 0): byte ready */
     c = Xil_In32(UART + 0x1000);             /* RBR: the read pops the FIFO */
 ```
 
-**Driver support (`XUartNs550`).** The course examples use the low-level
-helper macros, which wrap exactly these registers.
-
-| Function | Purpose | Registers touched |
-|----------|---------|-------------------|
-| `XUartNs550_SetBaud(base, 100000000, 115200)` | Program the divisor for the given clock | `LCR` (`DLAB`), `DLL`, `DLM` |
-| `XUartNs550_SetLineControlReg(base, 0x03)` | Set 8N1 framing | `LCR` |
-| `XUartNs550_SendByte(base, c)` | Send one byte (waits for `THRE`) | `LSR`, `THR` |
-| `XUartNs550_RecvByte(base)` | Read one byte (waits for `DR`) | `LSR`, `RBR` |
-| `XUartNs550_IsReceiveData(base)` | Test whether a byte is waiting | `LSR` |
-| `XUartNs550_Send`/`_Recv(&inst, buf, n)` | Buffered transfer through the high-level driver | `LSR`, `THR` / `RBR` |
-
 > **Note:** `DLAB` must be returned to 0 after the divisor is loaded, or
 > accesses at `0x1000` and `0x1004` continue to address the divisor latch
 > instead of the data and interrupt-enable registers. The divisor value 54
-> applies at the 100 MHz system clock; `XUartNs550_SetBaud` recomputes it from
-> the clock frequency passed to it.
+> applies at the 100 MHz system clock; a different clock changes it
+> (divisor = clock ÷ (16 × baud)).
 
 > **Reference:** AMD AXI UART 16550 LogiCORE IP Product Guide ([PG143](https://docs.amd.com/r/en-US/pg143-axi-uart16550)).
 
@@ -243,43 +231,12 @@ helper macros, which wrap exactly these registers.
 
 The general-purpose GPIO ports carry polled digital I/O. Each port is
 memory-mapped with per-pin direction control: the `TRI` register sets each
-pin's direction and the `DATA` register reads or writes the pins. The Vitis
-driver is `XGpio`. These ports have no interrupt hardware and cannot raise a
-processor interrupt; to watch a signal by interrupt, use the External Interrupt
-Inputs described in the next section.
+pin's direction and the `DATA` register reads or writes the pins. These ports
+have no interrupt hardware and cannot raise a processor interrupt; to watch a
+signal by interrupt, use the External Interrupt Inputs described in the next
+section.
 
-### 3.1 On-Board GPIO
-
-| Instance | Base Address | Width | Direction | Connection | Description |
-|----------|-------------|-------|-----------|------------|-------------|
-| `board_led_2bits` | `0x4000_0000` | 2 | Output | LD1, LD2 | On-board LEDs × 2 |
-| `board_button` | `0x4001_0000` | 1 | Input | BTN1 | On-board user button |
-| `board_rgb` | `0x4002_0000` | 3 | Output | LD0 | On-board RGB LED (bit 0 = Blue, bit 1 = Green, bit 2 = Red) |
-
-Each on-board port has a fixed direction: the LED and RGB ports are outputs and
-the button is an input, so the `TRI` register is hardwired (0 = output,
-1 = input) and software cannot change it. The `DATA` and `TRI` layout of each
-port follows.
-
-**On-board LEDs (`board_led_2bits`)** — 2-bit output.
-
-![LED DATA register: bit 0 drives LD1, bit 1 drives LD2](./images/reg_led_data.svg)
-
-![LED TRI register: both direction bits are fixed to 0 (output)](./images/reg_led_tri.svg)
-
-**User button (`board_button`)** — 1-bit input.
-
-![Button DATA register: bit 0 reads BTN1](./images/reg_btn_data.svg)
-
-![Button TRI register: the direction bit is fixed to 1 (input)](./images/reg_btn_tri.svg)
-
-**RGB LED (`board_rgb`, LD0)** — 3-bit output.
-
-![RGB DATA register: bits 2:0 drive Red, Green, Blue](./images/reg_rgb_data.svg)
-
-![RGB TRI register: all three direction bits are fixed to 0 (output)](./images/reg_rgb_tri.svg)
-
-### 3.2 DIP Connector GPIO (4 Groups × 7-bit)
+### 3.1 DIP Connector GPIO (4 Groups × 7-bit)
 
 | Instance | Base Address | Width | DIP Pins | Description |
 |----------|-------------|-------|----------|-------------|
@@ -290,12 +247,11 @@ port follows.
 
 **Description:** Each group is a 7-bit bidirectional port; every bit can be an input or an output independently.
 
-### 3.3 GPIO Register Map
+### 3.2 GPIO Register Map
 
 Every general-purpose port has the same two registers. Offsets are relative to
 the port base address. Only the low WIDTH bits are implemented (7 for groups
-A–D, 3 for the RGB port, 2 for the LED port, 1 for the button port);
-unimplemented bits read as 0.
+A–D; the on-board ports below are narrower); unimplemented bits read as 0.
 
 | Offset | Name | Access | Reset | Description |
 |--------|------|--------|-------|-------------|
@@ -320,22 +276,41 @@ unimplemented bits read as 0.
 | 31:W | — | — | Reserved. Read as 0. |
 | W-1:0 | `TRI` | RW | Per-pin direction: 1 = input, 0 = output. All pins are inputs after reset; software must clear the relevant bits before driving a pin. On the fixed-direction ports (LEDs, RGB, button) the direction is set in hardware and this register has no effect. |
 
-**Driver support (`XGpio`).** The functions below cover the course use of the
-driver; the last column names the registers each one accesses.
+> **Note:** Setting or clearing individual pins is a read-modify-write of
+> `DATA` (read the port, change the bits, write it back); it is not atomic, so
+> if an interrupt handler also writes the same port, keep all writes to that
+> port in one context.
 
-| Function | Purpose | Registers touched |
-|----------|---------|-------------------|
-| `XGpio_Initialize(&inst, base)` | Bind the instance to a port | none |
-| `XGpio_SetDataDirection(&inst, 1, m)` | Set pin directions | `TRI` |
-| `XGpio_DiscreteRead(&inst, 1)` | Read pin states | `DATA` |
-| `XGpio_DiscreteWrite(&inst, 1, v)` | Write the whole port | `DATA` |
-| `XGpio_DiscreteSet/Clear(&inst, 1, m)` | Set or clear only masked bits | `DATA` (read-modify-write) |
+### 3.3 On-Board GPIO
 
-> **Note:** `XGpio_DiscreteSet`/`Clear` are read-modify-write sequences, not
-> atomic: if an interrupt handler writes the same port, keep all writes to that
-> port in one context. `XGpio_Initialize` in this toolchain takes the port base
-> address (`XPAR_..._BASEADDR`); older examples that pass a device ID do not
-> compile here.
+| Instance | Base Address | Width | Direction | Connection | Description |
+|----------|-------------|-------|-----------|------------|-------------|
+| `board_led_2bits` | `0x4000_0000` | 2 | Output | LD1, LD2 | On-board LEDs × 2 |
+| `board_button` | `0x4001_0000` | 1 | Input | BTN1 | On-board user button |
+| `board_rgb` | `0x4002_0000` | 3 | Output | LD0 | On-board RGB LED (bit 0 = Blue, bit 1 = Green, bit 2 = Red) |
+
+The on-board ports use the same two registers, but each has a fixed direction:
+the LED and RGB ports are outputs and the button is an input, so the `TRI`
+register is hardwired (0 = output, 1 = input) and software cannot change it.
+The `DATA` and `TRI` layout of each port follows.
+
+**On-board LEDs (`board_led_2bits`)** — 2-bit output, base `0x4000_0000`.
+
+![LED DATA register (offset 0x000): bit 0 drives LD1, bit 1 drives LD2](./images/reg_led_data.svg)
+
+![LED TRI register (offset 0x004): both direction bits are fixed to 0 (output)](./images/reg_led_tri.svg)
+
+**User button (`board_button`)** — 1-bit input, base `0x4001_0000`.
+
+![Button DATA register (offset 0x000): bit 0 reads BTN1](./images/reg_btn_data.svg)
+
+![Button TRI register (offset 0x004): the direction bit is fixed to 1 (input)](./images/reg_btn_tri.svg)
+
+**RGB LED (`board_rgb`, LD0)** — 3-bit output, base `0x4002_0000`.
+
+![RGB DATA register (offset 0x000): bits 2:0 drive Red, Green, Blue](./images/reg_rgb_data.svg)
+
+![RGB TRI register (offset 0x004): all three direction bits are fixed to 0 (output)](./images/reg_rgb_tri.svg)
 
 > **Reference:** AMD AXI GPIO LogiCORE IP Product Guide ([PG144](https://docs.amd.com/r/en-US/pg144-axi-gpio)).
 
@@ -348,8 +323,7 @@ interrupt hardware. Its four pins are input-only, and a change on any of them
 (either edge) sets the interrupt status and raises interrupt controller input 5.
 The four pins share one interrupt line, so the handler reads `DATA` to see which
 pin changed. The pins can also be polled through `DATA` without using
-interrupts. The Vitis driver is `XGpio`, the same driver as the general-purpose
-ports.
+interrupts.
 
 | Item | Value |
 |------|-------|
@@ -401,21 +375,10 @@ interrupt registers gate and report the shared interrupt.
 The port has a single interrupt channel (`CH1`, bit 0) shared by all four pins;
 `ISR` reports it and `IER` enables it. Bits 31:1 are reserved in both.
 
-**Driver support (`XGpio`).**
-
-| Function | Purpose | Registers touched |
-|----------|---------|-------------------|
-| `XGpio_Initialize(&inst, base)` | Bind the instance to the port | none |
-| `XGpio_DiscreteRead(&inst, 1)` | Read the four pin levels | `DATA` |
-| `XGpio_InterruptGlobalEnable(&inst)` | Open the interrupt gate | `GIER` |
-| `XGpio_InterruptEnable(&inst, 1)` | Enable the port interrupt | `IER` |
-| `XGpio_InterruptGetStatus(&inst)` | Read pending status | `ISR` |
-| `XGpio_InterruptClear(&inst, 1)` | Acknowledge the interrupt | `ISR` (toggle-safe) |
-
 > **Note:** `ISR` toggles on write: writing a hard-coded 1 while the bit is
 > clear sets a phantom pending interrupt, so always write back exactly the value
-> just read (or use `XGpio_InterruptClear`). The interrupt reaches the processor
-> through the interrupt controller as input 5.
+> just read. The interrupt reaches the processor through the interrupt
+> controller as input 5.
 
 > **Reference:** The external interrupt inputs are the AMD AXI GPIO core in interrupt mode; see its LogiCORE IP Product Guide ([PG144](https://docs.amd.com/r/en-US/pg144-axi-gpio)).
 
@@ -423,7 +386,7 @@ The port has a single interrupt channel (`CH1`, bit 0) shared by all four pins;
 
 ## 4. Timers & PWM
 
-The device provides six 32-bit timer instances (Vitis driver: `XTmrCtr`): three serve as general-purpose timers with interrupts, and three have their outputs routed to pins as PWM channels.
+The device provides six 32-bit timer instances: three serve as general-purpose timers with interrupts, and three have their outputs routed to pins as PWM channels.
 
 ### 4.1 System Timers
 
@@ -515,17 +478,6 @@ Xil_Out32(PWM + 0x00, 0x296);          /* TCSR0: PWMA|ENT|ARHT|GENT|UDT */
 Xil_Out32(PWM + 0x10, 0x296);          /* TCSR1: same              */
 ```
 
-**Driver support (`XTmrCtr`).**
-
-| Function | Purpose | Registers touched |
-|----------|---------|-------------------|
-| `XTmrCtr_Initialize(&inst, base)` | Bind the instance and stop both counters | `TCSR0/1` |
-| `XTmrCtr_SetOptions(&inst, n, opt)` | Set mode bits (down-count, auto-reload, interrupt) | `TCSR` |
-| `XTmrCtr_SetResetValue(&inst, n, v)` | Set the load value | `TLR` |
-| `XTmrCtr_Start(&inst, n)` | Load and start counter *n* | `TCSR` (`LOAD`, then `ENT`) |
-| `XTmrCtr_Stop(&inst, n)` | Stop counter *n* | `TCSR` |
-| `XTmrCtr_GetValue(&inst, n)` | Read the live count | `TCR` |
-
 > **Note:** The PWM instances are ordinary timer blocks whose outputs are
 > routed to pins — there are no separate PWM registers. In interrupt use,
 > the handler must clear `TINT` by writing `TCSR` back with bit 8 set;
@@ -599,8 +551,7 @@ Flash contents are not memory-mapped: there is no XIP window, and code cannot ex
 
 #### XADC Register Map
 
-Routine measurements use the `XSysMon` driver. The subset below is what
-firmware reads directly: the status register and the per-channel result
+The registers below are the status register and the per-channel result
 registers. Offsets are from the instance base (`0x4060_0000`).
 
 | Offset | Name | Access | Description |
@@ -638,23 +589,10 @@ low half-word; bits 3:0 read 0. Shift the register right by 4 to obtain the
 ≈ 0.301), so the voltage at the DIP pin is approximately
 `(sample ÷ 4096) × 3.32 V` (full scale ≈ 3.3 V).
 
-**Driver support (`XSysMon`).**
-
-| Function | Purpose | Registers touched |
-|----------|---------|-------------------|
-| `XSysMon_CfgInitialize(&inst, cfg, base)` | Bind the instance | none |
-| `XSysMon_GetAdcData(&inst, ch)` | Read a channel's latest result | result registers |
-| `XSysMon_GetStatus(&inst)` | Read the status register | `SR` |
-| `XSysMon_GetMinMaxMeasurement(&inst, ch)` | Read the recorded min/max | result registers |
-
-The channel argument selects the source: `XSM_CH_TEMP` for die temperature,
-`XSM_CH_AUX_MIN + 4` for VAUX4 (DIP pin 15), and `XSM_CH_AUX_MIN + 12` for
-VAUX12 (DIP pin 16).
-
 > **Note:** The sequencer scans the five enabled channels continuously, so each
 > result register always holds the most recent sample and no start-conversion
-> step is required. `XSysMon_GetAdcData` returns the left-justified 16-bit
-> word; shift right by 4 for the 12-bit value.
+> step is required. A result read returns the left-justified 16-bit word; shift
+> right by 4 for the 12-bit value.
 
 > **Reference:** AMD XADC Wizard LogiCORE IP Product Guide ([PG091](https://docs.amd.com/v/u/en-US/pg091-xadc-wiz)).
 
@@ -673,13 +611,12 @@ VAUX12 (DIP pin 16).
 | Pull-ups | Weak FPGA internal pull-ups enabled; external 4.7 kΩ to 3.3 V recommended for real devices |
 | Interrupt | INTC In6 |
 
-**Description:** An I2C master controls external I2C devices (sensors, EEPROMs, OLED displays). The bus uses open-drain signaling: any device may only pull the line low, and the pull-up resistor returns it high. Devices are addressed by their 7-bit I2C address. Use the Vitis `XIic` driver.
+**Description:** An I2C master controls external I2C devices (sensors, EEPROMs, OLED displays). The bus uses open-drain signaling: any device may only pull the line low, and the pull-up resistor returns it high. Devices are addressed by their 7-bit I2C address.
 
 #### I2C Register Map
 
-Routine transfers use the `XIic` driver. The subset below is the part firmware
-touches directly: a software reset and the bus-busy guard the course template
-runs before a transfer. Offsets are from the instance base (`0x4070_0000`).
+The registers below cover control, status, the FIFOs, the target address, and
+the software reset. Offsets are from the instance base (`0x4070_0000`).
 
 | Offset | Name | Access | Description |
 |--------|------|--------|-------------|
@@ -724,21 +661,9 @@ runs before a transfer. Offsets are from the instance base (`0x4070_0000`).
 | 1 | `AAS` | RO | Addressed as slave. |
 | 0 | `GC` | RO | General call received. |
 
-**Driver support (`XIic`).**
-
-| Function | Purpose | Registers touched |
-|----------|---------|-------------------|
-| `XIic_Initialize(&inst, base)` | Bind the instance | none |
-| `XIic_SetAddress(&inst, dir, addr)` | Set the target 7-bit address | `ADR` |
-| `XIic_Start(&inst)` / `XIic_Stop(&inst)` | Enable / disable the controller | `CR` |
-| `XIic_MasterSend(&inst, buf, n)` | Write `n` bytes to a slave | `CR`, `TX_FIFO`, `SR` |
-| `XIic_MasterRecv(&inst, buf, n)` | Read `n` bytes from a slave | `CR`, `RX_FIFO`, `SR` |
-
-> **Note:** `XIic_MasterSend` and `XIic_MasterRecv` are polled and unbounded: a
-> slave that never acknowledges (unpowered or mis-wired) stalls the call. The
-> course template guards against a wedged bus by writing `0x0000000A` to `SOFTR`
-> to reset the controller, then confirming `SR.BB` (bit 2) is clear before
-> starting a transfer.
+> **Note:** A slave that never acknowledges (unpowered or mis-wired) can wedge
+> the bus. Before starting a transfer, reset the controller by writing
+> `0x0000000A` to `SOFTR` and confirm `SR.BB` (bit 2) is clear.
 
 > **Reference:** AMD AXI IIC Bus Interface LogiCORE IP Product Guide ([PG090](https://docs.amd.com/r/en-US/pg090-axi-iic)).
 
@@ -748,17 +673,16 @@ runs before a transfer. Offsets are from the instance base (`0x4070_0000`).
 |------|-------|
 | Base Address | `0x4080_0000` |
 | SCLK | Software-programmable, ≈1.6 – 25 MHz (6.25 MHz at reset) |
-| Clock Control | `0x4090_0000` — runtime clock setting; see `showcase/src/spi0.c` for the `spi0_set_clock()` helper |
+| Clock Control | `0x4090_0000` — runtime serial-clock setting (see the Serial Clock Control Unit below) |
 | Slave Selects | 2 — two devices can share the bus |
 | Pins | DIP 35 SCLK (V3) · 36 MOSI (W5) · 37 MISO (V4) · 38 SS0 (U4) · 39 SS1 (V5) |
 | Interrupt | INTC In7 |
 
-**Description:** An SPI master controls external devices (displays, ADCs, flash modules). The interface uses full-duplex push-pull signaling and requires no pull-up resistors; the active device is selected by driving its SS line low. Use the Vitis `XSpi` driver. The serial clock is set at runtime through the clock-control block: select a lower rate for breadboard wiring or long cables, and a higher rate for short-wired display modules. A single call to `spi0_set_clock(hz)` takes effect immediately.
+**Description:** An SPI master controls external devices (displays, ADCs, flash modules). The interface uses full-duplex push-pull signaling and requires no pull-up resistors; the active device is selected by driving its SS line low. The serial clock is set at runtime through the clock-control block: select a lower rate for breadboard wiring or long cables, and a higher rate for short-wired display modules.
 
 > **Note:** This is a second, independent SPI controller. Do not confuse it with
-> `axi_quad_spi_0` (`0x4050_0000`), which is dedicated to the on-board QSPI boot flash.
-> Firmware should select controllers by instance macro (`XPAR_SPI_0_BASEADDR` vs
-> `XPAR_AXI_QUAD_SPI_0_BASEADDR`), never by generic `XPAR_XSPI_n_*` numbering.
+> the QSPI flash controller at `0x4050_0000`, which is dedicated to the on-board
+> boot flash; the two are addressed by their distinct base addresses.
 
 #### SPI Register Map
 
@@ -809,10 +733,9 @@ subset used for byte-level transfers.
 | 1 | `RX_FULL` | RO | Receive FIFO full. |
 | 0 | `RX_EMPTY` | RO | Receive FIFO empty. Poll this to detect a received byte. |
 
-**Byte transfer** (board-verified; the reference implementation is
-`showcase/src/spi0.c`). The control register is written in two steps — a setup
-value that resets the FIFOs, then a run value that does not — and the slave is
-framed by `SSR`:
+**Byte transfer** (board-verified). The control register is written in two
+steps — a setup value that resets the FIFOs, then a run value that does not —
+and the slave is framed by `SSR`:
 
 ```c
 Xil_Out32(SPI + 0x40, 0x0A);         /* SRR: reset the core                    */
@@ -848,9 +771,8 @@ Xil_Out32(SPICLK + 0x25C, 3);              /* apply                           */
 while (!(Xil_In32(SPICLK + 0x004) & 1)) ;  /* wait for lock                   */
 ```
 
-> **Note:** This SPI core clocks the bus asynchronously to the CPU, which makes
-> the stock `XSpi_Transfer` driver unreliable on this device; the course uses
-> register-level transfers. Three rules keep them reliable: after a software
+> **Note:** This SPI core clocks the bus asynchronously to the CPU. Reliable
+> register-level transfers follow three rules: after a software
 > reset or a FIFO-reset write, wait about a dozen serial-clock periods before
 > the next register write; keep no more than 15 bytes in flight, because the
 > FIFO holds 16 and `TX_FULL` lags; and detect received bytes by the
@@ -899,16 +821,6 @@ layout. Bits 31:8 are reserved.
 | 31:2 | — | — | Reserved. |
 | 1 | `HIE` | RW | Hardware interrupt enable (write-once). |
 | 0 | `ME` | RW | Master enable: gates all interrupt output to the processor. |
-
-**Driver support (`XIntc`).**
-
-| Function | Purpose | Registers touched |
-|----------|---------|-------------------|
-| `XIntc_Initialize(&inst, base)` | Bind the controller | none |
-| `XIntc_Connect(&inst, id, handler, ref)` | Install a handler for input `id` | none |
-| `XIntc_Enable(&inst, id)` | Enable one source | `IER` |
-| `XIntc_Start(&inst, mode)` | Start the controller | `MER` |
-| `XIntc_Acknowledge(&inst, id)` | Acknowledge a handled interrupt | `IAR` |
 
 > **Note:** Enabling an interrupt takes two gates: the per-source bit in `IER`
 > and the master enable `MER.ME`. When loading a new program over JTAG, clear
