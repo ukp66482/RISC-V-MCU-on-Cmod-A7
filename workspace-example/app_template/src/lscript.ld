@@ -86,6 +86,13 @@ __itcm_lma = LOADADDR(.itcm.text);   /* where the copy lives in SRAM */
    KEEP (*(.fini))
 } > sram
 
+/* The toolchain emits a build-ID note into every ELF. Left unplaced, the
+ * linker puts it at 0x0, inside the bootloader's BRAM, and the flash
+ * bootloader would overwrite its own code with it. Keep it in SRAM. */
+.note.gnu.build-id : {
+   KEEP (*(.note.gnu.build-id))
+} > sram
+
 /* ------------------------------------------------------------------ *
  *  4. Constants and initialised data (SRAM, D-cached)                *
  *     The s* variants are RISC-V "small data": the compiler reaches  *
