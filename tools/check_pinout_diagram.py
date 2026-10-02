@@ -18,14 +18,14 @@ MD = os.path.join(REPO, "docs/datasheet/sections/pins.md")
 SVG = os.path.join(REPO, "docs/datasheet/sections/images/pinout_diagram.svg")
 XL_NUM, XR_NUM, XL_SIG, XR_SIG = 176, 364, 148, 392
 
-body = open(MD).read().split("## 2. Pin Map")[1].split("## 4.")[0]
+body = open(MD, encoding="utf-8").read().split("## 2. Pin Map")[1].split("## 4.")[0]
 spec = {int(m.group(1)): m.group(2) for m in
         re.finditer(r"^\|\s*(\d+)\s*\|\s*\*{0,2}([A-Za-z0-9_]+)\*{0,2}\s*\|",
                     body, re.M)}
 
 rows = {}
 for x, y, t in re.findall(r'<text[^>]*x="(\d+)" y="(\d+)"[^>]*>([^<]+)</text>',
-                          open(SVG).read()):
+                          open(SVG, encoding="utf-8").read()):
     rows.setdefault(int(y), {})[int(x)] = t
 
 errs = pins = 0

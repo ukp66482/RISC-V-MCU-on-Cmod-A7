@@ -1,4 +1,4 @@
-/* servo.h - hobby servo (SG90 class) on PWM_0, DIP 10 */
+/* servo.h - hobby servo (SG90 class) on PWM_0, DIP 19 */
 #ifndef SERVO_H
 #define SERVO_H
 

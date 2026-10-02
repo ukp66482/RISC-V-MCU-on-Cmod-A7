@@ -3,10 +3,10 @@
  *
  *   1  SPI  : frames to an ESP32 receiver station           DIP 35-38
  *   2  I2C  : telemetry to the same receiver (slave 0x28)   DIP 13/14
- *   3  PWM  : hobby servo, 50 Hz / 0.5-2.5 ms               DIP 10
+ *   3  PWM  : hobby servo, 50 Hz / 0.5-2.5 ms               DIP 19
  *   4  ADC  : potentiometer, live millivolts                DIP 15
  *   5  IRQ  : timer_0, 100 Hz system tick (ISR in ITCM)     no wiring
- *   6  IRQ  : external button on INTR_0                     DIP 8 (+10k to 3.3V)
+ *   6  IRQ  : external button on INTR_0                     DIP 9 (+10k to 3.3V)
  *   7  UART : telemetry + commands on the DIP UART          DIP 11/12
  *
  * The serial buses are demonstrated against an ESP32 "receiver station"
@@ -304,9 +304,9 @@ int main(void)
     xil_printf("  ESP32 bridge    : SCL13->G22 SDA14->G21 | SCK35->G18\r\n");
     xil_printf("                    MOSI36->G23 MISO37<-G19 CS38->G5\r\n");
     xil_printf("                    common GND (ESP32 on its own USB)\r\n");
-    xil_printf("  Servo (SG90)    : signal DIP10, power VU(5V), GND\r\n");
+    xil_printf("  Servo (SG90)    : signal DIP19, power VU(5V), GND\r\n");
     xil_printf("  Potentiometer   : wiper DIP15, ends 3.3V / GND\r\n");
-    xil_printf("  Button          : DIP8 -> button -> GND, 10k DIP8->3.3V\r\n");
+    xil_printf("  Button          : DIP9 -> button -> GND, 10k DIP9->3.3V\r\n");
     xil_printf("  DIP UART        : DIP11 TX / DIP12 RX, 115200 8N1\r\n");
     xil_printf("  3.3V comes from the Pmod connector VCC pins.\r\n\r\n");
 
@@ -321,7 +321,7 @@ int main(void)
     REG32(BTN1 + 0x4) = 1;                             /* BTN1 = input */
 
     xil_printf("  ADC ............ %s\r\n", adc_ok ? "OK" : "FAILED");
-    xil_printf("  Servo PWM ...... OK (50 Hz on DIP 10)\r\n");
+    xil_printf("  Servo PWM ...... OK (50 Hz on DIP 19)\r\n");
     xil_printf("  DIP UART ....... OK (telemetry at 1 Hz)\r\n");
     xil_printf("  ESP bridge ..... %s\r\n",
                bridge_ok ? "OK at 0x28 (I2C+SPI telemetry on, try 'n')"

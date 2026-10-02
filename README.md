@@ -18,7 +18,7 @@ and work entirely at the firmware level.
   - 512 KB SRAM: application code and data
   - 4 MB QSPI flash: bitstream and application storage
 - Peripherals
-  - GPIO: 28 pins in 4 groups, and the on-board LEDs, RGB LED, and buttons
+  - GPIO: 24 pins in 3 groups of 8, and the on-board LEDs, RGB LED, and buttons
   - PWM: 3 channels
   - UART: 2 (USB and external)
   - I2C and SPI masters
