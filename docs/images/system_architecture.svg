@@ -121,9 +121,9 @@
   <text class="ts" x="303" y="470" text-anchor="middle">USB &#183; DIP</text>
 
   <rect class="box" x="341" y="430" width="62" height="60"/>
-  <text class="tb" x="372" y="445" text-anchor="middle">GPIO 4&#215;7</text>
+  <text class="tb" x="372" y="445" text-anchor="middle">GPIO 3&#215;8</text>
   <text class="ts" x="372" y="458" text-anchor="middle">EXTI &#215;4</text>
-  <text class="ts" x="372" y="470" text-anchor="middle">A &#183; B &#183; C &#183; D</text>
+  <text class="ts" x="372" y="470" text-anchor="middle">A &#183; B &#183; C</text>
 
   <rect class="box" x="410" y="430" width="62" height="60"/>
   <text class="tb" x="441" y="445" text-anchor="middle">I2C</text>

@@ -39,11 +39,10 @@
 #define LED_BASE          0x40000000  /* 2-bit,  on-board LEDs, output      */
 #define BTN_BASE          0x40010000  /* 1-bit,  user button BTN1, input    */
 #define RGB_BASE          0x40020000  /* 3-bit,  RGB LED, output            */
-#define GPIO_A_BASE       0x40030000  /* 7-bit,  DIP pins 1-7,  bidir       */
-#define GPIO_B_BASE       0x40040000  /* 7-bit,  DIP pins 17-23, bidir      */
-#define GPIO_C_BASE       0x40050000  /* 7-bit,  DIP pins 42-48, bidir      */
-#define GPIO_D_BASE       0x40060000  /* 7-bit,  DIP pins 26-32, bidir      */
-#define EXTI_BASE         0x40070000  /* 4-bit,  INTR_0..3, input, IRQ 5    */
+#define GPIO_A_BASE       0x40030000  /* 8-bit,  DIP pins 1-8,  bidir       */
+#define GPIO_B_BASE       0x40040000  /* 8-bit,  DIP pins 33-26, bidir      */
+#define GPIO_C_BASE       0x40050000  /* 8-bit,  DIP pins 48-41, bidir      */
+#define EXTI_BASE         0x40070000  /* 4-bit,  INTR_0..3 = DIP 9,10,17,18 */
 
 /* register offsets (all ports share one layout) */
 #define GPIO_DATA         0x000       /* RW   pin data                      */
@@ -67,7 +66,7 @@
 #define TIMER0_BASE       0x40100000  /* general purpose, IRQ 0             */
 #define TIMER1_BASE       0x40110000  /* general purpose, IRQ 1             */
 #define TIMER2_BASE       0x40120000  /* general purpose, IRQ 2             */
-#define PWM0_BASE         0x40200000  /* PWM channel 0, DIP pin 10          */
+#define PWM0_BASE         0x40200000  /* PWM channel 0, DIP pin 19          */
 #define PWM1_BASE         0x40210000  /* PWM channel 1, DIP pin 34          */
 #define PWM2_BASE         0x40220000  /* PWM channel 2, DIP pin 40          */
 

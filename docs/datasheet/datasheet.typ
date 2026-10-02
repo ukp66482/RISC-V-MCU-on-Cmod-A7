@@ -76,7 +76,7 @@
   [*Toolchain*], [#meta-toolchain],
 )
 #v(0.6cm)
-#text(size: 9pt, fill: luma(90))[Document DS-CMOD7-0001 · Revision A · 2027]
+#text(size: 9pt, fill: luma(90))[Document DS-CMOD7-0001 · Revision B · 2027]
 #v(1.2cm)
 #outline(title: [Table of Contents], depth: 3)
 

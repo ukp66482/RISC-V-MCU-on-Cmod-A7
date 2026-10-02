@@ -183,6 +183,12 @@ workspace-example/showcase/src/*
 workspace-example/showcase/esp32_bridge/*
 !workspace-example/showcase/esp32_bridge/*.ino
 
+!workspace-example/pin_test/
+workspace-example/pin_test/*
+!workspace-example/pin_test/src/
+workspace-example/pin_test/src/*
+!workspace-example/pin_test/src/*.c
+
 # deployment flash image is a release artifact, keep it
 !release/*.mcs
 

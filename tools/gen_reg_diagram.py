@@ -120,9 +120,9 @@ REGS = {
     "reg_xadc_sr": [("JTBSY", 1), ("JTMOD", 1), ("JTLCK", 1), ("BUSY", 1),
                     ("EOS", 1), ("EOC", 1), ("CHANNEL[5:0]", 6)],
     "reg_gpio_data": [(s, 1) for s in
-        ("D6", "D5", "D4", "D3", "D2", "D1", "D0")],
+        ("D7", "D6", "D5", "D4", "D3", "D2", "D1", "D0")],
     "reg_gpio_tri": [(s, 1) for s in
-        ("T6", "T5", "T4", "T3", "T2", "T1", "T0")],
+        ("T7", "T6", "T5", "T4", "T3", "T2", "T1", "T0")],
     "reg_exti_data": [(s, 1) for s in ("INT3", "INT2", "INT1", "INT0")],
     "reg_exti_int": [("CH1", 1)],
     # on-board GPIO, fixed direction: DATA carries the signal, TRI is hardwired

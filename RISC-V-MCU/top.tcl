@@ -319,8 +319,6 @@ proc create_root_design { parentCell } {
 
   set gpio_C [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:gpio_rtl:1.0 gpio_C ]
 
-  set gpio_D [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:gpio_rtl:1.0 gpio_D ]
-
   set intr [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:gpio_rtl:1.0 intr ]
 
   set qspi_flash [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:spi_rtl:1.0 qspi_flash ]
@@ -475,7 +473,7 @@ proc create_root_design { parentCell } {
   set gpio_A_0_6 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 gpio_A_0_6 ]
   set_property -dict [list \
     CONFIG.C_ALL_OUTPUTS {0} \
-    CONFIG.C_GPIO_WIDTH {7} \
+    CONFIG.C_GPIO_WIDTH {8} \
     CONFIG.GPIO_BOARD_INTERFACE {Custom} \
     CONFIG.USE_BOARD_FLOW {true} \
   ] $gpio_A_0_6
@@ -485,27 +483,17 @@ proc create_root_design { parentCell } {
   set gpio_B_0_6 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 gpio_B_0_6 ]
   set_property -dict [list \
     CONFIG.C_ALL_OUTPUTS {0} \
-    CONFIG.C_GPIO_WIDTH {7} \
+    CONFIG.C_GPIO_WIDTH {8} \
     CONFIG.GPIO_BOARD_INTERFACE {Custom} \
     CONFIG.USE_BOARD_FLOW {true} \
   ] $gpio_B_0_6
-
-
-  # Create instance: gpio_D_0_6, and set properties
-  set gpio_D_0_6 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 gpio_D_0_6 ]
-  set_property -dict [list \
-    CONFIG.C_ALL_OUTPUTS {0} \
-    CONFIG.C_GPIO_WIDTH {7} \
-    CONFIG.GPIO_BOARD_INTERFACE {Custom} \
-    CONFIG.USE_BOARD_FLOW {true} \
-  ] $gpio_D_0_6
 
 
   # Create instance: gpio_C_0_6, and set properties
   set gpio_C_0_6 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 gpio_C_0_6 ]
   set_property -dict [list \
     CONFIG.C_ALL_OUTPUTS {0} \
-    CONFIG.C_GPIO_WIDTH {7} \
+    CONFIG.C_GPIO_WIDTH {8} \
     CONFIG.GPIO_BOARD_INTERFACE {Custom} \
     CONFIG.USE_BOARD_FLOW {true} \
   ] $gpio_C_0_6
@@ -620,7 +608,6 @@ proc create_root_design { parentCell } {
   connect_bd_intf_net -intf_net gpio_0_7_GPIO [get_bd_intf_ports gpio_A] [get_bd_intf_pins gpio_A_0_6/GPIO]
   connect_bd_intf_net -intf_net gpio_B_0_6_GPIO [get_bd_intf_ports gpio_B] [get_bd_intf_pins gpio_B_0_6/GPIO]
   connect_bd_intf_net -intf_net gpio_C_0_6_GPIO [get_bd_intf_ports gpio_C] [get_bd_intf_pins gpio_C_0_6/GPIO]
-  connect_bd_intf_net -intf_net gpio_D_0_6_GPIO [get_bd_intf_ports gpio_D] [get_bd_intf_pins gpio_D_0_6/GPIO]
   connect_bd_intf_net -intf_net i2c_0_IIC [get_bd_intf_ports i2c_ext] [get_bd_intf_pins i2c_0/IIC]
   connect_bd_intf_net -intf_net microblaze_riscv_0_M_AXI_DC [get_bd_intf_pins microblaze_riscv_0/M_AXI_DC] [get_bd_intf_pins smartconnect_0/S03_AXI]
   connect_bd_intf_net -intf_net microblaze_riscv_0_M_AXI_IC [get_bd_intf_pins microblaze_riscv_0/M_AXI_IC] [get_bd_intf_pins smartconnect_0/S02_AXI]
@@ -636,7 +623,6 @@ proc create_root_design { parentCell } {
   connect_bd_intf_net -intf_net microblaze_riscv_0_axi_periph_M08_AXI [get_bd_intf_pins microblaze_riscv_0_axi_periph/M08_AXI] [get_bd_intf_pins gpio_A_0_6/S_AXI]
   connect_bd_intf_net -intf_net microblaze_riscv_0_axi_periph_M09_AXI [get_bd_intf_pins microblaze_riscv_0_axi_periph/M09_AXI] [get_bd_intf_pins gpio_B_0_6/S_AXI]
   connect_bd_intf_net -intf_net microblaze_riscv_0_axi_periph_M10_AXI [get_bd_intf_pins microblaze_riscv_0_axi_periph/M10_AXI] [get_bd_intf_pins gpio_C_0_6/S_AXI]
-  connect_bd_intf_net -intf_net microblaze_riscv_0_axi_periph_M11_AXI [get_bd_intf_pins microblaze_riscv_0_axi_periph/M11_AXI] [get_bd_intf_pins gpio_D_0_6/S_AXI]
   connect_bd_intf_net -intf_net microblaze_riscv_0_axi_periph_M12_AXI [get_bd_intf_pins microblaze_riscv_0_axi_periph/M12_AXI] [get_bd_intf_pins INT_0_3/S_AXI]
   connect_bd_intf_net -intf_net microblaze_riscv_0_axi_periph_M13_AXI [get_bd_intf_pins microblaze_riscv_0_axi_periph/M13_AXI] [get_bd_intf_pins PWM_2/S_AXI]
   connect_bd_intf_net -intf_net microblaze_riscv_0_axi_periph_M14_AXI [get_bd_intf_pins microblaze_riscv_0_axi_periph/M14_AXI] [get_bd_intf_pins timer_1/S_AXI]
@@ -691,7 +677,6 @@ proc create_root_design { parentCell } {
   [get_bd_pins gpio_A_0_6/s_axi_aclk] \
   [get_bd_pins gpio_B_0_6/s_axi_aclk] \
   [get_bd_pins gpio_C_0_6/s_axi_aclk] \
-  [get_bd_pins gpio_D_0_6/s_axi_aclk] \
   [get_bd_pins INT_0_3/s_axi_aclk] \
   [get_bd_pins PWM_2/s_axi_aclk] \
   [get_bd_pins timer_1/s_axi_aclk] \
@@ -728,7 +713,6 @@ proc create_root_design { parentCell } {
   [get_bd_pins gpio_A_0_6/s_axi_aresetn] \
   [get_bd_pins gpio_B_0_6/s_axi_aresetn] \
   [get_bd_pins gpio_C_0_6/s_axi_aresetn] \
-  [get_bd_pins gpio_D_0_6/s_axi_aresetn] \
   [get_bd_pins INT_0_3/s_axi_aresetn] \
   [get_bd_pins PWM_2/s_axi_aresetn] \
   [get_bd_pins timer_1/s_axi_aresetn] \
@@ -786,7 +770,6 @@ proc create_root_design { parentCell } {
   assign_bd_address -offset 0x40030000 -range 0x00010000 -with_name SEG_gpio_0_7_Reg -target_address_space [get_bd_addr_spaces microblaze_riscv_0/Data] [get_bd_addr_segs gpio_A_0_6/S_AXI/Reg] -force
   assign_bd_address -offset 0x40040000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_riscv_0/Data] [get_bd_addr_segs gpio_B_0_6/S_AXI/Reg] -force
   assign_bd_address -offset 0x40050000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_riscv_0/Data] [get_bd_addr_segs gpio_C_0_6/S_AXI/Reg] -force
-  assign_bd_address -offset 0x40060000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_riscv_0/Data] [get_bd_addr_segs gpio_D_0_6/S_AXI/Reg] -force
   assign_bd_address -offset 0x40700000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_riscv_0/Data] [get_bd_addr_segs i2c_0/S_AXI/Reg] -force
   assign_bd_address -offset 0x40400000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_riscv_0/Data] [get_bd_addr_segs microblaze_riscv_0_axi_intc/S_AXI/Reg] -force
   assign_bd_address -offset 0x40800000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_riscv_0/Data] [get_bd_addr_segs spi_0/AXI_LITE/Reg] -force

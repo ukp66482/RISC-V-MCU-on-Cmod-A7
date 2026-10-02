@@ -236,22 +236,21 @@ have no interrupt hardware and cannot raise a processor interrupt; to watch a
 signal by interrupt, use the External Interrupt Inputs described in the next
 section.
 
-### 3.1 DIP Connector GPIO (4 Groups × 7-bit)
+### 3.1 DIP Connector GPIO (3 Groups × 8-bit)
 
-| Instance | Base Address | Width | DIP Pins | Description |
+| Instance | Base Address | Width | DIP Pins (bit 0 → bit 7) | Description |
 |----------|-------------|-------|----------|-------------|
-| `gpio_A_0_6` | `0x4003_0000` | 7 | Pin 1–7 | GPIO Group A, bidirectional I/O |
-| `gpio_B_0_6` | `0x4004_0000` | 7 | Pin 17–23 | GPIO Group B, bidirectional I/O |
-| `gpio_C_0_6` | `0x4005_0000` | 7 | Pin 42–48 | GPIO Group C, bidirectional I/O |
-| `gpio_D_0_6` | `0x4006_0000` | 7 | Pin 26–32 | GPIO Group D, bidirectional I/O |
+| `gpio_A_0_6` | `0x4003_0000` | 8 | Pin 1–8 | GPIO Group A, bidirectional I/O |
+| `gpio_B_0_6` | `0x4004_0000` | 8 | Pin 33–26 | GPIO Group B, bidirectional I/O |
+| `gpio_C_0_6` | `0x4005_0000` | 8 | Pin 48–41 | GPIO Group C, bidirectional I/O |
 
-**Description:** Each group is a 7-bit bidirectional port; every bit can be an input or an output independently.
+**Description:** Each group is an 8-bit bidirectional port; every bit can be an input or an output independently.
 
 ### 3.2 GPIO Register Map
 
 Every general-purpose port has the same two registers. Offsets are relative to
-the port base address. Only the low WIDTH bits are implemented (7 for groups
-A–D; the on-board ports below are narrower); unimplemented bits read as 0.
+the port base address. Only the low WIDTH bits are implemented (8 for groups
+A–C; the on-board ports below are narrower); unimplemented bits read as 0.
 
 | Offset | Name | Access | Reset | Description |
 |--------|------|--------|-------|-------------|
@@ -260,7 +259,7 @@ A–D; the on-board ports below are narrower); unimplemented bits read as 0.
 
 #### DATA — Port Data Register (Offset 0x000)
 
-![GPIO DATA layout: one bit per pin in the low bits; only the low W bits exist (W = 7 for groups A–D, fewer for the on-board ports)](./images/reg_gpio_data.svg)
+![GPIO DATA layout: one bit per pin in the low bits; only the low W bits exist (W = 8 for groups A–C, fewer for the on-board ports)](./images/reg_gpio_data.svg)
 
 | Bits | Name | Access | Description |
 |------|------|--------|-------------|
@@ -329,7 +328,7 @@ interrupts.
 |------|-------|
 | Base Address | `0x4007_0000` |
 | Width | 4-bit, input-only |
-| DIP Pins | Pin 8 (INTR_0), Pin 9 (INTR_1), Pin 41 (INTR_2), Pin 33 (INTR_3) |
+| DIP Pins | Pin 9 (INTR_0), Pin 10 (INTR_1), Pin 17 (INTR_2), Pin 18 (INTR_3) |
 | Interrupt | Interrupt controller input 5 |
 
 ### Interrupt Register Map
@@ -400,7 +399,7 @@ The device provides six 32-bit timer instances: three serve as general-purpose t
 
 | Instance | Base Address | Output Pin | DIP Pin | Description |
 |----------|-------------|-----------|---------|-------------|
-| `PWM_0` | `0x4020_0000` | J3 | Pin 10 | PWM Channel 0 |
+| `PWM_0` | `0x4020_0000` | P3 | Pin 19 | PWM Channel 0 |
 | `PWM_1` | `0x4021_0000` | W3 | Pin 34 | PWM Channel 1 |
 | `PWM_2` | `0x4022_0000` | W4 | Pin 40 | PWM Channel 2 |
 
@@ -848,7 +847,6 @@ directly from the address: class 0 = GPIO, 1 = Timer, 2 = PWM, 3 = UART, 4 = INT
 | `0x4003_0000` | 64K | GPIO group A | GPIO |
 | `0x4004_0000` | 64K | GPIO group B | GPIO |
 | `0x4005_0000` | 64K | GPIO group C | GPIO |
-| `0x4006_0000` | 64K | GPIO group D | GPIO |
 | `0x4007_0000` | 64K | External interrupt inputs | Interrupt |
 | `0x4010_0000` | 64K | Timer 0 | Timer |
 | `0x4011_0000` | 64K | Timer 1 | Timer |

@@ -7,10 +7,10 @@ and ties the peripherals together into a live control loop:
 |---|---------|----------|------|
 | 1 | SPI | frames to an ESP32 receiver station | DIP 35–38 |
 | 2 | I2C | telemetry to the same receiver (slave 0x28) | DIP 13 (SCL), DIP 14 (SDA) |
-| 3 | PWM | hobby servo (SG90 class), 50 Hz | DIP 10 |
+| 3 | PWM | hobby servo (SG90 class), 50 Hz | DIP 19 |
 | 4 | ADC | potentiometer, live millivolts | DIP 15 |
 | 5 | Timer IRQ | 100 Hz system tick, ISR in ITCM | — (internal) |
-| 6 | Button IRQ | push button on external interrupt INTR_0 | DIP 8 |
+| 6 | Button IRQ | push button on external interrupt INTR_0 | DIP 9 |
 | 7 | UART | telemetry + commands on the DIP UART | DIP 11 (TX), DIP 12 (RX) |
 
 The features interact rather than running independently: the tick
@@ -57,17 +57,17 @@ Read the power-rail notes before wiring anything:
 | ESP32 DevKit | GPIO 22 (SCL) / GPIO 21 (SDA) | DIP 13 / DIP 14 |
 | | GPIO 18 / 23 / 19 / 5 | DIP 35 (SCK) / 36 (MOSI) / 37 (MISO) / 38 (CS) |
 | | GND | GND (power from its own USB) |
-| Servo SG90 | orange (signal) | DIP 10 |
+| Servo SG90 | orange (signal) | DIP 19 |
 | | red / brown | VU / GND |
 | Potentiometer 10k | ends | Pmod 3.3 V and GND (**never VU**) |
 | | wiper | DIP 15 |
-| Push button | one side | DIP 8, plus 10 kΩ pull-up to 3.3 V |
+| Push button | one side | DIP 9, plus 10 kΩ pull-up to 3.3 V |
 | | other side | GND |
 | USB-TTL adapter (3.3 V!) | RX / TX / GND | DIP 11 / DIP 12 / GND |
 
 Notes:
 
-- DIP 8 has no internal pull-up; without the external 10 k the pin floats.
+- DIP 9 has no internal pull-up; without the external 10 k the pin floats.
   The firmware detects a floating/noisy INTR_0 (interrupt storm) and mutes
   the button IRQ with a console message instead of hanging.
 - The servo draws its current from VU. A single unloaded SG90 operates
