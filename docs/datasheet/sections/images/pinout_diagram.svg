@@ -50,150 +50,150 @@
 <text class="t" x="270" y="776" text-anchor="middle">Micro-USB &#183; JTAG + UART + power</text>
 <rect x="156" y="136" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
 <rect x="370" y="136" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="143">48</text>
-<text class="n" x="364" y="143" text-anchor="end">1</text>
-<text class="s" x="148" y="143" text-anchor="end">GPIO_C0</text>
-<text class="s" x="392" y="143">GPIO_A0</text>
+<text class="n" x="176" y="143">1</text>
+<text class="n" x="364" y="143" text-anchor="end">48</text>
+<text class="s" x="148" y="143" text-anchor="end">GPIO_A0</text>
+<text class="s" x="392" y="143">GPIO_C0</text>
 <rect x="156" y="160" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
 <rect x="370" y="160" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="167">47</text>
-<text class="n" x="364" y="167" text-anchor="end">2</text>
-<text class="s" x="148" y="167" text-anchor="end">GPIO_C1</text>
-<text class="s" x="392" y="167">GPIO_A1</text>
+<text class="n" x="176" y="167">2</text>
+<text class="n" x="364" y="167" text-anchor="end">47</text>
+<text class="s" x="148" y="167" text-anchor="end">GPIO_A1</text>
+<text class="s" x="392" y="167">GPIO_C1</text>
 <rect x="156" y="184" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
 <rect x="370" y="184" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="191">46</text>
-<text class="n" x="364" y="191" text-anchor="end">3</text>
-<text class="s" x="148" y="191" text-anchor="end">GPIO_C2</text>
-<text class="s" x="392" y="191">GPIO_A2</text>
+<text class="n" x="176" y="191">3</text>
+<text class="n" x="364" y="191" text-anchor="end">46</text>
+<text class="s" x="148" y="191" text-anchor="end">GPIO_A2</text>
+<text class="s" x="392" y="191">GPIO_C2</text>
 <rect x="156" y="208" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
 <rect x="370" y="208" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="215">45</text>
-<text class="n" x="364" y="215" text-anchor="end">4</text>
-<text class="s" x="148" y="215" text-anchor="end">GPIO_C3</text>
-<text class="s" x="392" y="215">GPIO_A3</text>
+<text class="n" x="176" y="215">4</text>
+<text class="n" x="364" y="215" text-anchor="end">45</text>
+<text class="s" x="148" y="215" text-anchor="end">GPIO_A3</text>
+<text class="s" x="392" y="215">GPIO_C3</text>
 <rect x="156" y="232" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
 <rect x="370" y="232" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="239">44</text>
-<text class="n" x="364" y="239" text-anchor="end">5</text>
-<text class="s" x="148" y="239" text-anchor="end">GPIO_C4</text>
-<text class="s" x="392" y="239">GPIO_A4</text>
+<text class="n" x="176" y="239">5</text>
+<text class="n" x="364" y="239" text-anchor="end">44</text>
+<text class="s" x="148" y="239" text-anchor="end">GPIO_A4</text>
+<text class="s" x="392" y="239">GPIO_C4</text>
 <rect x="156" y="256" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
 <rect x="370" y="256" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="263">43</text>
-<text class="n" x="364" y="263" text-anchor="end">6</text>
-<text class="s" x="148" y="263" text-anchor="end">GPIO_C5</text>
-<text class="s" x="392" y="263">GPIO_A5</text>
+<text class="n" x="176" y="263">6</text>
+<text class="n" x="364" y="263" text-anchor="end">43</text>
+<text class="s" x="148" y="263" text-anchor="end">GPIO_A5</text>
+<text class="s" x="392" y="263">GPIO_C5</text>
 <rect x="156" y="280" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
 <rect x="370" y="280" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="287">42</text>
-<text class="n" x="364" y="287" text-anchor="end">7</text>
-<text class="s" x="148" y="287" text-anchor="end">GPIO_C6</text>
-<text class="s" x="392" y="287">GPIO_A6</text>
+<text class="n" x="176" y="287">7</text>
+<text class="n" x="364" y="287" text-anchor="end">42</text>
+<text class="s" x="148" y="287" text-anchor="end">GPIO_A6</text>
+<text class="s" x="392" y="287">GPIO_C6</text>
 <rect x="156" y="304" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
 <rect x="370" y="304" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="311">41</text>
-<text class="n" x="364" y="311" text-anchor="end">8</text>
-<text class="s" x="148" y="311" text-anchor="end">INTR_2</text>
-<text class="s" x="392" y="311">INTR_0</text>
+<text class="n" x="176" y="311">8</text>
+<text class="n" x="364" y="311" text-anchor="end">41</text>
+<text class="s" x="148" y="311" text-anchor="end">GPIO_A7</text>
+<text class="s" x="392" y="311">GPIO_C7</text>
 <rect x="156" y="328" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
 <rect x="370" y="328" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="335">40</text>
-<text class="n" x="364" y="335" text-anchor="end">9</text>
-<text class="s" x="148" y="335" text-anchor="end">PWM_2</text>
-<text class="s" x="392" y="335">INTR_1</text>
+<text class="n" x="176" y="335">9</text>
+<text class="n" x="364" y="335" text-anchor="end">40</text>
+<text class="s" x="148" y="335" text-anchor="end">INTR_0</text>
+<text class="s" x="392" y="335">INTR_2</text>
 <rect x="156" y="352" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
 <rect x="370" y="352" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="359">39</text>
-<text class="n" x="364" y="359" text-anchor="end">10</text>
-<text class="s" x="148" y="359" text-anchor="end">SPI_SS1</text>
-<text class="s" x="392" y="359">PWM_0</text>
+<text class="n" x="176" y="359">10</text>
+<text class="n" x="364" y="359" text-anchor="end">39</text>
+<text class="s" x="148" y="359" text-anchor="end">PWM_0</text>
+<text class="s" x="392" y="359">SPI_SS1</text>
 <rect x="156" y="376" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
 <rect x="370" y="376" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="383">38</text>
-<text class="n" x="364" y="383" text-anchor="end">11</text>
-<text class="s" x="148" y="383" text-anchor="end">SPI_SS0</text>
-<text class="s" x="392" y="383">UART_TX</text>
+<text class="n" x="176" y="383">11</text>
+<text class="n" x="364" y="383" text-anchor="end">38</text>
+<text class="s" x="148" y="383" text-anchor="end">UART_TX</text>
+<text class="s" x="392" y="383">SPI_SS0</text>
 <rect x="156" y="400" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
 <rect x="370" y="400" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="407">37</text>
-<text class="n" x="364" y="407" text-anchor="end">12</text>
-<text class="s" x="148" y="407" text-anchor="end">SPI_MISO</text>
-<text class="s" x="392" y="407">UART_RX</text>
+<text class="n" x="176" y="407">12</text>
+<text class="n" x="364" y="407" text-anchor="end">37</text>
+<text class="s" x="148" y="407" text-anchor="end">UART_RX</text>
+<text class="s" x="392" y="407">SPI_MISO</text>
 <rect x="156" y="424" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
 <rect x="370" y="424" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="431">36</text>
-<text class="n" x="364" y="431" text-anchor="end">13</text>
-<text class="s" x="148" y="431" text-anchor="end">SPI_MOSI</text>
-<text class="s" x="392" y="431">I2C_SCL</text>
+<text class="n" x="176" y="431">13</text>
+<text class="n" x="364" y="431" text-anchor="end">36</text>
+<text class="s" x="148" y="431" text-anchor="end">I2C_SCL</text>
+<text class="s" x="392" y="431">SPI_MOSI</text>
 <rect x="156" y="448" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
 <rect x="370" y="448" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="455">35</text>
-<text class="n" x="364" y="455" text-anchor="end">14</text>
-<text class="s" x="148" y="455" text-anchor="end">SPI_SCLK</text>
-<text class="s" x="392" y="455">I2C_SDA</text>
-<rect x="156" y="472" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<rect x="370" y="472" width="14" height="8" fill="black" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="479">34</text>
-<text class="n" x="364" y="479" text-anchor="end">15</text>
-<text class="s" x="148" y="479" text-anchor="end">PWM_1</text>
-<text class="s" x="392" y="479">ADC_0</text>
-<rect x="156" y="496" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<rect x="370" y="496" width="14" height="8" fill="black" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="503">33</text>
-<text class="n" x="364" y="503" text-anchor="end">16</text>
-<text class="s" x="148" y="503" text-anchor="end">INTR_3</text>
-<text class="s" x="392" y="503">ADC_1</text>
+<text class="n" x="176" y="455">14</text>
+<text class="n" x="364" y="455" text-anchor="end">35</text>
+<text class="s" x="148" y="455" text-anchor="end">I2C_SDA</text>
+<text class="s" x="392" y="455">SPI_SCLK</text>
+<rect x="156" y="472" width="14" height="8" fill="black" stroke="black" stroke-width="1.2"/>
+<rect x="370" y="472" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
+<text class="n" x="176" y="479">15</text>
+<text class="n" x="364" y="479" text-anchor="end">34</text>
+<text class="s" x="148" y="479" text-anchor="end">ADC_0</text>
+<text class="s" x="392" y="479">INTR_3</text>
+<rect x="156" y="496" width="14" height="8" fill="black" stroke="black" stroke-width="1.2"/>
+<rect x="370" y="496" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
+<text class="n" x="176" y="503">16</text>
+<text class="n" x="364" y="503" text-anchor="end">33</text>
+<text class="s" x="148" y="503" text-anchor="end">ADC_1</text>
+<text class="s" x="392" y="503">GPIO_B0</text>
 <rect x="156" y="520" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
 <rect x="370" y="520" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="527">32</text>
-<text class="n" x="364" y="527" text-anchor="end">17</text>
-<text class="s" x="148" y="527" text-anchor="end">GPIO_D0</text>
-<text class="s" x="392" y="527">GPIO_B0</text>
+<text class="n" x="176" y="527">17</text>
+<text class="n" x="364" y="527" text-anchor="end">32</text>
+<text class="s" x="148" y="527" text-anchor="end">INTR_1</text>
+<text class="s" x="392" y="527">GPIO_B1</text>
 <rect x="156" y="544" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
 <rect x="370" y="544" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="551">31</text>
-<text class="n" x="364" y="551" text-anchor="end">18</text>
-<text class="s" x="148" y="551" text-anchor="end">GPIO_D1</text>
-<text class="s" x="392" y="551">GPIO_B1</text>
+<text class="n" x="176" y="551">18</text>
+<text class="n" x="364" y="551" text-anchor="end">31</text>
+<text class="s" x="148" y="551" text-anchor="end">PWM_1</text>
+<text class="s" x="392" y="551">GPIO_B2</text>
 <rect x="156" y="568" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
 <rect x="370" y="568" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="575">30</text>
-<text class="n" x="364" y="575" text-anchor="end">19</text>
-<text class="s" x="148" y="575" text-anchor="end">GPIO_D2</text>
-<text class="s" x="392" y="575">GPIO_B2</text>
+<text class="n" x="176" y="575">19</text>
+<text class="n" x="364" y="575" text-anchor="end">30</text>
+<text class="s" x="148" y="575" text-anchor="end">PWM_2</text>
+<text class="s" x="392" y="575">GPIO_B3</text>
 <rect x="156" y="592" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
 <rect x="370" y="592" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="599">29</text>
-<text class="n" x="364" y="599" text-anchor="end">20</text>
-<text class="s" x="148" y="599" text-anchor="end">GPIO_D3</text>
-<text class="s" x="392" y="599">GPIO_B3</text>
+<text class="n" x="176" y="599">20</text>
+<text class="n" x="364" y="599" text-anchor="end">29</text>
+<text class="s" x="148" y="599" text-anchor="end">NC</text>
+<text class="s" x="392" y="599">GPIO_B4</text>
 <rect x="156" y="616" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
 <rect x="370" y="616" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="623">28</text>
-<text class="n" x="364" y="623" text-anchor="end">21</text>
-<text class="s" x="148" y="623" text-anchor="end">GPIO_D4</text>
-<text class="s" x="392" y="623">GPIO_B4</text>
+<text class="n" x="176" y="623">21</text>
+<text class="n" x="364" y="623" text-anchor="end">28</text>
+<text class="s" x="148" y="623" text-anchor="end">NC</text>
+<text class="s" x="392" y="623">GPIO_B5</text>
 <rect x="156" y="640" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
 <rect x="370" y="640" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="647">27</text>
-<text class="n" x="364" y="647" text-anchor="end">22</text>
-<text class="s" x="148" y="647" text-anchor="end">GPIO_D5</text>
-<text class="s" x="392" y="647">GPIO_B5</text>
+<text class="n" x="176" y="647">22</text>
+<text class="n" x="364" y="647" text-anchor="end">27</text>
+<text class="s" x="148" y="647" text-anchor="end">NC</text>
+<text class="s" x="392" y="647">GPIO_B6</text>
 <rect x="156" y="664" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
 <rect x="370" y="664" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="671">26</text>
-<text class="n" x="364" y="671" text-anchor="end">23</text>
-<text class="s" x="148" y="671" text-anchor="end">GPIO_D6</text>
-<text class="s" x="392" y="671">GPIO_B6</text>
+<text class="n" x="176" y="671">23</text>
+<text class="n" x="364" y="671" text-anchor="end">26</text>
+<text class="s" x="148" y="671" text-anchor="end">NC</text>
+<text class="s" x="392" y="671">GPIO_B7</text>
 <rect x="156" y="688" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
 <rect x="370" y="688" width="14" height="8" fill="white" stroke="black" stroke-width="1.2"/>
-<text class="n" x="176" y="695">25</text>
-<text class="n" x="364" y="695" text-anchor="end">24</text>
-<text class="s" x="148" y="695" text-anchor="end" font-weight="bold">GND</text>
-<text class="s" x="392" y="695" font-weight="bold">VU</text>
-<circle cx="352" cy="131" r="2.5"/>
-<text class="ti" x="392" y="128">pin 1</text>
+<text class="n" x="176" y="695">24</text>
+<text class="n" x="364" y="695" text-anchor="end">25</text>
+<text class="s" x="148" y="695" text-anchor="end" font-weight="bold">VU</text>
+<text class="s" x="392" y="695" font-weight="bold">GND</text>
+<circle cx="188" cy="131" r="2.5"/>
+<text class="ti" x="148" y="128" text-anchor="end">pin 1</text>
 <line class="dim" x1="520" y1="40" x2="520" y2="740" marker-start="url(#db)" marker-end="url(#da)"/>
 <line class="dim" x1="510" y1="40" x2="530" y2="40"/>
 <line class="dim" x1="510" y1="740" x2="530" y2="740"/>
@@ -203,5 +203,5 @@
 <line class="dim" x1="370" y1="780" x2="370" y2="800"/>
 <text class="ti" x="270" y="812" text-anchor="middle">0.7 in (17.8 mm)</text>
 <rect x="192" y="827" width="14" height="8" fill="black" stroke="black" stroke-width="1.2"/>
-<text class="ti" x="212" y="834">= analog input (0&#8211;3.3 V via divider) &#183; all other pins digital LVCMOS33</text>
+<text class="ti" x="212" y="834">= analog input (0&#8211;3.3 V via divider) &#183; NC = not connected &#183; all other pins digital LVCMOS33</text>
 </svg>

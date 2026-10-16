@@ -40,10 +40,11 @@
   <text class="ts" x="338" y="208" text-anchor="start">stack</text>
   <text class="addr" x="162" y="226" text-anchor="end">0x0002 0000</text>
 
-  <!-- unmapped gap -->
+  <!-- unmapped gap: not decoded, wraps onto the TCM (board-measured) -->
   <line class="dash" x1="170" y1="222" x2="170" y2="268"/>
   <line class="dash" x1="400" y1="222" x2="400" y2="268"/>
-  <text class="ti" x="285" y="248" text-anchor="middle">(unmapped &#8212; access faults)</text>
+  <text class="ti" x="285" y="242" text-anchor="middle">(no memory &#8212; accesses wrap</text>
+  <text class="ti" x="285" y="254" text-anchor="middle">onto the TCM; do not use)</text>
 
   <!-- peripherals -->
   <rect class="box" x="170" y="268" width="230" height="52"/>

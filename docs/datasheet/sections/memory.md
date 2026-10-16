@@ -29,9 +29,16 @@ tightly-coupled memory.
 |---|---|---|---|
 | `0x0000_0000` – `0x0000_7FFF` | 32 KB | Bootloader (reserved) | uncached |
 | `0x0000_8000` – `0x0000_FFFF` | 32 KB | ITCM — application code | uncached |
-| `0x0001_0000` – `0x0001_FFFF` | 64 KB | DTCM — data; stack grows down from `0x0002_0000` | uncached |
+| `0x0001_0000` – `0x0001_FFFF` | 64 KB | DTCM — data; stack grows down from `0x0001_FFF0` | uncached |
 | `0x4000_0000` – `0x40FF_FFFF` | — | Peripheral registers | uncached |
 | `0x6000_0000` – `0x6007_FFFF` | 512 KB | External SRAM — application code / data / heap | cached |
+
+> **Note:** Unused addresses in the `0x4000_0000` – `0x7FFF_FFFF` range return a
+> bus error. Elsewhere the tightly-coupled memory is not decoded fully: an
+> access to an address outside the listed regions, such as `0x0002_0000`,
+> wraps around onto the 128 KB tightly-coupled memory. A stray pointer there
+> therefore fails silently and can overwrite the bootloader, ITCM code, or the
+> stack.
 
 ## 3. Caches
 
@@ -57,10 +64,11 @@ The write-through policy has two practical consequences:
 
 ## 4. Measured Access Latencies
 
-The figures below were measured on the board at 100 MHz with an optimized
-(`-O2`) word-copy loop and a hardware cycle counter; the cache-miss figure was
-taken immediately after invalidating the data cache. Each value is the latency
-of a single access.
+The figures below were measured on the board at 100 MHz by the `mem_bench`
+example: optimized (`-O2`) read and write loops timed with a hardware cycle
+counter, with the loop's own overhead (≈7 cycles per word) subtracted; the
+cache-miss figure was taken immediately after invalidating the data cache.
+Each value is the latency of a single access.
 
 | Access | Cycles | Notes |
 |---|---|---|
@@ -73,20 +81,46 @@ of a single access.
 
 ## 5. Memory Placement Guidance
 
-| What | Put it in |
-|---|---|
-| Interrupt handlers, timing-critical loops | ITCM |
-| Frequently-written data, buffers | DTCM |
-| Stack | DTCM |
-| Everything else — code, constants, data, heap | SRAM |
-| Firmware image | QSPI flash |
+The linker script `mcu/cmod_mcu.ld` assigns every section to a memory, and
+the device header `mcu/cmod_mcu.h` provides the `ITCM_FUNC` and `DTCM_DATA`
+attributes that move individual functions and variables into the
+tightly-coupled memories.
+
+| What | Put it in | How |
+|---|---|---|
+| Interrupt handlers, timing-critical loops | ITCM | `ITCM_FUNC` |
+| Frequently-written data, buffers, the `XIntc` driver instance | DTCM | `DTCM_DATA` |
+| Stack | DTCM | automatic: all DTCM after the `DTCM_DATA` variables |
+| Everything else — code, constants, data | SRAM | default |
+| Heap | SRAM | automatic: all SRAM after the program |
+| Firmware image | QSPI flash | see the Standalone Boot Mode guide |
 
 As a general rule, place code and data in SRAM by default and move them to
-the TCMs when predictable timing is required.
+the TCMs when predictable timing is required. In the tightly-coupled
+memories the worst-case latency equals the best-case latency.
 
-A function in SRAM usually runs at cache speed, but its worst case (a cold
-cache line) takes three to four times longer; for an interrupt handler this
-spread appears directly as latency jitter.
+Code in the ITCM keeps that property only while everything it calls is in
+the ITCM as well. At `-O0` the board-support package's `Xil_In32()` and
+`Xil_Out32()` are real function calls into SRAM, so ITCM code accesses
+registers with `REG32()` from `cmod_mcu.h`.
 
-In the tightly-coupled memories the worst-case latency equals the best-case
-latency.
+### 5.1 Interrupt Latency
+
+The trap entry and the interrupt controller's dispatch code always run from
+the ITCM, and the tables they read live in the DTCM. What remains to place
+is the handler itself and the `XIntc` driver instance:
+
+| Handler placement | Warm cache | Cold cache |
+|---|---|---|
+| `ITCM_FUNC` handler, `XIntc` instance in DTCM | 187 | 187 |
+| `ITCM_FUNC` handler, `XIntc` instance in SRAM | 187 | 227 |
+| Handler in SRAM | 187 | 591 |
+| `ITCM_FUNC` handler calling `Xil_In32()` at `-O0` | 199 | 348 |
+
+Cycles at 100 MHz from a timer event to the handler's first register read,
+measured on the board: `timer_2` raises the interrupt as it reloads, and the
+handler's first action reads the counter. "Cold" means both caches were
+invalidated before every interrupt, the worst case. Each value is the median
+of 256 interrupts; no run varied by more than 2 cycles. With the handler in
+the ITCM and the instance in the DTCM, an interrupt reaches the handler in
+1.87 µs whatever the cache state.

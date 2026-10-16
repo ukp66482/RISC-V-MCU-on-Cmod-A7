@@ -35,14 +35,14 @@
   <text class="ts" x="280" y="274" text-anchor="middle">from flash at <tspan class="code">0x22 0000</tspan></text>
   <line class="wire" x1="280" y1="288" x2="280" y2="320"/>
 
-  <!-- 5 copy to SRAM -->
+  <!-- 5 copy the records -->
   <rect class="box" x="80" y="320" width="400" height="50"/>
   <text class="tb" x="280" y="340" text-anchor="middle">Copies each record to the address it names</text>
-  <text class="ts" x="280" y="356" text-anchor="middle">every record lands in SRAM (<tspan class="code">0x6000 0000</tspan>)</text>
+  <text class="ts" x="280" y="356" text-anchor="middle">SRAM (<tspan class="code">0x6000 0000</tspan>), plus ITCM (<tspan class="code">0x8000</tspan>) and DTCM (<tspan class="code">0x1 0000</tspan>)</text>
   <line class="wire" x1="280" y1="370" x2="280" y2="402"/>
 
   <!-- 6 jump (end) -->
   <rect class="box" x="110" y="402" width="340" height="48" rx="16"/>
   <text class="tb" x="280" y="422" text-anchor="middle">Jumps to the entry point</text>
-  <text class="ts" x="280" y="438" text-anchor="middle">the application runs from SRAM</text>
+  <text class="ts" x="280" y="438" text-anchor="middle">the application runs from SRAM and the ITCM</text>
 </svg>

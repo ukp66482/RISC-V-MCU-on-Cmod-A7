@@ -12,12 +12,19 @@
     .rsvt { font-size:8.5px; font-style:italic; }
   </style>
 
-  <rect class="cell" x="16" y="42" width="458" height="34"/>
-  <rect x="16" y="42" width="458" height="34" fill="url(#rsv)" stroke="none"/>
-  <rect x="215" y="52" width="60" height="14" fill="white"/>
-  <text class="rsvt" x="245" y="63" text-anchor="middle">Reserved</text>
+  <rect class="cell" x="16" y="42" width="170" height="34"/>
+  <rect x="16" y="42" width="170" height="34" fill="url(#rsv)" stroke="none"/>
+  <rect x="71" y="52" width="60" height="14" fill="white"/>
+  <text class="rsvt" x="101" y="63" text-anchor="middle">Reserved</text>
   <text class="bit" x="22" y="37" text-anchor="start">31</text>
-  <text class="bit" x="468" y="37" text-anchor="end">5</text>
+  <text class="bit" x="180" y="37" text-anchor="end">11</text>
+  <rect class="cell" x="186" y="42" width="240" height="34"/>
+  <text class="bit" x="192" y="37" text-anchor="start">10</text>
+  <text class="bit" x="420" y="37" text-anchor="end">6</text>
+  <text class="fld" x="306" y="63" text-anchor="middle">ERR</text>
+  <rect class="cell" x="426" y="42" width="48" height="34"/>
+  <text class="bit" x="450" y="37" text-anchor="middle">5</text>
+  <text class="fld" x="450" y="63" text-anchor="middle">SMS</text>
   <rect class="cell" x="474" y="42" width="48" height="34"/>
   <text class="bit" x="498" y="37" text-anchor="middle">4</text>
   <text class="fld" x="498" y="63" text-anchor="middle">MODF</text>

@@ -133,10 +133,14 @@ template's generated files: `helloworld.c`, `lscript.ld`, `platform.c`, and
 
 ## 4. Replace the Sources with the Course Template
 
-The generated Hello World sources are replaced entirely by the course
-template. The template `main.c` starts with `mcu_init()`, and its
-`lscript.ld` places code in the 512 KB SRAM, places the stack in DTCM, and
-provides the `ITCM_FUNC`/`DTCM_DATA` placement attributes.
+The generated Hello World sources are replaced by the course template's
+`main.c`, and the component is pointed at the workspace's `mcu/` folder,
+which holds the two files every application builds against:
+
+| File | Content |
+|---|---|
+| `mcu/cmod_mcu.h` | Device header: base address, register offsets, and bit masks of every peripheral (C and assembly), plus `REG32()`, the `ITCM_FUNC`/`DTCM_DATA` placement attributes, and `mcu_init()` for C |
+| `mcu/cmod_mcu.ld` | Linker script: places code and data in ITCM, DTCM, and SRAM |
 
 ### 4.1 Delete the Generated Files
 
@@ -146,37 +150,66 @@ In the Explorer, select all four files under `src/` (`helloworld.c`,
 
 ![Delete Generated Sources](images/jtag16.png)
 
-### 4.2 Import the Template Files
+### 4.2 Import the Template File
 
 Right-click the `src/` folder and choose **Import > Files...**
 
 ![Import Files](images/jtag17.png)
 
-Navigate to `workspace-example/app_template/src/` and select both `main.c`
-and `lscript.ld`. Click **Open**.
+Navigate to `workspace-example/app_template/src/` and select `main.c`.
+Click **Open**.
 
 ![Select Template Files](images/jtag18.png)
 
-Afterwards `src/` contains exactly `main.c` and `lscript.ld`. Files inside
-`src/` are compiled automatically; no build configuration is needed.
+Afterwards `src/` contains only `main.c`. C files inside `src/` are compiled
+automatically. Assembly files (`.S`) are not collected automatically: list
+them under **Compiler Settings > Sources > Compile sources**
+(`USER_COMPILE_SOURCES`) in the component's settings.
 
-> **Note:** The `mcu_init();` call must remain the first line of `main()`.
-> It copies `ITCM_FUNC` code into the ITCM, zeroes the DTCM, and sets the
-> USB UART to 115200.
+### 4.3 Point the Component at the MCU Folder
+
+Open the component's **Settings > UserConfig.cmake** and set two values:
+
+| Setting | Value |
+|---|---|
+| **Compiler Settings > Includes > Include paths (-I)** | `${CMAKE_SOURCE_DIR}/../../mcu` |
+| **Linker Settings > Linker Script > Linker script file** | `${CMAKE_SOURCE_DIR}/../../mcu/cmod_mcu.ld` |
+
+`${CMAKE_SOURCE_DIR}` is the component's `src/` folder, so both values refer
+to `workspace-example/mcu/`. In the file `src/UserConfig.cmake` the two
+settings read:
+
+```cmake
+set(USER_INCLUDE_DIRECTORIES
+"${CMAKE_SOURCE_DIR}/../../mcu"
+)
+set(USER_LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/../../mcu/cmod_mcu.ld")
+```
+
+> **Note:** Keep `mcu_init();` as the first line of `main()`. It switches
+> interrupts off until the application enables them (a program loaded over
+> a running one must not inherit its interrupts), and it sets the USB UART
+> to 115200; the bootloader leaves it at 9600.
 
 The demo loop cycles the on-board RGB LED and prints a status line about
 once a second.
 
-### 4.3 About the Linker Script
+### 4.4 About the Linker Script
 
-The imported `lscript.ld` defines three memory regions: `sram` (512 KB),
-`itcm` (32 KB), and `dtcm` (64 KB). It maps everything to SRAM except the
-stack (DTCM) and `ITCM_FUNC` code (ITCM). The component settings page
-*Linker Script* can display the regions, but treat it as read-only: it
-understands only part of the hand-written script (an incomplete section list
-is expected), and letting it regenerate the script would discard the
-ITCM/DTCM layout. To resize the stack or heap, edit
-`_STACK_SIZE` / `_HEAP_SIZE` at the top of `lscript.ld` instead.
+`cmod_mcu.ld` defines three memory regions: `ITCM` (32 KB), `DTCM` (64 KB),
+and `SRAM` (512 KB). Everything goes to SRAM except `ITCM_FUNC` code and the
+interrupt entry path (ITCM), and `DTCM_DATA` variables, the interrupt tables,
+and the stack (DTCM). The loader writes ITCM and DTCM directly, so
+`ITCM_FUNC` code and `DTCM_DATA` variables, initial values included, are in
+place before `main()` runs.
+
+The stack receives all DTCM not used by `DTCM_DATA`, growing down from
+`0x0001_FFF0`; the heap receives all SRAM after the program. `_STACK_SIZE`
+and `_HEAP_SIZE` at the top of `cmod_mcu.ld` are minimums: the link fails if
+less remains. A different minimum for one application goes under **Linker
+Settings > Miscellaneous > Linker flags**, for example
+`-Wl,--defsym=_STACK_SIZE=0x4000`. The linker-script generator on the
+settings page writes a new `lscript.ld`, which this project does not use.
 
 ---
 
@@ -294,8 +327,9 @@ application image in SRAM), `0x8000` (ITCM), or `0x10000` (DTCM).
 ### 8.2 Register Inspector
 
 The Register Inspector shows all processor registers with live values. With
-the target paused at `main()`, `sp` reads `0x00020000`, the top of the DTCM,
-matching the linker script's stack placement.
+the target paused at `main()`, `sp` reads `0x0001FFF0`, just below the top of
+the DTCM, matching the linker script's stack placement (the top 16 bytes hold
+the startup code's argument slot).
 
 ![Register Inspector](images/jtag30.png)
 

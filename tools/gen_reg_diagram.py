@@ -103,10 +103,10 @@ REGS = {
     "reg_uart_lsr": [(s, 1) for s in
         ("RFE", "TEMT", "THRE", "BI", "FE", "PE", "OE", "DR")],
     "reg_spi_cr": [(s, 1) for s in
-        ("INHIBIT", "MSS", "RXRST", "TXRST", "CPHA",
+        ("LSBF", "INHIBIT", "MSS", "RXRST", "TXRST", "CPHA",
          "CPOL", "MSTR", "SPE", "LOOP")],
-    "reg_spi_sr": [(s, 1) for s in
-        ("MODF", "TX_FULL", "TX_EMPTY", "RX_FULL", "RX_EMPTY")],
+    "reg_spi_sr": [("ERR", 5)] + [(s, 1) for s in
+        ("SMS", "MODF", "TX_FULL", "TX_EMPTY", "RX_FULL", "RX_EMPTY")],
     "reg_i2c_cr": [(s, 1) for s in
         ("GC", "RSTA", "TXAK", "TX", "MSMS", "TXFIFO", "EN")],
     "reg_i2c_sr": [(s, 1) for s in
@@ -120,19 +120,20 @@ REGS = {
     "reg_xadc_sr": [("JTBSY", 1), ("JTMOD", 1), ("JTLCK", 1), ("BUSY", 1),
                     ("EOS", 1), ("EOC", 1), ("CHANNEL[5:0]", 6)],
     "reg_gpio_data": [(s, 1) for s in
-        ("D6", "D5", "D4", "D3", "D2", "D1", "D0")],
+        ("D7", "D6", "D5", "D4", "D3", "D2", "D1", "D0")],
     "reg_gpio_tri": [(s, 1) for s in
-        ("T6", "T5", "T4", "T3", "T2", "T1", "T0")],
+        ("T7", "T6", "T5", "T4", "T3", "T2", "T1", "T0")],
     "reg_exti_data": [(s, 1) for s in ("INT3", "INT2", "INT1", "INT0")],
     "reg_exti_int": [("CH1", 1)],
-    # on-board GPIO, fixed direction: DATA carries the signal, TRI is hardwired
-    # (0 = output, 1 = input) so its cells show the fixed value.
+    # on-board GPIO, fixed direction: DATA carries the signal; TRI is not
+    # implemented (writes ignored, reads 0xFFFFFFFF, board-verified), so its
+    # cells show the read value.
     "reg_led_data": [("LD2", 1), ("LD1", 1)],
-    "reg_led_tri": [("0", 1), ("0", 1)],
+    "reg_led_tri": [("1", 1), ("1", 1)],
     "reg_btn_data": [("BTN1", 1)],
     "reg_btn_tri": [("1", 1)],
     "reg_rgb_data": [("Red", 1), ("Green", 1), ("Blue", 1)],
-    "reg_rgb_tri": [("0", 1), ("0", 1), ("0", 1)],
+    "reg_rgb_tri": [("1", 1), ("1", 1), ("1", 1)],
 }
 
 

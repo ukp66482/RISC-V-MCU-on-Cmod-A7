@@ -2,7 +2,7 @@
  *
  * The SPI unit runs on its own software-settable clock: the clock-control
  * block at 0x4090_0000 sets the serial clock anywhere in ~1.6-25 MHz
- * (see the IP peripheral reference §7.2).
+ * (see the SPI Master section of the datasheet).
  *
  * Transfer rules (board-derived; the stock XSpi driver violates them and
  * loses data on this async-clocked unit):

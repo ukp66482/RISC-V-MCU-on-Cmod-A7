@@ -100,7 +100,7 @@ void setup()
     Serial.printf("  I2C slave 0x%02X (SDA=21 SCL=22)   SPI slave %s\r\n",
                   I2C_ADDR, e == ESP_OK ? "(SCK18 MOSI23 MISO19 CS5)"
                                         : "INIT FAILED");
-    Serial.println("  live telemetry decoded below; [ok] = that bus delivered");
+    Serial.println("  live telemetry decoded below; [I2C]/[SPI] = delivering bus");
     Serial.println("---------------------------------------------------------");
 }
 

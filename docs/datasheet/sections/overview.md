@@ -1,8 +1,8 @@
 # Device Overview
 
 <!-- Datasheet-only source: this file provides Chapter 1 of the unified
-datasheet (build_datasheet.py). Everything else is pulled from the existing
-spec/guide markdown. -->
+datasheet (build_datasheet.py). Every other chapter is assembled from the
+other files in this folder. -->
 
 ## Introduction
 
@@ -21,7 +21,7 @@ and an ADC.
 | Tightly-coupled memory | 128 KB: 32 KB bootloader, 32 KB ITCM, 64 KB DTCM |
 | External RAM | 512 KB SRAM, cached |
 | Flash | 4 MB QSPI |
-| GPIO | 28 pins, 4 external interrupts |
+| GPIO | 24 pins (3 × 8-bit ports), 4 external interrupts |
 | Timers / PWM | 3 × 32-bit timers with interrupts, 3 PWM channels |
 | UART | 2 × 16550 UART |
 | I2C | Master, 100 kHz |

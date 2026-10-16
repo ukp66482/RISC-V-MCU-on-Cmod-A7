@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Build the unified Cmod A7 MCU datasheet (integrated edition).
 
-The markdown files under docs/ stay the single source of truth. Instead of
-concatenating whole files, this script parses each file into sections and
+The markdown files under sections/ stay the single source of truth. Instead
+of concatenating whole files, this script parses each file into sections and
 reassembles them into a real datasheet outline (RECIPE below): overview,
-CPU/memory, pinout, peripherals, electrical/power, boot, development.
+pinout, electrical/power, system architecture, memory, peripherals, JTAG
+debug, standalone boot.
 Sections that duplicate other sections are dropped explicitly (DROPPED, with
 reasons); a coverage check fails the build if any source section is neither
 used nor accounted for.

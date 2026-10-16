@@ -1,6 +1,6 @@
 # RISC-V MCU — Vivado Hardware Design
 
-Tcl rebuild script and IP peripheral reference for the MicroBlaze RISC-V MCU block design on the Cmod A7-35T.
+Tcl rebuild scripts for the MicroBlaze RISC-V MCU block design on the Cmod A7-35T.
 
 ## Files
 
@@ -8,7 +8,7 @@ Tcl rebuild script and IP peripheral reference for the MicroBlaze RISC-V MCU blo
 |------------------|-------------|
 | `recreate_project.tcl` | **Entry point** — custom wrapper that sets up board files, creates the project, sources `top.tcl`, adds XDC constraints, and creates the HDL wrapper. **This file is manually maintained and will not be overwritten by Vivado.** |
 | `top.tcl` | Vivado-generated block design Tcl script — reconstructs the full MicroBlaze RISC-V BD design. Regenerated via `write_bd_tcl -force top.tcl` after design updates. |
-| [../docs/IP-Specification/](../docs/IP-Specification/Cmod_A7_IP_Peripheral_Reference.md) | Peripheral list, base addresses, interrupt mapping |
+| [../docs/datasheet/sections/peripherals.md](../docs/datasheet/sections/peripherals.md) | Peripheral list, base addresses, interrupt mapping |
 
 ## Usage
 

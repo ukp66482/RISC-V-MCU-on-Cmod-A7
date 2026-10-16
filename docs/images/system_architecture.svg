@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 640" font-family="Liberation Sans, Helvetica, Arial, sans-serif" fill="black">
-  <rect x="0" y="0" width="880" height="640" fill="white"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 890 640" font-family="Liberation Sans, Helvetica, Arial, sans-serif" fill="black">
+  <rect x="0" y="0" width="890" height="640" fill="white"/>
   <defs>
     <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
       <path d="M0,0 L8,4 L0,8 z"/>
@@ -41,19 +41,19 @@
   <text class="t" x="457" y="157" text-anchor="middle">16 KB D-Cache</text>
   <text class="ts" x="300" y="200" text-anchor="middle">TCM</text>
   <text class="ts" x="430" y="200" text-anchor="middle">Cache</text>
-  <text class="ts" x="505" y="200" text-anchor="middle">Peripherals</text>
+  <text class="ts" x="527" y="200" text-anchor="end">Peripherals</text>
 
   <!-- ============ debug ============ -->
-  <rect class="box" x="560" y="100" width="120" height="40"/>
-  <text class="tb" x="620" y="115" text-anchor="middle">Debug Unit</text>
-  <text class="t"  x="620" y="128" text-anchor="middle">JTAG</text>
-  <line class="dash" x1="560" y1="120" x2="534" y2="120" marker-end="url(#arr)"/>
-  <line class="dash" x1="680" y1="120" x2="708" y2="120"/>
+  <rect class="box" x="568" y="100" width="120" height="40"/>
+  <text class="tb" x="628" y="115" text-anchor="middle">Debug Unit</text>
+  <text class="t"  x="628" y="128" text-anchor="middle">JTAG</text>
+  <line class="dash" x1="568" y1="120" x2="534" y2="120" marker-end="url(#arr)"/>
+  <line class="dash" x1="688" y1="120" x2="718" y2="120"/>
 
   <!-- ============ USB connector (off-FPGA) ============ -->
-  <rect class="box" x="712" y="98" width="146" height="46"/>
-  <text class="tb" x="785" y="115" text-anchor="middle">Micro-USB</text>
-  <text class="t"  x="785" y="129" text-anchor="middle">FT2232: JTAG + UART</text>
+  <rect class="box" x="722" y="98" width="146" height="46"/>
+  <text class="tb" x="795" y="115" text-anchor="middle">Micro-USB</text>
+  <text class="t"  x="795" y="129" text-anchor="middle">FT2232: JTAG + UART</text>
 
   <!-- ============ CPU buses ============ -->
   <!-- to local memory -->
@@ -64,10 +64,9 @@
   <line class="bus" x1="430" y1="210" x2="430" y2="251"/>
   <line x1="422" y1="232" x2="434" y2="222" stroke="black" stroke-width="1"/>
   <text class="ts" x="438" y="228">32</text>
-  <!-- to peripherals -->
-  <line class="bus" x1="505" y1="210" x2="505" y2="369"/>
-  <line x1="497" y1="242" x2="509" y2="232" stroke="black" stroke-width="1"/>
-  <text class="ts" x="513" y="238">32</text>
+  <!-- to peripherals: the line itself is drawn after the SRAM bus -->
+  <line x1="507" y1="242" x2="519" y2="232" stroke="black" stroke-width="1"/>
+  <text class="ts" x="523" y="238">32</text>
 
   <!-- ============ local memory ============ -->
   <rect class="box" x="210" y="255" width="180" height="80"/>
@@ -76,15 +75,19 @@
   <text class="ts" x="300" y="311" text-anchor="middle">32 K bootloader &#183; 32 K ITCM &#183; 64 K DTCM</text>
 
   <!-- ============ memory interconnect -> SRAM ============ -->
-  <rect class="box" x="405" y="255" width="110" height="30"/>
-  <text class="t" x="460" y="274" text-anchor="middle">Memory Arbiter</text>
-  <line class="wire" x1="430" y1="285" x2="430" y2="308"/>
-  <rect class="box" x="405" y="310" width="110" height="28"/>
-  <text class="t" x="460" y="328" text-anchor="middle">SRAM Controller</text>
-  <line class="bus" x1="515" y1="324" x2="706" y2="324"/>
-  <rect class="box" x="712" y="300" width="146" height="52"/>
-  <text class="tb" x="785" y="320" text-anchor="middle">SRAM 512 KB</text>
-  <text class="ts" x="785" y="335" text-anchor="middle">cached</text>
+  <rect class="box" x="405" y="255" width="85" height="30"/>
+  <text class="t" x="448" y="274" text-anchor="middle">Memory Arbiter</text>
+  <line class="wire" x1="430" y1="285" x2="430" y2="316"/>
+  <rect class="box" x="405" y="318" width="85" height="28"/>
+  <text class="t" x="448" y="336" text-anchor="middle">SRAM Controller</text>
+  <line class="bus" x1="490" y1="332" x2="716" y2="332"/>
+  <rect class="box" x="722" y="306" width="146" height="52"/>
+  <text class="tb" x="795" y="326" text-anchor="middle">SRAM 512 KB</text>
+  <text class="ts" x="795" y="341" text-anchor="middle">cached</text>
+
+  <!-- CPU -> peripheral bus, crossing over the SRAM bus (white gap = no connection) -->
+  <line x1="515" y1="324" x2="515" y2="340" stroke="white" stroke-width="14"/>
+  <line class="bus" x1="515" y1="210" x2="515" y2="369"/>
 
   <!-- ============ peripheral bus bar ============ -->
   <text class="ts" x="65" y="367">Peripheral bus</text>
@@ -121,9 +124,9 @@
   <text class="ts" x="303" y="470" text-anchor="middle">USB &#183; DIP</text>
 
   <rect class="box" x="341" y="430" width="62" height="60"/>
-  <text class="tb" x="372" y="445" text-anchor="middle">GPIO 4&#215;7</text>
+  <text class="tb" x="372" y="445" text-anchor="middle">GPIO 3&#215;8</text>
   <text class="ts" x="372" y="458" text-anchor="middle">EXTI &#215;4</text>
-  <text class="ts" x="372" y="470" text-anchor="middle">A &#183; B &#183; C &#183; D</text>
+  <text class="ts" x="372" y="470" text-anchor="middle">A &#183; B &#183; C</text>
 
   <rect class="box" x="410" y="430" width="62" height="60"/>
   <text class="tb" x="441" y="445" text-anchor="middle">I2C</text>
@@ -146,14 +149,14 @@
   <text class="ts" x="62" y="168">IRQ</text>
 
   <!-- ============ QSPI -> flash chip ============ -->
-  <polyline class="wire" points="679,458 700,458 700,420 708,420"/>
-  <rect class="box" x="712" y="394" width="146" height="52"/>
-  <text class="tb" x="785" y="410" text-anchor="middle">QSPI NOR Flash</text>
-  <text class="t"  x="785" y="424" text-anchor="middle">4 MB</text>
-  <text class="ts" x="785" y="437" text-anchor="middle">hardware image + application</text>
+  <line class="wire" x1="679" y1="460" x2="720" y2="460"/>
+  <rect class="box" x="722" y="434" width="146" height="52"/>
+  <text class="tb" x="795" y="450" text-anchor="middle">QSPI NOR Flash</text>
+  <text class="t"  x="795" y="464" text-anchor="middle">4 MB</text>
+  <text class="ts" x="795" y="477" text-anchor="middle">hardware image + application</text>
 
   <!-- ============ UART-USB route ============ -->
-  <polyline class="dash" points="303,426 303,404 690,404 690,160 740,160 740,148"/>
+  <polyline class="dash" points="303,426 303,404 693,404 693,160 750,160 750,144"/>
   <text class="ti" x="475" y="398" text-anchor="middle">UART0 (USB)</text>
 
   <!-- ============ DIP header ============ -->

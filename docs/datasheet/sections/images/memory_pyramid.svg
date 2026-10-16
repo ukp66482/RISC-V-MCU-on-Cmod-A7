@@ -54,7 +54,7 @@
 
   <line class="lead" x1="502" y1="328" x2="536" y2="328"/>
   <text class="ti" x="540" y="325">storage</text>
-  <text class="ti" x="540" y="335">copied to SRAM at boot</text>
+  <text class="ti" x="540" y="335">copied to RAM at boot</text>
 
   <!-- ============ speed axis (left; explicit arrowhead, horizontal labels) ============ -->
   <line class="lead" x1="24" y1="356" x2="24" y2="54"/>

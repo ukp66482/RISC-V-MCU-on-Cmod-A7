@@ -24,8 +24,8 @@ Peripheral registers and base addresses are documented in the
 | 5 | GPIO_A4 | C15 | I/O | General purpose GPIO, Group A bit 4 |
 | 6 | GPIO_A5 | H1 | I/O | General purpose GPIO, Group A bit 5 |
 | 7 | GPIO_A6 | A15 | I/O | General purpose GPIO, Group A bit 6 |
-| 8 | INTR_0 | B15 | Input | External interrupt input 0 |
-| 9 | INTR_1 | A14 | Input | External interrupt input 1 |
+| 8 | GPIO_A7 | B15 | I/O | General purpose GPIO, Group A bit 7 |
+| 9 | INTR_0 | A14 | Input | External interrupt input 0 |
 | 10 | PWM_0 | J3 | Output | PWM output channel 0 |
 | 11 | UART_TX | J1 | Output | UART 1 transmit |
 | 12 | UART_RX | K2 | Input | UART 1 receive |
@@ -33,13 +33,13 @@ Peripheral registers and base addresses are documented in the
 | 14 | I2C_SDA | L2 | I/O (open-drain) | I2C data (external 4.7 kΩ pull-up recommended) |
 | 15 | ADC_0 | G3 / G2 | Analog | Analog input 0 (XADC VAUX4) |
 | 16 | ADC_1 | H2 / J2 | Analog | Analog input 1 (XADC VAUX12) |
-| 17 | GPIO_B0 | M1 | I/O | General purpose GPIO, Group B bit 0 |
-| 18 | GPIO_B1 | N3 | I/O | General purpose GPIO, Group B bit 1 |
-| 19 | GPIO_B2 | P3 | I/O | General purpose GPIO, Group B bit 2 |
-| 20 | GPIO_B3 | M2 | I/O | General purpose GPIO, Group B bit 3 |
-| 21 | GPIO_B4 | N1 | I/O | General purpose GPIO, Group B bit 4 |
-| 22 | GPIO_B5 | N2 | I/O | General purpose GPIO, Group B bit 5 |
-| 23 | GPIO_B6 | P1 | I/O | General purpose GPIO, Group B bit 6 |
+| 17 | INTR_1 | M1 | Input | External interrupt input 1 |
+| 18 | PWM_1 | N3 | Output | PWM output channel 1 |
+| 19 | PWM_2 | P3 | Output | PWM output channel 2 |
+| 20 | NC | M2 | — | Not connected (reserved for future use) |
+| 21 | NC | N1 | — | Not connected (reserved for future use) |
+| 22 | NC | N2 | — | Not connected (reserved for future use) |
+| 23 | NC | P1 | — | Not connected (reserved for future use) |
 | 24 | **VU** | — | Power | Power input (ext) / Power output (USB) |
 
 ---
@@ -49,22 +49,22 @@ Peripheral registers and base addresses are documented in the
 | DIP Pin | Signal Name | FPGA Pin | Direction | Function |
 |---------|-------------|----------|-----------|----------|
 | 25 | **GND** | — | Power | Ground reference |
-| 26 | GPIO_D6 | R3 | I/O | General purpose GPIO, Group D bit 6 |
-| 27 | GPIO_D5 | T3 | I/O | General purpose GPIO, Group D bit 5 |
-| 28 | GPIO_D4 | R2 | I/O | General purpose GPIO, Group D bit 4 |
-| 29 | GPIO_D3 | T1 | I/O | General purpose GPIO, Group D bit 3 |
-| 30 | GPIO_D2 | T2 | I/O | General purpose GPIO, Group D bit 2 |
-| 31 | GPIO_D1 | U1 | I/O | General purpose GPIO, Group D bit 1 |
-| 32 | GPIO_D0 | W2 | I/O | General purpose GPIO, Group D bit 0 |
-| 33 | INTR_3 | V2 | Input | External interrupt input 3 |
-| 34 | PWM_1 | W3 | Output | PWM output channel 1 |
+| 26 | GPIO_B7 | R3 | I/O | General purpose GPIO, Group B bit 7 |
+| 27 | GPIO_B6 | T3 | I/O | General purpose GPIO, Group B bit 6 |
+| 28 | GPIO_B5 | R2 | I/O | General purpose GPIO, Group B bit 5 |
+| 29 | GPIO_B4 | T1 | I/O | General purpose GPIO, Group B bit 4 |
+| 30 | GPIO_B3 | T2 | I/O | General purpose GPIO, Group B bit 3 |
+| 31 | GPIO_B2 | U1 | I/O | General purpose GPIO, Group B bit 2 |
+| 32 | GPIO_B1 | W2 | I/O | General purpose GPIO, Group B bit 1 |
+| 33 | GPIO_B0 | V2 | I/O | General purpose GPIO, Group B bit 0 |
+| 34 | INTR_3 | W3 | Input | External interrupt input 3 |
 | 35 | SPI_SCLK | V3 | Output | SPI clock (software-settable, up to 25 MHz) |
 | 36 | SPI_MOSI | W5 | Output | SPI master-out slave-in |
 | 37 | SPI_MISO | V4 | Input | SPI master-in slave-out |
 | 38 | SPI_SS0 | U4 | Output | SPI slave select 0 (active low) |
 | 39 | SPI_SS1 | V5 | Output | SPI slave select 1 (active low) |
-| 40 | PWM_2 | W4 | Output | PWM output channel 2 |
-| 41 | INTR_2 | U5 | Input | External interrupt input 2 |
+| 40 | INTR_2 | W4 | Input | External interrupt input 2 |
+| 41 | GPIO_C7 | U5 | I/O | General purpose GPIO, Group C bit 7 |
 | 42 | GPIO_C6 | U2 | I/O | General purpose GPIO, Group C bit 6 |
 | 43 | GPIO_C5 | W6 | I/O | General purpose GPIO, Group C bit 5 |
 | 44 | GPIO_C4 | U3 | I/O | General purpose GPIO, Group C bit 4 |
@@ -77,12 +77,15 @@ Peripheral registers and base addresses are documented in the
 
 ## 4. GPIO Groups
 
-| Group | Width | DIP Pins |
-|-------|-------|----------|
-| A | 7-bit | 1–7 |
-| B | 7-bit | 17–23 |
-| C | 7-bit | 42–48 |
-| D | 7-bit | 26–32 |
+| Group | Width | DIP Pins | Bit Order |
+|-------|-------|----------|-----------|
+| A | 8-bit | 1–8 | A0 = pin 1 … A7 = pin 8 |
+| B | 8-bit | 26–33 | B0 = pin 33 … B7 = pin 26 |
+| C | 8-bit | 41–48 | C0 = pin 48 … C7 = pin 41 |
+
+Each group occupies eight adjacent pins, with bit 0 at the end nearest the
+Pmod connector. Groups A and C face each other bit for bit across the
+connector (pin k faces pin 49 − k).
 
 ---
 
@@ -90,10 +93,10 @@ Peripheral registers and base addresses are documented in the
 
 | Signal | DIP Pin | FPGA Pin |
 |--------|---------|----------|
-| INTR_0 | 8 | B15 |
-| INTR_1 | 9 | A14 |
-| INTR_2 | 41 | U5 |
-| INTR_3 | 33 | V2 |
+| INTR_0 | 9 | A14 |
+| INTR_1 | 17 | M1 |
+| INTR_2 | 40 | W4 |
+| INTR_3 | 34 | W3 |
 
 ---
 
@@ -102,8 +105,8 @@ Peripheral registers and base addresses are documented in the
 | Signal | DIP Pin | FPGA Pin |
 |--------|---------|----------|
 | PWM_0 | 10 | J3 |
-| PWM_1 | 34 | W3 |
-| PWM_2 | 40 | W4 |
+| PWM_1 | 18 | N3 |
+| PWM_2 | 19 | P3 |
 
 ---
 

@@ -20,11 +20,11 @@
   <text class="bit" x="564" y="37" text-anchor="end">3</text>
   <rect class="cell" x="570" y="42" width="48" height="34"/>
   <text class="bit" x="594" y="37" text-anchor="middle">2</text>
-  <text class="fld" x="594" y="63" text-anchor="middle">0</text>
+  <text class="fld" x="594" y="63" text-anchor="middle">1</text>
   <rect class="cell" x="618" y="42" width="48" height="34"/>
   <text class="bit" x="642" y="37" text-anchor="middle">1</text>
-  <text class="fld" x="642" y="63" text-anchor="middle">0</text>
+  <text class="fld" x="642" y="63" text-anchor="middle">1</text>
   <rect class="cell" x="666" y="42" width="48" height="34"/>
   <text class="bit" x="690" y="37" text-anchor="middle">0</text>
-  <text class="fld" x="690" y="63" text-anchor="middle">0</text>
+  <text class="fld" x="690" y="63" text-anchor="middle">1</text>
 </svg>

@@ -147,13 +147,18 @@ workspace-example/*
 ############################################
 # Plan-B pure-MCU additions
 ############################################
+!workspace-example/mcu/
+workspace-example/mcu/*
+!workspace-example/mcu/README.md
+!workspace-example/mcu/*.h
+!workspace-example/mcu/*.ld
+
 !workspace-example/app_template/
 workspace-example/app_template/*
 !workspace-example/app_template/src/
 workspace-example/app_template/src/*
 !workspace-example/app_template/src/*.c
 !workspace-example/app_template/src/*.h
-!workspace-example/app_template/src/*.ld
 
 !workspace-example/asm_template/
 workspace-example/asm_template/*
@@ -161,7 +166,6 @@ workspace-example/asm_template/*
 !workspace-example/asm_template/src/
 workspace-example/asm_template/src/*
 !workspace-example/asm_template/src/*.S
-!workspace-example/asm_template/src/*.ld
 
 !workspace-example/mem_bench/
 workspace-example/mem_bench/*
@@ -169,7 +173,6 @@ workspace-example/mem_bench/*
 workspace-example/mem_bench/src/*
 !workspace-example/mem_bench/src/*.c
 !workspace-example/mem_bench/src/*.h
-!workspace-example/mem_bench/src/*.ld
 
 !workspace-example/showcase/
 workspace-example/showcase/*
@@ -178,7 +181,6 @@ workspace-example/showcase/*
 workspace-example/showcase/src/*
 !workspace-example/showcase/src/*.c
 !workspace-example/showcase/src/*.h
-!workspace-example/showcase/src/*.ld
 !workspace-example/showcase/esp32_bridge/
 workspace-example/showcase/esp32_bridge/*
 !workspace-example/showcase/esp32_bridge/*.ino

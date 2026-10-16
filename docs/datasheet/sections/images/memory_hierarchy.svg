@@ -43,7 +43,7 @@
   <text class="t"  x="165" y="413" text-anchor="middle">DTCM &#8212; 64 KB</text>
   <text class="ts" x="165" y="427" text-anchor="middle">0x0001 0000 &#183; fast data</text>
   <text class="ts" x="165" y="441" text-anchor="middle">stack, top-down from</text>
-  <text class="ts" x="165" y="453" text-anchor="middle">0x0002 0000</text>
+  <text class="ts" x="165" y="453" text-anchor="middle">0x0001 FFF0</text>
 
   <!-- bus CPU -> TCM -->
   <path class="bus" d="M 350 158 L 350 205 L 165 205 L 165 248"/>

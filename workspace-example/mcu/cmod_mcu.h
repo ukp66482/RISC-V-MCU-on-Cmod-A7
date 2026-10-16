@@ -2,9 +2,12 @@
  * cmod_mcu.h - device header for the RISC-V MCU on Cmod A7-35T
  *
  * Base addresses, register offsets, and bit masks for every peripheral,
- * mirroring chapter 5 of the datasheet (Register Access Conventions and
- * the per-peripheral register maps). All registers are 32-bit words and
+ * mirroring the datasheet's Peripherals chapter (Register Access Conventions
+ * and the per-peripheral register maps). All registers are 32-bit words and
  * must be accessed with full-word reads and writes.
+ *
+ * For C it also provides REG32() register access, the ITCM_FUNC / DTCM_DATA
+ * placement attributes (memory layout in cmod_mcu.ld), and mcu_init().
  *
  * The same file serves C and assembly:
  *   C:        #include "cmod_mcu.h"      REG32(RGB_BASE) = RGB_GREEN;
@@ -23,8 +26,8 @@
 
 #define CPU_HZ            100000000   /* system clock: 100 MHz, 10 ns/cycle */
 
-/* Memory map (see datasheet chapter 3) */
-#define BOOTROM_BASE      0x00000000  /* 32 KB boot ROM (do not use)   */
+/* Memory map (see the datasheet's Memory Hierarchy chapter) */
+#define BOOTROM_BASE      0x00000000  /* 32 KB bootloader (never write) */
 #define ITCM_BASE         0x00008000  /* 32 KB fast code (ITCM_FUNC)   */
 #define ITCM_SIZE         0x00008000
 #define DTCM_BASE         0x00010000  /* 64 KB fast data + stack       */
@@ -33,17 +36,19 @@
 #define SRAM_SIZE         0x00080000
 
 /* ------------------------------------------------------------------ */
-/* GPIO ports (datasheet 5.2)                                          */
+/* GPIO ports (datasheet: GPIO, External Interrupt Inputs)             */
 /* ------------------------------------------------------------------ */
 
 #define LED_BASE          0x40000000  /* 2-bit,  on-board LEDs, output      */
 #define BTN_BASE          0x40010000  /* 1-bit,  user button BTN1, input    */
 #define RGB_BASE          0x40020000  /* 3-bit,  RGB LED, output            */
-#define GPIO_A_BASE       0x40030000  /* 7-bit,  DIP pins 1-7,  bidir       */
-#define GPIO_B_BASE       0x40040000  /* 7-bit,  DIP pins 17-23, bidir      */
-#define GPIO_C_BASE       0x40050000  /* 7-bit,  DIP pins 42-48, bidir      */
-#define GPIO_D_BASE       0x40060000  /* 7-bit,  DIP pins 26-32, bidir      */
+#define GPIO_A_BASE       0x40030000  /* 8-bit,  DIP pins 1-8,   bidir      */
+#define GPIO_B_BASE       0x40040000  /* 8-bit,  DIP pins 26-33, bidir      */
+#define GPIO_C_BASE       0x40050000  /* 8-bit,  DIP pins 41-48, bidir      */
 #define EXTI_BASE         0x40070000  /* 4-bit,  INTR_0..3, input, IRQ 5    */
+
+/* DIP groups A-C: bit 0 is the pin nearest the Pmod end
+ * (A0 = pin 1, B0 = pin 33, C0 = pin 48) */
 
 /* register offsets (all ports share one layout) */
 #define GPIO_DATA         0x000       /* RW   pin data                      */
@@ -61,15 +66,15 @@
 #define RGB_RED           0x4
 
 /* ------------------------------------------------------------------ */
-/* Timers and PWM (datasheet 5.3) - dual 32-bit counter blocks         */
+/* Timers and PWM (datasheet: Timers and PWM) - dual 32-bit counters   */
 /* ------------------------------------------------------------------ */
 
 #define TIMER0_BASE       0x40100000  /* general purpose, IRQ 0             */
 #define TIMER1_BASE       0x40110000  /* general purpose, IRQ 1             */
 #define TIMER2_BASE       0x40120000  /* general purpose, IRQ 2             */
 #define PWM0_BASE         0x40200000  /* PWM channel 0, DIP pin 10          */
-#define PWM1_BASE         0x40210000  /* PWM channel 1, DIP pin 34          */
-#define PWM2_BASE         0x40220000  /* PWM channel 2, DIP pin 40          */
+#define PWM1_BASE         0x40210000  /* PWM channel 1, DIP pin 18          */
+#define PWM2_BASE         0x40220000  /* PWM channel 2, DIP pin 19          */
 
 /* register offsets: counter 0 at +0x00, counter 1 at +0x10 */
 #define TMR_TCSR0         0x00        /* RW   counter 0 control/status      */
@@ -98,7 +103,7 @@
 #define TMR_PWM_RUN       (TMR_PWMA | TMR_ENT | TMR_ARHT | TMR_GENT | TMR_UDT)
 
 /* ------------------------------------------------------------------ */
-/* UART, industry-standard 16550 (datasheet 5.4)                       */
+/* UART, industry-standard 16550 (datasheet: UART)                     */
 /* ------------------------------------------------------------------ */
 
 #define UART_USB_BASE     0x40300000  /* USB console, IRQ 4                 */
@@ -133,7 +138,7 @@
 #define UART_DIV_115200   54
 
 /* ------------------------------------------------------------------ */
-/* Interrupt controller (datasheet 5.1.4 / 2.x)                        */
+/* Interrupt controller (datasheet: Interrupt Controller)              */
 /* ------------------------------------------------------------------ */
 
 #define INTC_BASE         0x40400000
@@ -162,7 +167,7 @@
 #define IRQ_BIT(n)        (1u << (n))
 
 /* ------------------------------------------------------------------ */
-/* SPI master spi_0 + clock control (datasheet 5.7)                    */
+/* SPI master spi_0 + clock control (datasheet: SPI Master)            */
 /* NOTE: use the register-level flow from showcase/src/spi0.c; the     */
 /* generic driver transfer path is not reliable on this device.        */
 /* ------------------------------------------------------------------ */
@@ -202,7 +207,7 @@
 /* board-verified CR values (see spi0.c): setup -> settle -> run */
 #define SPI_CR_SETUP      0x1E6       /* enable+master+manual SS+FIFO reset */
 #define SPI_CR_RUN        0x086       /* external transfer, SS by SPI_SSR   */
-#define SPI_CR_IDLE       0x186       /* inhibited between transfers        */
+#define SPI_CR_IDLE       0x1E6       /* inhibited + FIFO reset, idle       */
 
 /* SPI clock control unit: SCK = 200 MHz / N, N = 8..128 (default 32) */
 #define SPI0_CLK_BASE     0x40900000
@@ -212,8 +217,9 @@
 #define SPI0CLK_APPLY     0x25C       /* WO   write 3 to apply              */
 
 /* ------------------------------------------------------------------ */
-/* I2C master i2c_0 (datasheet 5.6) - course path is the driver;       */
-/* the subset below covers reset and the bus-busy guard.               */
+/* I2C master i2c_0 (datasheet: I2C Controller) - the course           */
+/* path is the driver; the subset below covers reset and the           */
+/* bus-busy guard.                                                     */
 /* ------------------------------------------------------------------ */
 
 #define I2C_BASE          0x40700000  /* DIP pins 13/14, 100 kHz, IRQ 6     */
@@ -243,7 +249,7 @@
 #define I2C_SR_TX_EMPTY   0x80
 
 /* ------------------------------------------------------------------ */
-/* ADC (datasheet 5.5) - course path is the driver; data registers     */
+/* ADC (datasheet: ADC) - course path is the driver; data registers    */
 /* below allow direct reads. Samples are 12-bit, left-justified in     */
 /* bits [15:4] of the 16-bit result.                                   */
 /* ------------------------------------------------------------------ */
@@ -284,6 +290,37 @@
  *   while (!(REG32(UART_USB_BASE + UART_LSR) & UART_LSR_THRE)) ;
  *   REG32(UART_USB_BASE + UART_THR) = 'A';
  */
+
+/* Placement in tightly-coupled memory: 1-cycle, never cached, so the worst
+ * case equals the best case (cmod_mcu.ld places them).
+ *   ITCM_FUNC void isr(void *ref) { ... }    -- function runs from ITCM
+ *   DTCM_DATA static u32 buf[64];            -- variable lives in DTCM
+ * Code in ITCM stays fast only while everything it calls is in ITCM too.
+ * Use REG32() there: at -O0 the BSP's Xil_In32()/Xil_Out32() are real
+ * function calls into SRAM. */
+#define ITCM_FUNC         __attribute__((section(".itcm.text"), noinline))
+#define DTCM_DATA         __attribute__((section(".dtcm")))
+
+/* mcu_init() - call first in main():
+ *   - starts from a quiet interrupt state, even when JTAG loads this
+ *     program over one that was running: global interrupts off, the
+ *     interrupt controller muted;
+ *   - sets the USB console to 115200 baud, 8N1 (the bootloader leaves 9600).
+ * Memory needs no setup: the loader has already placed ITCM_FUNC code and
+ * DTCM_DATA variables. */
+static inline void mcu_init(void)
+{
+    __asm__ volatile("csrc mstatus, %0" :: "r"(0x8));   /* MIE = 0       */
+    REG32(INTC_BASE + INTC_MER) = 0;
+    REG32(INTC_BASE + INTC_IER) = 0;
+
+    while (!(REG32(UART_USB_BASE + UART_LSR) & UART_LSR_TX_EMPTY))
+        ;                                   /* let pending output finish */
+    REG32(UART_USB_BASE + UART_LCR) = UART_LCR_DLAB;
+    REG32(UART_USB_BASE + UART_DLL) = UART_DIV_115200 & 0xFF;
+    REG32(UART_USB_BASE + UART_DLM) = UART_DIV_115200 >> 8;
+    REG32(UART_USB_BASE + UART_LCR) = UART_LCR_8N1;
+}
 
 #endif /* __ASSEMBLER__ */
 

@@ -3,7 +3,7 @@
 This guide describes how an application is stored in the QSPI flash and
 started automatically at power-on. A small bootloader (AMD's standard
 SREC SPI Bootloader, carried inside the hardware image) copies the
-application from flash into SRAM and starts it, with no PC attached, in
+application from flash into RAM and starts it, with no PC attached, in
 under a second after power is applied.
 
 The walkthrough covers the complete path: building the bootloader,
@@ -15,7 +15,7 @@ image itself is done in the Vitis Unified IDE.
 
 ## 1. How Standalone Boot Works
 
-![Standalone boot sequence: the FPGA restores the bootloader, which copies the application from flash into SRAM and runs it](./images/boot_flow.svg)
+![Standalone boot sequence: the FPGA restores the bootloader, which copies the application from flash into SRAM, ITCM, and DTCM and runs it](./images/boot_flow.svg)
 
 The flash holds two independent regions, read by two different readers:
 
@@ -28,15 +28,17 @@ Block RAM is volatile, so the bootloader cannot live there across a power
 cycle. Its persistent copy travels inside the bitstream: a bitstream
 carries the initial contents of every block RAM, and the CPU's local
 memory is built from block RAM. At every power-on the configuration
-engine reloads the bitstream from flash, which restores the bootloader.
-Like a mask ROM, it cannot be corrupted from software. The CPU then
-leaves reset at address `0x0` and executes it.
+engine reloads the bitstream from flash, which restores the bootloader,
+so application updates never touch it. The CPU then leaves reset at
+address `0x0` and executes it.
 
 The application is stored as an SREC image (Motorola S-record), a text
 format in which every line carries its own destination address. The
 bootloader copies each record to the address it names, so the linker
-script decides where the program runs. The course template links to SRAM
-at `0x6000_0000`, so the image is loaded there.
+script decides where the program runs. The course linker script
+(`mcu/cmod_mcu.ld`) places the program in SRAM at `0x6000_0000`, and
+`ITCM_FUNC` code and `DTCM_DATA` variables in the ITCM and DTCM, so the
+image is loaded into those three memories.
 
 | Memory | Size | Role |
 |---|---|---|
@@ -95,8 +97,9 @@ click **Finish**.
 ![Bootloader Summary](images/boot3.png)
 
 > **Note:** The template automatically selects this board's QSPI flash
-> controller, and it links the bootloader to Block RAM at `0x0`, so the
-> bootloader can copy an application into SRAM without overwriting itself.
+> controller, and it links the bootloader to Block RAM at `0x0`, below the
+> application's ITCM and DTCM, so the bootloader can load an application
+> without overwriting itself.
 > Neither setting needs to be adjusted.
 
 ## 4. Configure the Bootloader
@@ -223,7 +226,9 @@ cp workspace-example/test/build/test.srec \
 
 Each S3 line of the SREC text embeds its destination address; with the
 course linker script every record falls in SRAM (addresses beginning
-`6000`). The image is about three times the size of the binary it
+`6000`), the ITCM (`00008000`–`0000FFFF`), or the DTCM
+(`00010000`–`0001FFFF`), and none lies below `0x0000_8000`, where the
+bootloader lives. The image is about three times the size of the binary it
 encodes; the 1.875 MB slot therefore never limits an application before
 the 512 KB SRAM does.
 
@@ -338,10 +343,17 @@ flash contents cannot interfere with a debug session.
    template sets the UART divisor in `mcu_init()`; the plain Hello World
    template does not set it at all.
 6. **Deployed, but silent after power-on (works under JTAG):** The ELF
-   was not linked with the course template's `lscript.ld`. The bootloader
-   honors the SREC record addresses, and a default all-BRAM layout
-   collides with the bootloader itself. Rebuild with the template and
-   redeploy.
+   was not linked with the course linker script, `mcu/cmod_mcu.ld`. The
+   bootloader honors the SREC record addresses, and a default all-BRAM
+   layout collides with the bootloader itself. Rebuild against the `mcu/`
+   folder and redeploy.
 7. **Board boots an old application:** The flash write did not complete.
    Repeat the application programming step and confirm the verify pass
    succeeds.
+8. **Power-on boots normally, but the reset button (BTN0) hangs the
+   board:** The application was linked with an earlier course linker
+   script, which wrote over the bootloader's first instructions at every
+   boot. A power cycle restores the bootloader; a reset does not. Rebuild
+   against the current `mcu/cmod_mcu.ld` and redeploy, then check the SREC
+   text: in every `S3` line the address (the eight hex digits after `S3`
+   and the two-digit byte count) must be `00008000` or higher.

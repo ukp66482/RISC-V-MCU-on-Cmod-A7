@@ -6,7 +6,7 @@
  *   3  PWM  : hobby servo, 50 Hz / 0.5-2.5 ms               DIP 10
  *   4  ADC  : potentiometer, live millivolts                DIP 15
  *   5  IRQ  : timer_0, 100 Hz system tick (ISR in ITCM)     no wiring
- *   6  IRQ  : external button on INTR_0                     DIP 8 (+10k to 3.3V)
+ *   6  IRQ  : external button on INTR_0                     DIP 9 (+10k to 3.3V)
  *   7  UART : telemetry + commands on the DIP UART          DIP 11/12
  *
  * The serial buses are demonstrated against an ESP32 "receiver station"
@@ -65,28 +65,10 @@
 #define IPISR       0x120
 #define IPIER       0x128
 
-static void mcu_init(void)
-{
-    extern char __itcm_lma[], __itcm_start[], __itcm_end[];
-    extern char __dtcm_start[], __dtcm_end[];
-
-    /* start from a quiet state even if loaded over a running program
-     * (JTAG reload): global interrupts off, interrupt controller muted */
-    __asm__ volatile("csrc mstatus, %0" :: "r"(8));
-    Xil_Out32(XPAR_XINTC_0_BASEADDR + 0x1C, 0);        /* MER = 0 */
-    Xil_Out32(XPAR_XINTC_0_BASEADDR + 0x08, 0);        /* IER = 0 */
-
-    memcpy(__itcm_start, __itcm_lma, (size_t)(__itcm_end - __itcm_start));
-    memset(__dtcm_start, 0, (size_t)(__dtcm_end - __dtcm_start));
-    __asm__ volatile("fence.i");
-    XUartNs550_SetBaud(UART_USB, 100000000, 115200);
-    XUartNs550_SetLineControlReg(UART_USB, XUN_LCR_8_DATA_BITS);
-}
-
 /* ------------------------------------------------------------------ */
 /* interrupt service routines                                         */
 /* ------------------------------------------------------------------ */
-volatile u32 g_ticks;                     /* 100 Hz system tick        */
+DTCM_DATA volatile u32 g_ticks;           /* 100 Hz system tick        */
 static volatile u32 btn_presses;          /* debounced button presses  */
 static volatile u32 exti_raw;             /* every EXTI event (guard)  */
 
@@ -115,7 +97,7 @@ static void exti_isr(void *ref)
     }
 }
 
-static XIntc intc;
+DTCM_DATA static XIntc intc;      /* read on every interrupt: keep it in DTCM */
 
 static int irq_init(void)
 {
@@ -129,8 +111,7 @@ static int irq_init(void)
                                  (Xil_ExceptionHandler)XIntc_InterruptHandler,
                                  &intc);
 
-    /* EXTI port: inputs, channel interrupt + global interrupt enable */
-    REG32(EXTI + 0x4)   = 0xF;
+    /* EXTI port: channel interrupt + global interrupt enable */
     REG32(EXTI + IPISR) = REG32(EXTI + IPISR);
     REG32(EXTI + IPIER) = 1;
     REG32(EXTI + GIER)  = 0x80000000u;
@@ -306,19 +287,15 @@ int main(void)
     xil_printf("                    common GND (ESP32 on its own USB)\r\n");
     xil_printf("  Servo (SG90)    : signal DIP10, power VU(5V), GND\r\n");
     xil_printf("  Potentiometer   : wiper DIP15, ends 3.3V / GND\r\n");
-    xil_printf("  Button          : DIP8 -> button -> GND, 10k DIP8->3.3V\r\n");
+    xil_printf("  Button          : DIP9 -> button -> GND, 10k DIP9->3.3V\r\n");
     xil_printf("  DIP UART        : DIP11 TX / DIP12 RX, 115200 8N1\r\n");
     xil_printf("  3.3V comes from the Pmod connector VCC pins.\r\n\r\n");
-
-    REG32(RGB + 0x4)  = 0;                             /* LEDs = outputs */
-    REG32(LED2 + 0x4) = 0;
 
     int adc_ok = (adc_init() == 0);
     servo_init();
     uart1_init();
     bridge_init();
     int irq_ok = (irq_init() == 0);
-    REG32(BTN1 + 0x4) = 1;                             /* BTN1 = input */
 
     xil_printf("  ADC ............ %s\r\n", adc_ok ? "OK" : "FAILED");
     xil_printf("  Servo PWM ...... OK (50 Hz on DIP 10)\r\n");
@@ -328,7 +305,7 @@ int main(void)
                          : "not detected (wire it + reset, or ignore)");
     xil_printf("  Interrupts ..... %s\r\n",
                irq_ok ? "OK (timer_0 + button EXTI)" : "FAILED");
-    xil_printf("  tick ISR runs from ITCM at 0x%08x (see lscript.ld)\r\n",
+    xil_printf("  tick ISR runs from ITCM at 0x%08x (see mcu/cmod_mcu.ld)\r\n",
                (unsigned)(UINTPTR)tick_isr);
     console_help();
 

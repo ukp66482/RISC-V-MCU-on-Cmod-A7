@@ -14,30 +14,14 @@
  *     re-read the same buffer. A 32 KB buffer exceeds the 16 KB D-cache,
  *     so its warm pass stays cold — capacity in action.
  *
- * Built on the course template: mcu_init() first, template lscript.ld.
+ * Built on the course template: cmod_mcu.h + cmod_mcu.ld (workspace mcu/).
  * =========================================================================*/
-#include <string.h>
 #include "xil_printf.h"
 #include "xil_io.h"
 #include "xil_cache.h"
-#include "xuartns550_l.h"
 #include "xparameters.h"
 #include "sleep.h"
-
-#define ITCM_FUNC __attribute__((section(".itcm.text"), noinline))
-#define DTCM_DATA __attribute__((section(".dtcm")))
-
-static void mcu_init(void)
-{
-    extern char __itcm_lma[], __itcm_start[], __itcm_end[];
-    extern char __dtcm_start[], __dtcm_end[];
-
-    memcpy(__itcm_start, __itcm_lma, (size_t)(__itcm_end - __itcm_start));
-    memset(__dtcm_start, 0, (size_t)(__dtcm_end - __dtcm_start));
-    __asm__ volatile("fence.i");
-
-    XUartNs550_SetBaud(XPAR_UART_USB_BASEADDR, 100000000, 115200);
-}
+#include "cmod_mcu.h"
 
 /* ------------------------------------------------------------------ timer */
 #define TIMER_BASE  XPAR_TIMER_2_BASEADDR   /* timer_2: free in course apps */
@@ -124,7 +108,7 @@ static void report(const char *name, u32 cyc, u32 n)
 
 int main(void)
 {
-    mcu_init();                         /* <-- the one rule */
+    mcu_init();                         /* console to 115200 baud */
 
     xil_printf("\r\n==== mem_bench - memory hierarchy latencies ====\r\n");
     xil_printf("I$ %uK  D$ %uK  line %u words   (compare: Memory Spec, "

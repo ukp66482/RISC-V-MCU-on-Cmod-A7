@@ -38,11 +38,12 @@ stack and fast data.
 
 > **Note:** The bootloader region has no software load path. Its contents are
 > carried inside the hardware image and restored from flash at every power-on,
-> before the processor starts. Like a mask ROM, the bootloader survives
-> application updates and cannot be corrupted by software
-> (see the Standalone Boot Mode guide).
+> before the processor starts, so application updates never touch it
+> (see the Standalone Boot Mode guide). The region is ordinary RAM, however:
+> software must never write below `0x0000_8000`. A stray write there persists
+> until the next power cycle, and a reset then restarts the damaged bootloader.
 
-### 1.4 AXI Interrupt Controller (`microblaze_riscv_0_axi_intc`)
+### 1.3 AXI Interrupt Controller (`microblaze_riscv_0_axi_intc`)
 
 The interrupt controller combines the peripheral interrupt sources into a single
 request line to the processor. When an interrupt is taken, the processor reads
@@ -66,7 +67,7 @@ the controller to determine which source is active.
 > **Note:** The controller's registers and programming interface are described
 > with the other peripheral registers in the Peripherals chapter.
 
-### 1.5 Debug Module (`mdm_1`)
+### 1.4 Debug Module (`mdm_1`)
 
 **Description:** The debug module connects a host debugger to the processor
 over the JTAG port. Vitis and `xsdb` sessions use it to halt and single-step
@@ -77,13 +78,14 @@ writing a GPIO register to drive an output — with no firmware running.
 
 ![The debug module gives the host debugger access to the core, memory, peripheral registers, and system reset over JTAG](./images/debug_module.svg)
 
-### 1.6 Clocking Wizard (`clk_wiz_1`)
+### 1.5 Clocking Wizard (`clk_wiz_1`)
 
 **Description:** The system clock is 100 MHz, generated from the 12 MHz
-on-board oscillator by an on-chip PLL. The processor and all peripherals
-run at this frequency.
+on-board oscillator by an on-chip PLL. The processor, the buses, and all
+peripheral registers run at this frequency; only the SPI master's serial
+clock is generated separately (see the SPI Master section).
 
-### 1.7 Processor System Reset (`rst_clk_wiz_1_100M`)
+### 1.6 Processor System Reset (`rst_clk_wiz_1_100M`)
 
 **Description:** A reset restarts the processor from the bootloader, which
 reloads the application from flash (see the Standalone Boot Mode guide),
@@ -236,22 +238,21 @@ have no interrupt hardware and cannot raise a processor interrupt; to watch a
 signal by interrupt, use the External Interrupt Inputs described in the next
 section.
 
-### 3.1 DIP Connector GPIO (4 Groups × 7-bit)
+### 3.1 DIP Connector GPIO (3 Groups × 8-bit)
 
 | Instance | Base Address | Width | DIP Pins | Description |
 |----------|-------------|-------|----------|-------------|
-| `gpio_A_0_6` | `0x4003_0000` | 7 | Pin 1–7 | GPIO Group A, bidirectional I/O |
-| `gpio_B_0_6` | `0x4004_0000` | 7 | Pin 17–23 | GPIO Group B, bidirectional I/O |
-| `gpio_C_0_6` | `0x4005_0000` | 7 | Pin 42–48 | GPIO Group C, bidirectional I/O |
-| `gpio_D_0_6` | `0x4006_0000` | 7 | Pin 26–32 | GPIO Group D, bidirectional I/O |
+| `gpio_A_0_7` | `0x4003_0000` | 8 | Pin 1–8 (bit 0 = pin 1) | GPIO Group A, bidirectional I/O |
+| `gpio_B_0_7` | `0x4004_0000` | 8 | Pin 26–33 (bit 0 = pin 33) | GPIO Group B, bidirectional I/O |
+| `gpio_C_0_7` | `0x4005_0000` | 8 | Pin 41–48 (bit 0 = pin 48) | GPIO Group C, bidirectional I/O |
 
-**Description:** Each group is a 7-bit bidirectional port; every bit can be an input or an output independently.
+**Description:** Each group is an 8-bit bidirectional port on eight adjacent pins, so a whole port is read or written as one byte; every bit can be an input or an output independently. Bit 0 of each group is the pin nearest the Pmod connector.
 
 ### 3.2 GPIO Register Map
 
 Every general-purpose port has the same two registers. Offsets are relative to
-the port base address. Only the low WIDTH bits are implemented (7 for groups
-A–D; the on-board ports below are narrower); unimplemented bits read as 0.
+the port base address. Only the low WIDTH bits are implemented (8 for groups
+A–C; the on-board ports below are narrower); unimplemented bits read as 0.
 
 | Offset | Name | Access | Reset | Description |
 |--------|------|--------|-------|-------------|
@@ -260,7 +261,7 @@ A–D; the on-board ports below are narrower); unimplemented bits read as 0.
 
 #### DATA — Port Data Register (Offset 0x000)
 
-![GPIO DATA layout: one bit per pin in the low bits; only the low W bits exist (W = 7 for groups A–D, fewer for the on-board ports)](./images/reg_gpio_data.svg)
+![GPIO DATA layout: one bit per pin in the low bits; only the low W bits exist (W = 8 for groups A–C, fewer for the on-board ports)](./images/reg_gpio_data.svg)
 
 | Bits | Name | Access | Description |
 |------|------|--------|-------------|
@@ -274,12 +275,28 @@ A–D; the on-board ports below are narrower); unimplemented bits read as 0.
 | Bits | Name | Access | Description |
 |------|------|--------|-------------|
 | 31:W | — | — | Reserved. Read as 0. |
-| W-1:0 | `TRI` | RW | Per-pin direction: 1 = input, 0 = output. All pins are inputs after reset; software must clear the relevant bits before driving a pin. On the fixed-direction ports (LEDs, RGB, button) the direction is set in hardware and this register has no effect. |
+| W-1:0 | `TRI` | RW | Per-pin direction: 1 = input, 0 = output. All pins are inputs after reset; software must clear the relevant bits before driving a pin. The fixed-direction ports (LEDs, RGB, button) do not implement this register (see On-Board GPIO). |
 
 > **Note:** Setting or clearing individual pins is a read-modify-write of
 > `DATA` (read the port, change the bits, write it back); it is not atomic, so
 > if an interrupt handler also writes the same port, keep all writes to that
 > port in one context.
+
+**Usage recipe** (board-verified). `GPIO` is the port base address
+(`0x4003_0000`, `0x4004_0000` or `0x4005_0000`); bit `n` of the registers is
+pin `n` of the group, whose DIP pin is listed in the pin maps:
+
+```c
+Xil_Out32(GPIO + 0x4, 0x00);             /* TRI: all 8 pins outputs            */
+Xil_Out32(GPIO + 0x0, 0xA5);             /* DATA: drive the byte 1010 0101     */
+
+Xil_Out32(GPIO + 0x4, 0xFF);             /* TRI: all 8 pins inputs             */
+u32 pins = Xil_In32(GPIO + 0x0) & 0xFF;  /* DATA: read the 8 pin levels        */
+
+Xil_Out32(GPIO + 0x4, 0xF0);             /* TRI: bits 7:4 inputs, 3:0 outputs  */
+u32 v = Xil_In32(GPIO + 0x0);            /* read-modify-write one output:      */
+Xil_Out32(GPIO + 0x0, v | (1u << 2));    /*   set bit 2, keep the others       */
+```
 
 ### 3.3 On-Board GPIO
 
@@ -289,34 +306,35 @@ A–D; the on-board ports below are narrower); unimplemented bits read as 0.
 | `board_button` | `0x4001_0000` | 1 | Input | BTN1 | On-board user button |
 | `board_rgb` | `0x4002_0000` | 3 | Output | LD0 | On-board RGB LED (bit 0 = Blue, bit 1 = Green, bit 2 = Red) |
 
-The on-board ports use the same two registers, but each has a fixed direction:
-the LED and RGB ports are outputs and the button is an input, so the `TRI`
-register is hardwired (0 = output, 1 = input) and software cannot change it.
-The `DATA` and `TRI` layout of each port follows.
+The on-board ports have a fixed direction: the LED and RGB ports are outputs
+and the button is an input. Only their `DATA` register is functional; `TRI` is
+not implemented on these ports: writes to it are ignored and it always reads
+`0xFFFF_FFFF`, whatever the port's direction. The `DATA` and `TRI` layout of
+each port follows.
 
 **On-board LEDs (`board_led_2bits`)** — 2-bit output, base `0x4000_0000`.
 
 ![LED DATA register (offset 0x000): bit 0 drives LD1, bit 1 drives LD2](./images/reg_led_data.svg)
 
-![LED TRI register (offset 0x004): both direction bits are fixed to 0 (output)](./images/reg_led_tri.svg)
+![LED TRI register (offset 0x004): not implemented; writes are ignored and every bit reads 1](./images/reg_led_tri.svg)
 
 **User button (`board_button`)** — 1-bit input, base `0x4001_0000`.
 
 ![Button DATA register (offset 0x000): bit 0 reads BTN1](./images/reg_btn_data.svg)
 
-![Button TRI register (offset 0x004): the direction bit is fixed to 1 (input)](./images/reg_btn_tri.svg)
+![Button TRI register (offset 0x004): not implemented; writes are ignored and every bit reads 1](./images/reg_btn_tri.svg)
 
 **RGB LED (`board_rgb`, LD0)** — 3-bit output, base `0x4002_0000`.
 
 ![RGB DATA register (offset 0x000): bits 2:0 drive Red, Green, Blue](./images/reg_rgb_data.svg)
 
-![RGB TRI register (offset 0x004): all three direction bits are fixed to 0 (output)](./images/reg_rgb_tri.svg)
+![RGB TRI register (offset 0x004): not implemented; writes are ignored and every bit reads 1](./images/reg_rgb_tri.svg)
 
 > **Reference:** AMD AXI GPIO LogiCORE IP Product Guide ([PG144](https://docs.amd.com/r/en-US/pg144-axi-gpio)).
 
 ---
 
-## External Interrupt Inputs (`INT_0_3`)
+## 4. External Interrupt Inputs (`INT_0_3`)
 
 `INT_0_3` is a dedicated interrupt port: it is the only GPIO instance built with
 interrupt hardware. Its four pins are input-only, and a change on any of them
@@ -329,10 +347,10 @@ interrupts.
 |------|-------|
 | Base Address | `0x4007_0000` |
 | Width | 4-bit, input-only |
-| DIP Pins | Pin 8 (INTR_0), Pin 9 (INTR_1), Pin 41 (INTR_2), Pin 33 (INTR_3) |
+| DIP Pins | Pin 9 (INTR_0), Pin 17 (INTR_1), Pin 40 (INTR_2), Pin 34 (INTR_3) |
 | Interrupt | Interrupt controller input 5 |
 
-### Interrupt Register Map
+### 4.1 Interrupt Register Map
 
 Offsets are relative to the base address. `DATA` reads the four pins; the three
 interrupt registers gate and report the shared interrupt.
@@ -380,15 +398,47 @@ The port has a single interrupt channel (`CH1`, bit 0) shared by all four pins;
 > just read. The interrupt reaches the processor through the interrupt
 > controller as input 5.
 
+**Usage recipe** (board-verified). Polled use needs no setup:
+
+```c
+u32 pins = Xil_In32(EXTI + 0x000) & 0xF;   /* DATA: INTR_3..INTR_0 levels */
+```
+
+For interrupt use, the handler acknowledges the port and reads the pins, and
+the port's two enables are opened after the handler is installed on input 5 of
+the interrupt controller (the installation itself is shown in the Interrupt
+Controller section):
+
+```c
+void exti_isr(void *ref)
+{
+    u32 st = Xil_In32(EXTI + 0x120);      /* ISR: read the status             */
+    Xil_Out32(EXTI + 0x120, st);          /* write it back unchanged: clears  */
+    u32 pins = Xil_In32(EXTI + 0x000);    /* DATA: compare with the previous  */
+    /* ... */                             /* levels to find the pin(s) that   */
+}                                         /* changed                          */
+
+Xil_Out32(EXTI + 0x120, Xil_In32(EXTI + 0x120));  /* ISR: drop stale status   */
+Xil_Out32(EXTI + 0x128, 0x1);                     /* IER: channel 1           */
+Xil_Out32(EXTI + 0x11C, 0x80000000);              /* GIER: global enable      */
+```
+
+> **Note:** The four pins share the interrupt, so an unconnected interrupt pin
+> that floats can raise it continuously and starve the program. Give every
+> interrupt pin a defined level (drive it, or add a pull-up or pull-down
+> resistor) before enabling the interrupt. The toggle-on-write behavior also
+> has a use: writing `1` to `ISR` while it is clear raises the interrupt from
+> software, which tests the complete handler chain without any wiring.
+
 > **Reference:** The external interrupt inputs are the AMD AXI GPIO core in interrupt mode; see its LogiCORE IP Product Guide ([PG144](https://docs.amd.com/r/en-US/pg144-axi-gpio)).
 
 ---
 
-## 4. Timers & PWM
+## 5. Timers & PWM
 
 The device provides six 32-bit timer instances: three serve as general-purpose timers with interrupts, and three have their outputs routed to pins as PWM channels.
 
-### 4.1 System Timers
+### 5.1 System Timers
 
 | Instance | Base Address | Interrupt | Description |
 |----------|-------------|-----------|-------------|
@@ -396,17 +446,17 @@ The device provides six 32-bit timer instances: three serve as general-purpose t
 | `timer_1` | `0x4011_0000` | INTC In1 | General-purpose timer |
 | `timer_2` | `0x4012_0000` | INTC In2 | General-purpose timer |
 
-### 4.2 PWM Outputs
+### 5.2 PWM Outputs
 
 | Instance | Base Address | Output Pin | DIP Pin | Description |
 |----------|-------------|-----------|---------|-------------|
 | `PWM_0` | `0x4020_0000` | J3 | Pin 10 | PWM Channel 0 |
-| `PWM_1` | `0x4021_0000` | W3 | Pin 34 | PWM Channel 1 |
-| `PWM_2` | `0x4022_0000` | W4 | Pin 40 | PWM Channel 2 |
+| `PWM_1` | `0x4021_0000` | N3 | Pin 18 | PWM Channel 1 |
+| `PWM_2` | `0x4022_0000` | P3 | Pin 19 | PWM Channel 2 |
 
 **Description:** These timer instances are configured in PWM mode to generate square-wave outputs, suitable for applications such as LED dimming, motor speed control, and buzzer tone generation. Frequency and duty cycle are configured through the Timer Load Registers and the PWM enable bit.
 
-### 4.3 Timer/PWM Register Map
+### 5.3 Timer/PWM Register Map
 
 Each of the six instances (`timer_0`–`timer_2`, `PWM_0`–`PWM_2`) is one dual
 32-bit counter block: counter 0 occupies offsets `0x00`–`0x08` and counter 1
@@ -478,6 +528,23 @@ Xil_Out32(PWM + 0x00, 0x296);          /* TCSR0: PWMA|ENT|ARHT|GENT|UDT */
 Xil_Out32(PWM + 0x10, 0x296);          /* TCSR1: same              */
 ```
 
+Periodic interrupt — counter 0 counts down from `TLR0`, raises `TINT`, and
+reloads (`0xD2` = `ENT|ENIT|ARHT|UDT`). The handler is installed on the
+timer's interrupt-controller input (In0–In2) as shown in the Interrupt
+Controller section, and must clear `TINT` on every call:
+
+```c
+Xil_Out32(TIMER + 0x04, PERIOD_CYC - 2);  /* TLR0: period (+2-cycle overhead)  */
+Xil_Out32(TIMER + 0x00, 0x20);            /* LOAD pulse: TCR0 <- TLR0          */
+Xil_Out32(TIMER + 0x00, 0xD2);            /* ENT|ENIT|ARHT|UDT: run, interrupt */
+
+void timer_isr(void *ref)
+{
+    Xil_Out32(TIMER + 0x00, Xil_In32(TIMER + 0x00) | 0x100);  /* clear TINT */
+    /* ... periodic work ... */
+}
+```
+
 > **Note:** The PWM instances are ordinary timer blocks whose outputs are
 > routed to pins — there are no separate PWM registers. In interrupt use,
 > the handler must clear `TINT` by writing `TCSR` back with bit 8 set;
@@ -491,9 +558,9 @@ Xil_Out32(PWM + 0x10, 0x296);          /* TCSR1: same              */
 
 ---
 
-## 5. External Memory
+## 6. External Memory
 
-### 5.1 QSPI Flash (`axi_quad_spi_0`)
+### 6.1 QSPI Flash (`axi_quad_spi_0`)
 
 | Item | Value |
 |------|-------|
@@ -511,7 +578,7 @@ Flash contents are not memory-mapped: there is no XIP window, and code cannot ex
 > flash CPU-programmable at runtime is preferred over execute-in-place, and
 > execution is served by the 512 KB SRAM and the I-cache instead.
 
-### 5.2 SRAM / Cellular RAM (`axi_emc_0`)
+### 6.2 SRAM / Cellular RAM (`axi_emc_0`)
 
 | Item | Value |
 |------|-------|
@@ -524,15 +591,15 @@ Flash contents are not memory-mapped: there is no XIP window, and code cannot ex
 
 ---
 
-## 6. Analog-to-Digital Conversion (XADC)
+## 7. Analog-to-Digital Conversion (XADC)
 
-### 6.1 XADC Wizard (`xadc_wiz_0`)
+### 7.1 XADC Wizard (`xadc_wiz_0`)
 
 | Item | Value |
 |------|-------|
 | Base Address | `0x4060_0000` |
 | Resolution | 12-bit |
-| Conversion Rate | 500 KSPS aggregate |
+| Conversion Rate | ≈481 kSPS aggregate, ≈96 kSPS per channel |
 | Sequencer | Continuous scan over the 5 enabled channels |
 
 **Enabled Channels:**
@@ -547,7 +614,7 @@ Flash contents are not memory-mapped: there is no XIP window, and code cannot ex
 
 **Description:** The Artix-7 built-in 12-bit ADC measures external analog signals and monitors internal FPGA temperature and supply voltages. External input pins pass through an on-board resistive voltage divider (2.32 kΩ / 1 kΩ, ratio ≈ 0.301), accepting up to 3.3 V at the DIP pin.
 
-**Effective Per-Channel Sampling Rate:** The sequencer continuously cycles through all 5 enabled channels (VAUX4, VAUX12, Temperature, VCCINT, VCCAUX). The aggregate conversion rate is 500 KSPS, giving each channel an effective rate of 500 K ÷ 5 = 100 KSPS.
+**Effective Per-Channel Sampling Rate:** The sequencer continuously cycles through all 5 enabled channels (VAUX4, VAUX12, Temperature, VCCINT, VCCAUX). The converter clock is 100 MHz ÷ 8 = 12.5 MHz and each conversion takes 26 converter clocks, so the aggregate rate is ≈481 kSPS and each channel is refreshed at ≈481 k ÷ 5 ≈ 96 kSPS.
 
 #### XADC Register Map
 
@@ -594,13 +661,30 @@ low half-word; bits 3:0 read 0. Shift the register right by 4 to obtain the
 > step is required. A result read returns the left-justified 16-bit word; shift
 > right by 4 for the 12-bit value.
 
+**Reading recipe** (board-verified). One load per channel, then the
+conversion to physical units in integer arithmetic:
+
+```c
+u32 t   = Xil_In32(XADC + 0x200) >> 4;   /* TEMP: 12-bit code             */
+u32 vcc = Xil_In32(XADC + 0x204) >> 4;   /* VCCINT (0x208: VCCAUX)        */
+u32 a0  = Xil_In32(XADC + 0x250) >> 4;   /* VAUX4 = DIP pin 15 (0x270: 16) */
+
+int mdegC  = (int)(t * 503975u / 4096) - 273150;  /* die temperature, m°C   */
+u32 vcc_mV = vcc * 3000u / 4096;                  /* supplies: 3 V scale    */
+u32 pin_mV = a0 * 3322u / 4096;                   /* DIP pin, via divider   */
+```
+
+At room temperature the die reads roughly 45–60 °C, `VCCINT` ≈ 1.0 V and
+`VCCAUX` ≈ 1.8 V; these internal channels are a quick self-test of the ADC
+without any wiring.
+
 > **Reference:** AMD XADC Wizard LogiCORE IP Product Guide ([PG091](https://docs.amd.com/v/u/en-US/pg091-xadc-wiz)).
 
 ---
 
-## 7. Serial Expansion Interfaces (I2C / SPI)
+## 8. Serial Expansion Interfaces (I2C / SPI)
 
-### 7.1 I2C Controller (`i2c_0`)
+### 8.1 I2C Controller (`i2c_0`)
 
 | Item | Value |
 |------|-------|
@@ -615,8 +699,8 @@ low half-word; bits 3:0 read 0. Shift the register right by 4 to obtain the
 
 #### I2C Register Map
 
-The registers below cover control, status, the FIFOs, the target address, and
-the software reset. Offsets are from the instance base (`0x4070_0000`).
+The registers below cover control, status, the FIFOs, the slave-mode address,
+and the software reset. Offsets are from the instance base (`0x4070_0000`).
 
 | Offset | Name | Access | Description |
 |--------|------|--------|-------------|
@@ -628,7 +712,7 @@ the software reset. Offsets are from the instance base (`0x4070_0000`).
 | `0x104` | `SR` | RO | Status |
 | `0x108` | `TX_FIFO` | WO | Transmit FIFO |
 | `0x10C` | `RX_FIFO` | RO | Receive FIFO (a read pops one entry) |
-| `0x110` | `ADR` | RW | Target slave address |
+| `0x110` | `ADR` | RW | The controller's own address, used only when it is addressed as a slave. A master transfer sends the target's address as its first `TX_FIFO` byte instead. |
 
 ##### CR — Control Register (Offset 0x100)
 
@@ -665,9 +749,35 @@ the software reset. Offsets are from the instance base (`0x4070_0000`).
 > the bus. Before starting a transfer, reset the controller by writing
 > `0x0000000A` to `SOFTR` and confirm `SR.BB` (bit 2) is clear.
 
+**Transfer recipe** (board-verified). Master transfers use the driver's
+low-level calls: each takes the controller base address and the 7-bit device
+address, runs the whole transaction (START, address, data, STOP), and returns
+the number of bytes transferred, which is 0 when no device acknowledges:
+
+```c
+#include "xiic_l.h"
+
+if (Xil_In32(I2C + 0x104) & 0x04)          /* SR.BB: bus wedged?            */
+    Xil_Out32(I2C + 0x40, 0x0A);           /* SOFTR: reset the controller   */
+
+u8 cmd[2] = { REG, VALUE };
+unsigned n = XIic_Send(I2C, ADDR, cmd, 2, XIIC_STOP);  /* write two bytes    */
+
+u8 val;
+n = XIic_Recv(I2C, ADDR, &val, 1, XIIC_STOP);          /* read one byte      */
+if (n == 0) {
+    /* no acknowledge: device absent, unpowered, or wrong address */
+}
+```
+
+Probing an address with a one-byte read is also how a bus scan finds the
+attached devices. A device that requires a repeated start between writing its
+register pointer and reading the data is read by passing `XIIC_REPEATED_START`
+instead of `XIIC_STOP` to the `XIic_Send` call.
+
 > **Reference:** AMD AXI IIC Bus Interface LogiCORE IP Product Guide ([PG090](https://docs.amd.com/r/en-US/pg090-axi-iic)).
 
-### 7.2 External SPI Master (`spi_0`)
+### 8.2 External SPI Master (`spi_0`)
 
 | Item | Value |
 |------|-------|
@@ -705,11 +815,12 @@ subset used for byte-level transfers.
 
 ##### CR — Control Register (Offset 0x60)
 
-![SPI CR bit layout: the transfer-control fields occupy bits 8:0](./images/reg_spi_cr.svg)
+![SPI CR bit layout: the transfer-control fields occupy bits 9:0](./images/reg_spi_cr.svg)
 
 | Bits | Name | Access | Description |
 |------|------|--------|-------------|
-| 31:9 | — | — | Reserved. |
+| 31:10 | — | — | Reserved. |
+| 9 | `LSBF` | RW | Bit order: 1 = least-significant bit first, 0 = most-significant bit first (the SPI default). |
 | 8 | `INHIBIT` | RW | Master transaction inhibit: set to hold off the transfer while the FIFO is loaded, clear to start. |
 | 7 | `MSS` | RW | Manual slave-select mode: software drives `SSR`. Required for framed transactions. |
 | 6 | `RXRST` | RW | Reset (clear) the receive FIFO. |
@@ -722,11 +833,13 @@ subset used for byte-level transfers.
 
 ##### SR — Status Register (Offset 0x64)
 
-![SPI SR bit layout: five FIFO and fault status flags in bits 4:0](./images/reg_spi_sr.svg)
+![SPI SR bit layout: FIFO and fault flags in bits 4:0, the slave-mode select in bit 5, and the mode-error flags in bits 10:6](./images/reg_spi_sr.svg)
 
 | Bits | Name | Access | Description |
 |------|------|--------|-------------|
-| 31:5 | — | — | Reserved. |
+| 31:11 | — | — | Reserved. |
+| 10:6 | `ERR` | RO | Mode-error flags of the dual and quad SPI modes; always 0 on this device. |
+| 5 | `SMS` | RO | Slave-mode select: reads 1 while the core is not selected as a slave, which is always the case here (`SR` reads `0x25` after reset). |
 | 4 | `MODF` | RO | Mode fault. |
 | 3 | `TX_FULL` | RO | Transmit FIFO full. |
 | 2 | `TX_EMPTY` | RO | Transmit FIFO empty. |
@@ -783,7 +896,7 @@ while (!(Xil_In32(SPICLK + 0x004) & 1)) ;  /* wait for lock                   */
 
 ---
 
-## 8. Interrupt Controller (`microblaze_riscv_0_axi_intc`)
+## 9. Interrupt Controller (`microblaze_riscv_0_axi_intc`)
 
 The interrupt controller and its source-to-input map are introduced in the
 System Architecture chapter, with the block diagram. This section documents its
@@ -791,7 +904,7 @@ registers. Offsets are from the instance base (`0x4040_0000`). The status,
 enable, pending, and acknowledge registers all use the same layout: bit `n`
 corresponds to interrupt input `n`.
 
-### Interrupt Controller Register Map
+### 9.1 Interrupt Controller Register Map
 
 | Offset | Name | Access | Description |
 |--------|------|--------|-------------|
@@ -828,11 +941,46 @@ layout. Bits 31:8 are reserved.
 > taken as soon as the master enable is set, before the new handlers are
 > installed.
 
+**Installing a handler** (board-verified). The processor enters every external
+interrupt through the board-support package's trap entry, and the controller's
+driver calls the C handler registered for the active input. The complete
+sequence for one source, input `N` of the interrupt map:
+
+```c
+#include "xintc.h"
+#include "xil_exception.h"
+#include "cmod_mcu.h"                 /* ITCM_FUNC, DTCM_DATA */
+
+DTCM_DATA static XIntc intc;          /* read on every interrupt */
+
+XIntc_Initialize(&intc, XPAR_XINTC_0_BASEADDR);
+XIntc_Connect(&intc, N, (XInterruptHandler)my_isr, NULL); /* handler for input N */
+XIntc_Start(&intc, XIN_REAL_MODE);                        /* MER: ME + HIE        */
+Xil_ExceptionInit();
+Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,
+                             (Xil_ExceptionHandler)XIntc_InterruptHandler, &intc);
+/* ... enable the interrupt inside the peripheral itself ... */
+XIntc_Enable(&intc, N);                                   /* IER: bit N           */
+Xil_ExceptionEnable();                                    /* CPU: take interrupts */
+```
+
+`my_isr` is a C function `void my_isr(void *ref)`, declared `ITCM_FUNC` so
+that it runs from the ITCM. The driver acknowledges the controller (`IAR`)
+itself; the handler must clear the flag
+inside the peripheral (`TINT` for a timer, `ISR` for the external interrupt
+port), or the interrupt is taken again immediately.
+Further sources are added with one more `XIntc_Connect` / `XIntc_Enable` pair
+each. The trap entry and the dispatch code always run from the ITCM, and the
+tables they read live in the DTCM (`mcu/cmod_mcu.ld` places them). With the
+handler in the ITCM and the `XIntc` instance in the DTCM, as above, an
+interrupt reaches the handler in 187 cycles (1.87 µs) whatever the cache
+state (see Interrupt Latency in the Memory Specification).
+
 > **Reference:** AMD AXI Interrupt Controller LogiCORE IP Product Guide ([PG099](https://docs.amd.com/v/u/en-US/pg099-axi-intc)).
 
 ---
 
-## 9. Complete Address Map
+## 10. Complete Address Map
 
 Peripheral addresses follow a class-based convention: `0x40[C]x_xxxx`, where `C` is the
 peripheral class (1 MB per class, 64 KB per instance). The device type is identifiable
@@ -848,7 +996,6 @@ directly from the address: class 0 = GPIO, 1 = Timer, 2 = PWM, 3 = UART, 4 = INT
 | `0x4003_0000` | 64K | GPIO group A | GPIO |
 | `0x4004_0000` | 64K | GPIO group B | GPIO |
 | `0x4005_0000` | 64K | GPIO group C | GPIO |
-| `0x4006_0000` | 64K | GPIO group D | GPIO |
 | `0x4007_0000` | 64K | External interrupt inputs | Interrupt |
 | `0x4010_0000` | 64K | Timer 0 | Timer |
 | `0x4011_0000` | 64K | Timer 1 | Timer |
@@ -868,14 +1015,16 @@ directly from the address: class 0 = GPIO, 1 = Timer, 2 = PWM, 3 = UART, 4 = INT
 
 ---
 
-## 9. Register Access Conventions
+## 11. Register Access Conventions
 
 Every peripheral register in this device is a 32-bit word at a word-aligned
 offset from its instance base address (the Complete Address Map lists all
 base addresses). Registers must be accessed with full-word reads and writes:
 in C through `Xil_In32`/`Xil_Out32` or a `volatile` pointer, in assembly with
 `lw`/`sw`. Byte and halfword accesses are not supported by the peripheral
-bus.
+bus. The device header `mcu/cmod_mcu.h` names the base addresses, register
+offsets, and bits of this chapter for C and assembly, and provides
+`REG32()`, a `volatile` word access.
 
 The register tables in this chapter use the following access codes:
 
@@ -899,20 +1048,19 @@ Reset values apply after power-on or reset.
 > interrupts and half-finished bus transactions. Programs must not assume
 > reset values at entry; initialize every peripheral before use.
 
-The following two fragments are equivalent and drive the RGB LED port
-directly — the C form is the course template's idiom, the assembly form is
-the `asm_template` idiom:
+The following two fragments are equivalent and turn the RGB LED green — the
+C form is the course template's idiom, the assembly form is the
+`asm_template` idiom. Both include `cmod_mcu.h`, which defines `RGB_BASE`
+(`0x4002_0000`), `GPIO_DATA` (offset `0x0`), and `RGB_GREEN` (bit 1):
 
 ```c
-Xil_Out32(0x40020000 + 0x4, 0x0);   /* TRI: all pins outputs */
-Xil_Out32(0x40020000, 0x2);         /* DATA: green (bit 1)   */
+REG32(RGB_BASE + GPIO_DATA) = RGB_GREEN;  /* same as Xil_Out32(0x40020000, 0x2) */
 ```
 
 ```asm
-li   t0, 0x40020000        # RGB LED port base
-sw   zero, 4(t0)           # TRI: all pins outputs
-li   t1, 0x2               # bit 1 = green
-sw   t1, 0(t0)             # DATA: drive the pins
+li   t0, RGB_BASE          # RGB LED port base, 0x40020000
+li   t1, RGB_GREEN         # bit 1 = green
+sw   t1, GPIO_DATA(t0)     # DATA register: drive the pins
 ```
 
 ---

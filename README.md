@@ -18,7 +18,7 @@ and work entirely at the firmware level.
   - 512 KB SRAM: application code and data
   - 4 MB QSPI flash: bitstream and application storage
 - Peripherals
-  - GPIO: 28 pins in 4 groups, and the on-board LEDs, RGB LED, and buttons
+  - GPIO: 24 pins in 3 × 8-bit groups, and the on-board LEDs, RGB LED, and user button
   - PWM: 3 channels
   - UART: 2 (USB and external)
   - I2C and SPI masters
@@ -57,11 +57,12 @@ RISC-V-MCU/               Vivado project (recreate_project.tcl)
 board/                    Cmod A7 hardware: constraints, board files, KiCad symbol
 docs/                     specs (pin / power / IP), guides (JTAG / standalone boot), diagrams
 workspace-example/
+  mcu/                    device header (cmod_mcu.h) + linker script (cmod_mcu.ld) every app builds against
   showcase/               full-feature demo: SPI+I2C to an ESP32, servo, ADC, interrupts (preloaded on the board)
   app_template/           template for new applications (C)
   asm_template/           template for RISC-V assembly applications (.S)
   mem_bench/              measures the memory-hierarchy latencies in the datasheet
-tools/                    maintainer helper scripts (app scaffolding, JTAG run, flash deploy, doc builds)
+tools/                    maintainer helper scripts (app scaffolding and builds, JTAG run, doc tooling)
 ```
 
 ## Rebuilding the hardware

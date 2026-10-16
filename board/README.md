@@ -7,6 +7,6 @@ specifications live in [docs/](../docs/).
 
 | Item | Description |
 |------|-------------|
-| [Cmod-A7-Master.xdc](Cmod-A7-Master.xdc) | Pin constraints, plus bitstream settings for fast boot (SPI x4 @ 33 MHz, compression) |
+| [Cmod-A7-Master.xdc](Cmod-A7-Master.xdc) | Pin constraints, plus the bitstream settings for booting from flash (SPI x1 @ 33 MHz, compression) |
 | [Board-Files/](Board-Files/) | Digilent board files for Vivado (cmod_a7-35t) |
 | [Kicad_symbol/](Kicad_symbol/) | KiCad schematic symbol for the Cmod A7 |

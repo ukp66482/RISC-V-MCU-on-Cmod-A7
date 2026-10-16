@@ -1,9 +1,10 @@
 # Unified MCU Datasheet
 
 `Cmod_A7_MCU_Datasheet.pdf` is a single datasheet built from the markdown
-under `docs/` — not a concatenation: the build parses every file into
+under `sections/` — not a concatenation: the build parses every file into
 sections and reassembles them into a real datasheet outline (overview →
-system architecture → pinout → peripherals → electrical/power → boot),
+pinout → electrical/power → system architecture → memory → peripherals →
+JTAG debug → standalone boot),
 drops sections that duplicate others, and rewrites
 cross-references that only made sense inside the standalone files into live
 internal section links.
@@ -18,7 +19,8 @@ python3 build_datasheet.py        # needs the `typst` CLI on PATH
 | File | Role |
 |------|------|
 | `build_datasheet.py` | section-level markdown → Typst assembler; the datasheet outline lives in `RECIPE`, deliberate omissions in `DROPPED` |
-| `overview.md` | Chapter 1 source (introduction, features, block diagram, reference documents) — the only datasheet-specific content |
+| `sections/` | the chapter sources, one Markdown file per topic, with their `images/` |
+| `sections/overview.md` | Chapter 1 source (introduction, features, on-board components, block diagram) — the only datasheet-specific content |
 | `datasheet.typ` | page template: title page, headers/footers, styles |
 | `defs.typ` | shared building blocks (note boxes) |
 | `Cmod_A7_MCU_Datasheet.pdf` | build output |

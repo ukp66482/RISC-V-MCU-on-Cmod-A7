@@ -10,7 +10,7 @@ and ties the peripherals together into a live control loop:
 | 3 | PWM | hobby servo (SG90 class), 50 Hz | DIP 10 |
 | 4 | ADC | potentiometer, live millivolts | DIP 15 |
 | 5 | Timer IRQ | 100 Hz system tick, ISR in ITCM | — (internal) |
-| 6 | Button IRQ | push button on external interrupt INTR_0 | DIP 8 |
+| 6 | Button IRQ | push button on external interrupt INTR_0 | DIP 9 |
 | 7 | UART | telemetry + commands on the DIP UART | DIP 11 (TX), DIP 12 (RX) |
 
 The features interact rather than running independently: the tick
@@ -61,13 +61,13 @@ Read the power-rail notes before wiring anything:
 | | red / brown | VU / GND |
 | Potentiometer 10k | ends | Pmod 3.3 V and GND (**never VU**) |
 | | wiper | DIP 15 |
-| Push button | one side | DIP 8, plus 10 kΩ pull-up to 3.3 V |
+| Push button | one side | DIP 9, plus 10 kΩ pull-up to 3.3 V |
 | | other side | GND |
 | USB-TTL adapter (3.3 V!) | RX / TX / GND | DIP 11 / DIP 12 / GND |
 
 Notes:
 
-- DIP 8 has no internal pull-up; without the external 10 k the pin floats.
+- DIP 9 has no internal pull-up; without the external 10 k the pin floats.
   The firmware detects a floating/noisy INTR_0 (interrupt storm) and mutes
   the button IRQ with a console message instead of hanging.
 - The servo draws its current from VU. A single unloaded SG90 operates
@@ -96,7 +96,8 @@ arduino-cli upload -p /dev/ttyUSBx --fqbn esp32:esp32:esp32 workspace-example/sh
 - **USB console** (115200 8N1): boot banner with the wiring table,
   init status for every feature, a 1 Hz status line, and single-key
   commands: `m` next mode, `a`/`d` servo −/+10° (mode C), `r` reset the
-  button counter, `n` bridge round-trip test, `h` help.
+  button counter, `b` re-probe the bridge, `n` bridge round-trip test,
+  `h` help.
 - **DIP UART** (115200 8N1): 1 Hz CSV telemetry
   `$MCU,<uptime_s>,<pot_mV>,<angle>,<mode>,<button_count>`; the same
   command keys are accepted, so a second computer (or another MCU) can
@@ -114,11 +115,12 @@ be reused independently in another project:
 | `servo.c/.h` | 50 Hz PWM, glitch-free width updates |
 | `adc.c/.h` | potentiometer millivolts + die temperature |
 | `uart1.c/.h` | DIP-header UART, polled |
-| `showcase.h` | shared tick counter and register helpers |
+| `showcase.h` | shared tick counter; pulls in `cmod_mcu.h` (`REG32`, `ITCM_FUNC`, `DTCM_DATA`) |
 | `esp32_bridge/` | Arduino sketch for the receiver station |
 
-Notable implementation details: the tick ISR runs from ITCM (the boot log
-prints its address; compare with `lscript.ld`), `spi0.c` documents the
+Notable implementation details: the tick ISR runs from ITCM and the
+interrupt controller's driver instance lives in DTCM (the boot log prints the
+ISR address; the layout is in `../mcu/cmod_mcu.ld`), `spi0.c` documents the
 flow-control rules for the adjustable-clock SPI unit, and the SPI clock is
 set with a single function call (`spi0_set_clock()`).
 
@@ -126,7 +128,7 @@ set with a single function call (`spi0_set_clock()`).
 
 | Symptom | Likely cause |
 |---------|--------------|
-| `ESP bridge ... not detected` | bridge not powered/wired, or wrong pins — its monitor must show "ready" first; then press `b` to re-probe |
+| `ESP bridge ... not detected` | bridge not powered/wired, or wrong pins — its serial monitor must show the "ESP32 receiver station" banner first; then press `b` to re-probe |
 | bridge SPI FAIL, I2C PASS | check MISO (DIP 37 ← GPIO 19); to isolate the MCU side, jumper DIP 36 ↔ DIP 37 and the SPI leg should echo |
 | `button IRQ muted: INTR_0 is floating` | add the 10 k pull-up to 3.3 V, then reset |
 | servo twitches but does not hold | weak 5 V supply — use an external one, common GND |
